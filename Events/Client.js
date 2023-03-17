@@ -4,7 +4,7 @@ const ascii = require("ascii-table");
 const mongoose = require("mongoose");
 require("colors");
 
-const BlackCat = class extends Client {
+module.exports.Client = class extends Client {
   constructor(options) {
     super({
       messageCacheLifetime: 60,
@@ -65,7 +65,7 @@ const BlackCat = class extends Client {
     mongoose.set('strictQuery', false);
   };
   /*========================================================
-  # Ready Commands
+  # Ready Commands/ Slash/ Events
   ========================================================*/
   commandHandler(options) {
     let tableCmds = new ascii('BlackCat - commands');
@@ -102,8 +102,8 @@ const BlackCat = class extends Client {
 			  } else {
 					SlashCmds.addRow(file.split('.js')[0], '⛔')
 			  };
-        if(!slashCommand.name) return; // console.log("thiếu tên lệnh")
-        if(!slashCommand.description) return; // console.log("thiếu mô tả lệnh")
+        if(!slashCommand.name) return; // console.log("thiếu tên lệnh");
+        if(!slashCommand.description) return; // console.log("thiếu mô tả lệnh");
         data.push({
           name: slashCommand.name,
           description: slashCommand.description,
@@ -131,8 +131,8 @@ const BlackCat = class extends Client {
     const loadDir = (dir) => {
       const allevents = [];
       let amount = 0;
-      const event_files = readdirSync(`${options.EventPath}/${dir}`).filter((file) => file.endsWith(".js"));
-      for (const file of event_files) {
+      const eventFiles = readdirSync(`${options.EventPath}/${dir}`).filter((file) => file.endsWith(".js"));
+      for (const file of eventFiles) {
         try {
           const event = require(`${options.EventPath}/${dir}/${file}`);
           let eventName = file.split(".")[0];
@@ -148,6 +148,5 @@ const BlackCat = class extends Client {
     };
     await options.Events.forEach(e => loadDir(e));
     console.log(Events.toString().yellow);
-  }
+  };
 };
-module.exports.Client = BlackCat;

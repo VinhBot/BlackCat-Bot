@@ -9,7 +9,7 @@ const client = new Client({
     `Prefix: ${config.prefix}`,
   ],
 });
-
+// Handlers
 client.eventHandler({
   EventPath: `${process.cwd()}/Events/Guild/`,
   Events: ["Guilds", "Client"]

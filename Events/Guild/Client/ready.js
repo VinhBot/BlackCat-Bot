@@ -1,3 +1,8 @@
+const { Language, switchLanguage } = require("../../Language/lang");
+
 module.exports = (client) => {
-  console.log(client.user.username);
+  new Language({
+    language: "vi"
+  });
+  console.log(switchLanguage("logger"));
 };
