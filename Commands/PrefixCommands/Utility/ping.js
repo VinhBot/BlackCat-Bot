@@ -7,7 +7,7 @@ module.exports = {
     description: "Ping Bot", // mô tả lệnh
     userPerms: [], // Administrator, ....
     owner: false, //: tắt // true : bật
-    category:"Information", // tên folder chứa lệnh
+    category:"Utility", // tên folder chứa lệnh
     cooldown: 5, // thời gian có thể tái sử dụng lệnh
     run: async(client, message, args, prefix, database) => {
     const pingImageArr = [

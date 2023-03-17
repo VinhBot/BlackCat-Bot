@@ -11,14 +11,19 @@ const client = new Client({
     `Prefix: ${config.prefix}`,
   ],
 });
+
+client.eventHandler({
+  EventPath: `${process.cwd()}/Events/Guild/`,
+  Events: ["Guilds", "Client"]
+});
+client.commandHandler({
+  CommandPath: `${process.cwd()}/Commands/PrefixCommands`
+});
+client.slashHandler({
+  setToken: process.env.token || config.token,
+  SlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`,
+});
 // 
-client.maps = new Map();
-client.aliases = new Collection();
-client.commands = new Collection();
-client.cooldowns = new Collection();
-client.voiceGenerator = new Collection();
-client.slashCommands = new Collection(); 
-client.categories = require("fs").readdirSync("./Commands");
 readdirSync('./Handlers').forEach((BlackCat) => {
   require(`./Handlers/${BlackCat}`)(client)
 })

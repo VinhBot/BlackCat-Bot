@@ -226,7 +226,7 @@ module.exports = {
   description: "", // mô tả lệnh
   userPerms: [], // Administrator, ....
   owner: false, //: tắt // true : bật
-  category:"", // tên folder chứa lệnh
+  category:"Game", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, database, prefix) => {
     if(!message.mentions.users.first()) return message.reply("chỉ định ai đó");

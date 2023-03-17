@@ -6,8 +6,6 @@ const database = require("../../Json/database.json");
 
 module.exports = async(client, message) => {
   if(message.author.bot || !message.guild) return;
-  var start = new Date();
-  // PREFIX 
   let PREFIX = config.prefix;
   const GuildPrefix = await GPrefix.findOne({ guild: message.guild.id });
   if(GuildPrefix && GuildPrefix.prefix) PREFIX = GuildPrefix.prefix;
@@ -50,14 +48,13 @@ module.exports = async(client, message) => {
               /*--------------------
               # dev commands
               --------------------*/
-              if (command.owner && message.author.id !== "413192599663280138") return message.reply({ 
-                embeds: [embed.setDescription(`Lệnh này chỉ <@413192599663280138> mới có thể sử dụng`)]
+              if (command.owner && message.author.id !== database.developer) return message.reply({ 
+                embeds: [embed.setDescription(`Lệnh này chỉ <@${database.developer}> mới có thể sử dụng`)]
               });
               /*--------------------
               # kết thúc
               --------------------*/
               command.run(client, message, args, database, prefix = client.prefix);
-              var end = new Date() - start;
               let channel = client.channels.cache.get(database.channelLog);
               if (channel) {
                    channel.send({ embeds: [new EmbedBuilder()
@@ -68,17 +65,12 @@ module.exports = async(client, message) => {
                   ]});
               };                
     } catch(error) {
-      console.log(error.toString())
-      message.reply({ content: `[MessageCreate]: lỗi đã được gởi đi` })
+      console.log(error.toString());
+      message.reply({ content: `[MessageCreate]: lỗi đã được gởi đi` });
     };
   } else {
-    const msg = await message.reply({ embeds: [new EmbedBuilder()
-        .setTitle(`Sai lệnh rồi nhé`)
-        .setDescription(`vui lòng sử dụng lại lệnh hoặc\n${client.prefix}help để xem lại tất cả các lệnh`)
-        .setFooter({ text: `${client.user.username}`, iconURL: database.avatar })
-        .setColor("Red")
-        .setTimestamp(Date.now())],
+    return message.reply({ content: `\`sai lệnh. vui lòng \n${client.prefix}help để xem lại tất cả các lệnh\`` }).then((msg) => {
+      setTimeout(() => msg.delete(), 10000);
     });
-    setTimeout(() => msg.delete(), 10000);
   }; 
 };
