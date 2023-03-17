@@ -1,7 +1,5 @@
-const { Collection } = require("discord.js");
 const { Client } = require("./Events/Client");
 const config = require("./config.json");
-const { readdirSync } = require("node:fs");
 const client = new Client({
   setReply: false,
   setToken: process.env.token || config.token,
@@ -23,7 +21,3 @@ client.slashHandler({
   setToken: process.env.token || config.token,
   SlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`,
 });
-// 
-readdirSync('./Handlers').forEach((BlackCat) => {
-  require(`./Handlers/${BlackCat}`)(client)
-})
