@@ -9,8 +9,7 @@ const I18nProvider = class {
         var _a;
         this.FilepathPrefix = 'file:';
         this.DefaultLocale = 'vi';
-        const workingDirectory = (_a = global.__dirname) !== null && _a !== void 0 ? _a : __dirname;
-        const localesPath = path_1.default.join(workingDirectory, '.', 'config');
+        const localesPath = path_1.default.join((_a = global.__dirname) !== null && _a !== void 0 ? _a : __dirname, '.', 'config');
         this.availableLocales = new Map(fs_1.default.readdirSync(localesPath).map(file => [path_1.default.basename(file, '.json'), path_1.default.resolve(localesPath, file)]));
     }
     loadFromLocale(locale) {
