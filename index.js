@@ -1,4 +1,4 @@
-const { Client } = require("./Events/Client");
+const { Client, optionHandlerEvents } = require("./Client");
 const config = require("./config.json");
 const client = new Client({
   setReply: false,
@@ -9,15 +9,19 @@ const client = new Client({
     `Prefix: ${config.prefix}`,
   ],
 });
-// Handlers
-client.eventHandler({
+
+const handlers = new optionHandlerEvents(client, {
+  setClient: config, // test thôi nên chả có tác dụng gì đâu
+});
+
+handlers.eventHandler({
   EventPath: `${process.cwd()}/Events/Guild/`,
   Events: ["Guilds", "Client"]
 });
-client.commandHandler({
-  CommandPath: `${process.cwd()}/Commands/PrefixCommands`
-});
-client.slashHandler({
+handlers.slashHandler({
   setToken: process.env.token || config.token,
-  SlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`,
+  SlashCommandPath: "Commands/SlashCommands",
+});
+handlers.commandHandler({
+  CommandPath: "Commands/PrefixCommands"
 });
