@@ -1,18 +1,19 @@
-const { Client, optionHandlerEvents } = require("./Client");
+const Client = require("./Client");
 const config = require("./config.json");
-const client = new Client({
+const handlers = new Client({
   setReply: false, // đặt chế độ reply cho bot
-  setToken: process.env.token || config.token,
-  setMongoDB: process.env.mongourl || config.mongourl
+  setToken: process.env.token || config.token, // token của bot
+  setConnectMongoDB: true, // bật tắt kết nối mongourl || đang thử nhiệm xem có cần thiết hay là không 
+  setMongoDB: process.env.mongourl || config.mongourl, // mongourl
 });
-
-const status = [
-  `${config.prefix}help/@botname help`,
-  `Prefix: ${config.prefix}`,
-];
-const handlers = new optionHandlerEvents(client, {
-  // bot ready
-  setStatus: status,
+// xem bot đã on hay chưa, client.on("ready" .......) :)))
+handlers.handlerReadyEvents({
+  setStatus: [
+    "bot discord v14",
+    "BlackCat-Club",
+    `${config.prefix}help để xem tất cả các lệnh`,
+    "@botname help"
+  ]
 });
 // Khởi chạy Events 
 handlers.eventHandler({
@@ -21,14 +22,13 @@ handlers.eventHandler({
 });
 // khởi chạy các lệnh slash (/)
 handlers.slashHandler({
-  setHandlerInteraction: true,
-  setDeveloper: config.developer,
-  setToken: process.env.token || config.token,
-  setSlashCommandPath: "Commands/SlashCommands",
+  setHandlerInteraction: true, // bật tắt hỗ trợ interactionCreate || nếu tắt tính năng này bạn sẽ phải tự custom interactionCreate của discord
+  setDeveloper: config.developer, // id của owner || nếu setHandlerInteraction: false, thì cái này sẽ vô dụng
+  setSlashCommandPath: "Commands/SlashCommands", // đường dẫn đến file slashCommands
 });
 // khởi chạy các lệnh prefix commands
 handlers.commandHandler({
   setHandlerMessageCreate: false, // bật hoặc tắt messageCreate của package
-  setPrefix: "!", // nếu lhi tắt messageCreate thì cái này vô dụng
+  setPrefix: "!", // nếu lhi tắt setHandlerMessageCreate: false, thì cái này vô dụng
   setCommandPath: "Commands/PrefixCommands" // set đường dẫn đến commands
 });

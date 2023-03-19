@@ -21,10 +21,12 @@ const BlackCat = class extends Client {
       intents: Object.keys(GatewayIntentBits),
       partials: Object.keys(Partials),
     });
+    // setToken bot
+    this.tokenBot = options.setToken;
     // thiết lập evt
     this.init();
     // login bot
-    this.login(options.setToken);
+    this.login(this.tokenBot);
     // kết nối tới mongodb 
     this._mongodb(options);
   };
@@ -33,30 +35,31 @@ const BlackCat = class extends Client {
     this.commands = new Collection();
     this.slashCommands = new Collection(); 
   };
+  /*========================================================
+  # mongourl 
+  ========================================================*/
   _mongodb(options) { 
-    mongoose.connect(options.setMongoDB, { 
-      useNewUrlParser: true, 
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false
-    }).then(() => {
-      console.log("Bot được kết nối với cơ sở dữ liệu!".blue)
-    }).catch((err) => {
-      console.error(`Lỗi kết nối Mongoose: \n${err.stack}`.red);
-    });
-    mongoose.connection.on("disconnected", () => {
-      console.warn("Kết nối Mongoose khoing thành công".red);
-    });
-    mongoose.set('strictQuery', false);
+    if(options.setConnectMongoDB) {
+      mongoose.connect(options.setMongoDB, { 
+        useNewUrlParser: true, 
+        useUnifiedTopology: true,
+        useCreateIndex: true,
+        useFindAndModify: false
+      }).then(() => {
+        console.log("Bot được kết nối với cơ sở dữ liệu!".blue)
+      }).catch((err) => {
+        console.error(`Lỗi kết nối Mongoose: \n${err.stack}`.red);
+      });
+      mongoose.connection.on("disconnected", () => {
+        console.warn("Kết nối Mongoose khoing thành công".red);
+      });
+      mongoose.set('strictQuery', false);
+    };
   };
-};
-
-const optionHandlerEvents = class {
-  constructor(defaultClient, options) {
-    this.client = defaultClient;
-    this.handlerReadyEvents(options);
-  };
-  handlerReadyEvents(options, client = this.client) {
+  /*========================================================
+  # ready bot
+  ========================================================*/
+  handlerReadyEvents(options, client = this) {
     client.on("ready", () => {
       console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
       setInterval(() => {
@@ -70,8 +73,10 @@ const optionHandlerEvents = class {
   	  }, 5000);
     });
   };
-  // interactionCretae
-  handlerInteractionCreate(options, client = this.client) {
+  /*========================================================
+  # interactionCretae
+  ========================================================*/
+  handlerInteractionCreate(options, client = this) {
     const { EmbedBuilder, PermissionsBitField, InteractionType } = require("discord.js");
     if(options.setHandlerInteraction) {
       console.log("Bạn đang sử dụng interactionCreate của BlackCat-djs".red);
@@ -79,7 +84,7 @@ const optionHandlerEvents = class {
         if(interaction.type === InteractionType.ApplicationCommand) {
           if(!client.slashCommands.has(interaction.commandName) || !interaction.guild) return;
           const SlashCommands = client.slashCommands.get(interaction.commandName);
-          if(!SlashCommands) return;
+          if(!SlashCommands) return console.log(!SlashCommands);
           if(SlashCommands) {
             try {
               const embed = new EmbedBuilder().setTitle("Thiếu quyền sử dụng lệnh").setColor("Random");
@@ -88,23 +93,18 @@ const optionHandlerEvents = class {
                 content: `Tôi, không phải là bot ngu ngốc, chỉ chủ sở hữu mới có thể sử dụng lệnh này`
               });
               // Các quyền của thành viên
-              if (SlashCommands.userPerms) {
+              if(SlashCommands.userPerms) {
                 if(!interaction.member.permissions.has(PermissionsBitField.resolve(SlashCommands.userPerms || []))) return interaction.reply({               
                   embeds: [embed.setDescription(`Xin lỗi, bạn không có quyền \`${SlashCommands.userPerms}\` trong <#${interaction.channelId}> để sử dụng lệnh \`${SlashCommands.name}\` này`)]
                 });
-              };  
+              };
               // Đầu ra những lệnh đã được sử dụng
               console.log(`${SlashCommands.name} được sử dụng bởi ${interaction.user.tag} từ ${interaction.guild.name} (${interaction.guild.id})`);
               SlashCommands.run(client, interaction);
             } catch(error) {
-              if(interaction.replied) {
-                return await interaction.editReplyinteraction.editReply({                                                                        
-                  embeds: [new EmbedBuilder().setDescription("Đã xảy ra lỗi khi thực hiện lệnh, xin lỗi vì sự bất tiện \`<3\`")], 
-                  ephemeral: true,
-                }).catch(() => {});
-              } else return await interaction.followUp({
+              if(interaction.replied) return await interaction.editReplyinteraction.editReply({                                                                        
                 embeds: [new EmbedBuilder().setDescription("Đã xảy ra lỗi khi thực hiện lệnh, xin lỗi vì sự bất tiện \`<3\`")], 
-                ephemeral: true 
+                ephemeral: true,
               }).catch(() => {});
               console.log(error);
             };
@@ -113,8 +113,10 @@ const optionHandlerEvents = class {
       });
     };
   };
-  // messageCreate
-  handlerMessageCreate(options, client = this.client) {
+  /*========================================================
+  # messageCreate
+  ========================================================*/
+  handlerMessageCreate(options, client = this) {
     if(options.setHandlerMessageCreate) {
       console.log("Bạn đang sử dụng messageCreate của BlackCat-djs".red);
       client.on("messageCreate", (message) => {
@@ -125,10 +127,9 @@ const optionHandlerEvents = class {
     };
   };
   /*========================================================
-  # Ready Commands/ Slash/ Events
+  # Commands
   ========================================================*/
-  // Commands
-  commandHandler(options, client = this.client) {
+  commandHandler(options, client = this) {
     let tableCmds = new ascii('BlackCat - commands');
     tableCmds.setHeading("Tên file", "Tình trạng");
     const commandsPath = path.join(__dirname, options.setCommandPath);
@@ -151,8 +152,10 @@ const optionHandlerEvents = class {
     this.handlerMessageCreate(options);
     console.log(tableCmds.toString().magenta);
   };
-  // SlashCommands
-  slashHandler(options, client = this.client) {
+  /*========================================================
+  # SlashCommands
+  ========================================================*/
+  slashHandler(options, client = this) {
     const SlashCmds = new ascii("BlackCat - Slash");
     SlashCmds.setHeading('Slash Commands', 'Trạng thái').setBorder('|', '=', "0", "0");
     const slashCommandsPath = path.join(__dirname, options.setSlashCommandPath);
@@ -177,7 +180,7 @@ const optionHandlerEvents = class {
         });
       };
     });
-    const rest = new REST({ version: "10" }).setToken(options.setToken);
+    const rest = new REST({ version: "10" }).setToken(this.tokenBot);
     client.on("ready", async() => {
       (async() => {
         try {
@@ -191,7 +194,10 @@ const optionHandlerEvents = class {
     this.handlerInteractionCreate(options);
     console.log(SlashCmds.toString().red);
   };
-  async eventHandler(options, client = this.client) {
+  /*========================================================
+  # khởi chạy các evets 
+  ========================================================*/
+  async eventHandler(options, client = this) {
     let Events = new ascii("Events");
     Events.setHeading("Tên file", "Trạng thái");
     const loadDir = (dir) => {
@@ -217,7 +223,4 @@ const optionHandlerEvents = class {
   };
 };
 
-module.exports = {
-  Client: BlackCat,
-  optionHandlerEvents
-};
+module.exports = BlackCat;
