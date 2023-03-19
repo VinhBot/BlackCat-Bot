@@ -6,28 +6,29 @@ const client = new Client({
   setMongoDB: process.env.mongourl || config.mongourl
 });
 
+const status = [
+  `${config.prefix}help/@botname help`,
+  `Prefix: ${config.prefix}`,
+];
 const handlers = new optionHandlerEvents(client, {
-  handlerInteraction: false, // đang test 
-  handlerMessageCreate: false, // đang test 
-});
-// khởi chạy ready events
-handlers.handlerReadyEvents({
-  setStatus: [
-    `${config.prefix}help/@botname help`,
-    `Prefix: ${config.prefix}`,
-  ],
+  // bot ready
+  setStatus: status,
 });
 // Khởi chạy Events 
 handlers.eventHandler({
-  EventPath: "Events/Guild",
-  Events: ["Guilds", "Client"]
+  EventPath: "Events/Guild", // đường dẫn của events
+  Events: ["Guilds", "Client"] // tên folder
 });
 // khởi chạy các lệnh slash (/)
 handlers.slashHandler({
+  setHandlerInteraction: true,
+  setDeveloper: config.developer,
   setToken: process.env.token || config.token,
-  SlashCommandPath: "Commands/SlashCommands",
+  setSlashCommandPath: "Commands/SlashCommands",
 });
 // khởi chạy các lệnh prefix commands
 handlers.commandHandler({
-  CommandPath: "Commands/PrefixCommands"
+  setHandlerMessageCreate: false, // bật hoặc tắt messageCreate của package
+  setPrefix: "!", // nếu lhi tắt messageCreate thì cái này vô dụng
+  setCommandPath: "Commands/PrefixCommands" // set đường dẫn đến commands
 });

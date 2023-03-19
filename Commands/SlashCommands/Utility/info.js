@@ -37,7 +37,7 @@ module.exports = {
           required: true,
       }],
   }],
-  run: async(client, interaction, Options) => {
+  run: async(client, interaction) => {
     try {
       if(interaction.options.getSubcommand() === "avatar") {
         const member = interaction.options.getMentionable('user') || interaction.user;
@@ -71,12 +71,13 @@ module.exports = {
         ]);
         interaction?.reply({ embeds: [embeduserinfo] });
       } else if(interaction.options.getSubcommand() === "invite") {
-        interaction.reply({ ephemeral: true,
-        embeds: [new EmbedBuilder()
-          .setColor("Random")
-          .setFooter({ text: Options.name, iconURL: Options.avatar })
-          .setDescription(`[Bấm vào đây để mời tôi!](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands)\n\n||[Nhấp vào đây để mời tôi mà không có Lệnh Slash!](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot)||`)
-        ]});
+        return interaction.reply({ 
+          ephemeral: true,
+          embeds: [new EmbedBuilder()
+            .setColor("Random")
+            .setFooter({ text: client.user.username, iconURL: interaction.member.guild.iconURL({ dynamic: true }) })
+            .setDescription(`[Bấm vào đây để mời tôi!](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot%20applications.commands)\n\n||[Nhấp vào đây để mời tôi mà không có Lệnh Slash!](https://discord.com/api/oauth2/authorize?client_id=${client.user.id}&permissions=8&scope=bot)||`)]
+        });
       } else if(interaction.options.getSubcommand() === "ping") {
         const pingImageArr = [
          "https://cdn.discordapp.com/attachments/892794857905602560/892794900863660062/63e1657a8a6249a2fc9c062b17f27ce0.gif",
@@ -114,18 +115,16 @@ module.exports = {
           { name: 'Sử dụng bộ nhớ', value: `\`\`\`yaml\n${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB\`\`\``, inline: true },
         ]);
        interaction.reply({ embeds: [loadingEmbed] }).then(() => {
-           setTimeout(() => {
-               interaction.editReply({ embeds: [pingEmbed] });
-           }, 1001);
+          setTimeout(() => interaction.editReply({ embeds: [pingEmbed] }), 1001);
        });
       } else if(interaction.options.getSubcommand() === "server") {
         let boosts = interaction.guild.premiumSubscriptionCount;
         var boostlevel = 0;
-        if (boosts >= 2) boostlevel = "1";
-        if (boosts >= 7) boostlevel = "2";
-        if (boosts >= 14) boostlevel = "3";
+        if(boosts >= 2) boostlevel = "1";
+        if(boosts >= 7) boostlevel = "2";
+        if(boosts >= 14) boostlevel = "3";
         const Thong_tin_server = new EmbedBuilder()
-            .setColor(Options.colors.vang)
+            .setColor("Random")
             .setAuthor({ name: `Server: ${interaction.guild.name}`, iconURL: client.user.displayAvatarURL() })
             .setDescription(interaction.guild.description || "Không có mô tả")
             .setThumbnail(interaction.guild.iconURL())

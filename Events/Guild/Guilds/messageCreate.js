@@ -15,7 +15,7 @@ module.exports = async(client, message) => {
   --------------------*/
   const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(client.prefix)})\\s*`);
-  if (!prefixRegex.test(message.content)) return;
+  if(!prefixRegex.test(message.content)) return;
   const [ matchedPrefix ] = message.content.match(prefixRegex);
   if(!message.content.startsWith(matchedPrefix)) return;       
   const args = message.content.slice(matchedPrefix.length).trim().split(/ +/g);
@@ -34,29 +34,29 @@ module.exports = async(client, message) => {
              /*--------------------
              # thời gian hồi lệnh
              --------------------*/
-             if (onCoolDown(message, command)) return message.channel.send({ 
+             if(onCoolDown(message, command)) return message.channel.send({ 
                content: `❌ vui lòng chờ ${onCoolDown(message, command)} giây trước khi sử dụng lại lệnh ${command.name}`
              });
              /*--------------------
              # giới hạn quyền sử dụng lệnh
              --------------------*/
-             if (command.userPerms) {
-                if (!message.member.permissions.has(PermissionsBitField.resolve(command.userPerms || []))) return message.reply({ 
+             if(command.userPerms) {
+                if(!message.member.permissions.has(PermissionsBitField.resolve(command.userPerms || []))) return message.reply({ 
                   embeds: [embed.setDescription(`bạn không có quyền ${command.userPerms} để sử dụng lệnh ${command.name} trong ${message.channelId}`)] 
                 });
               }; 
               /*--------------------
               # dev commands
               --------------------*/
-              if (command.owner && message.author.id !== database.developer) return message.reply({ 
-                embeds: [embed.setDescription(`Lệnh này chỉ <@${database.developer}> mới có thể sử dụng`)]
+              if(command.owner && message.author.id !== config.developer) return message.reply({ 
+                embeds: [embed.setDescription(`Lệnh này chỉ <@${config.developer}> mới có thể sử dụng`)]
               });
               /*--------------------
               # kết thúc
               --------------------*/
               command.run(client, message, args, database, prefix = client.prefix);
               let channel = client.channels.cache.get(database.channelLog);
-              if (channel) {
+              if(channel) {
                    channel.send({ embeds: [new EmbedBuilder()
                       .setColor(database.colors.vang)
                       .setFooter({ text: `${database.name}`, iconURL: `${database.avatar}`})

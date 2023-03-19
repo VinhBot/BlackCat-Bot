@@ -54,8 +54,7 @@ const BlackCat = class extends Client {
 const optionHandlerEvents = class {
   constructor(defaultClient, options) {
     this.client = defaultClient;
-    this.handlerInteractionCreate(options);
-    this.handlerMessageCreate(options);
+    this.handlerReadyEvents(options);
   };
   handlerReadyEvents(options, client = this.client) {
     client.on("ready", () => {
@@ -71,16 +70,55 @@ const optionHandlerEvents = class {
   	  }, 5000);
     });
   };
-  handlerInteractionCreate(options) {
-    if(options.handlerInteraction) {
+  // interactionCretae
+  handlerInteractionCreate(options, client = this.client) {
+    const { EmbedBuilder, PermissionsBitField, InteractionType } = require("discord.js");
+    if(options.setHandlerInteraction) {
       console.log("Bạn đang sử dụng interactionCreate của BlackCat-djs".red);
+      client.on("interactionCreate", async(interaction) => {
+        if(interaction.type === InteractionType.ApplicationCommand) {
+          if(!client.slashCommands.has(interaction.commandName) || !interaction.guild) return;
+          const SlashCommands = client.slashCommands.get(interaction.commandName);
+          if(!SlashCommands) return;
+          if(SlashCommands) {
+            try {
+              const embed = new EmbedBuilder().setTitle("Thiếu quyền sử dụng lệnh").setColor("Random");
+              // dev commands
+              if(SlashCommands.owner && options.setDeveloper.includes(interaction.user.id)) return interaction.reply({ 
+                content: `Tôi, không phải là bot ngu ngốc, chỉ chủ sở hữu mới có thể sử dụng lệnh này`
+              });
+              // Các quyền của thành viên
+              if (SlashCommands.userPerms) {
+                if(!interaction.member.permissions.has(PermissionsBitField.resolve(SlashCommands.userPerms || []))) return interaction.reply({               
+                  embeds: [embed.setDescription(`Xin lỗi, bạn không có quyền \`${SlashCommands.userPerms}\` trong <#${interaction.channelId}> để sử dụng lệnh \`${SlashCommands.name}\` này`)]
+                });
+              };  
+              // Đầu ra những lệnh đã được sử dụng
+              console.log(`${SlashCommands.name} được sử dụng bởi ${interaction.user.tag} từ ${interaction.guild.name} (${interaction.guild.id})`);
+              SlashCommands.run(client, interaction);
+            } catch(error) {
+              if(interaction.replied) {
+                return await interaction.editReplyinteraction.editReply({                                                                        
+                  embeds: [new EmbedBuilder().setDescription("Đã xảy ra lỗi khi thực hiện lệnh, xin lỗi vì sự bất tiện \`<3\`")], 
+                  ephemeral: true,
+                }).catch(() => {});
+              } else return await interaction.followUp({
+                embeds: [new EmbedBuilder().setDescription("Đã xảy ra lỗi khi thực hiện lệnh, xin lỗi vì sự bất tiện \`<3\`")], 
+                ephemeral: true 
+              }).catch(() => {});
+              console.log(error);
+            };
+          };
+        };
+      });
     };
   };
+  // messageCreate
   handlerMessageCreate(options, client = this.client) {
-    if(options.handlerMessageCreate) {
+    if(options.setHandlerMessageCreate) {
       console.log("Bạn đang sử dụng messageCreate của BlackCat-djs".red);
       client.on("messageCreate", (message) => {
-        if(message.content === "!ping2") {
+        if(message.content === options.setPrefix + "ping2") {
           message.reply({ content: client.ws.ping + " ms" });
         };
       });
@@ -93,7 +131,7 @@ const optionHandlerEvents = class {
   commandHandler(options, client = this.client) {
     let tableCmds = new ascii('BlackCat - commands');
     tableCmds.setHeading("Tên file", "Tình trạng");
-    const commandsPath = path.join(__dirname, options.CommandPath);
+    const commandsPath = path.join(__dirname, options.setCommandPath);
     readdirSync(commandsPath).forEach((dir) => {
       const commands = readdirSync(`${commandsPath}/${dir}/`).filter(file => file.endsWith(".js"));
       for (let file of commands) {
@@ -110,13 +148,14 @@ const optionHandlerEvents = class {
         };
       };
     });
+    this.handlerMessageCreate(options);
     console.log(tableCmds.toString().magenta);
   };
   // SlashCommands
   slashHandler(options, client = this.client) {
     const SlashCmds = new ascii("BlackCat - Slash");
     SlashCmds.setHeading('Slash Commands', 'Trạng thái').setBorder('|', '=', "0", "0");
-    const slashCommandsPath = path.join(__dirname, options.SlashCommandPath);
+    const slashCommandsPath = path.join(__dirname, options.setSlashCommandPath);
     const data = [];
     readdirSync(slashCommandsPath).forEach((dir) => {
       const slashCommandFile = readdirSync(`${slashCommandsPath}/${dir}/`).filter((files) => files.endsWith(".js"));
@@ -128,8 +167,8 @@ const optionHandlerEvents = class {
 			  } else {
 					SlashCmds.addRow(file.split('.js')[0], '⛔')
 			  };
-        if(!slashCommand.name) return console.log("thiếu tên lệnh");
-        if(!slashCommand.description) return console.log("thiếu mô tả lệnh");
+        if(!slashCommand.name) return console.log("[slash] thiếu tên lệnh");
+        if(!slashCommand.description) return console.log("[slash] thiếu mô tả lệnh");
         data.push({
           name: slashCommand.name,
           description: slashCommand.description,
@@ -149,6 +188,7 @@ const optionHandlerEvents = class {
         };
       })();
     });
+    this.handlerInteractionCreate(options);
     console.log(SlashCmds.toString().red);
   };
   async eventHandler(options, client = this.client) {
