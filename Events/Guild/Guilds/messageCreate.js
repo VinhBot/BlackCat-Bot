@@ -44,33 +44,28 @@ module.exports = async(client, message) => {
                 if(!message.member.permissions.has(PermissionsBitField.resolve(command.userPerms || []))) return message.reply({ 
                   embeds: [embed.setDescription(`bạn không có quyền ${command.userPerms} để sử dụng lệnh ${command.name} trong ${message.channelId}`)] 
                 });
-              }; 
+              };
               /*--------------------
               # dev commands
               --------------------*/
-              if(command.owner && message.author.id !== config.developer) return message.reply({ 
-                embeds: [embed.setDescription(`Lệnh này chỉ <@${config.developer}> mới có thể sử dụng`)]
-              });
-              /*--------------------
-              # kết thúc
-              --------------------*/
-              command.run(client, message, args, database, prefix = client.prefix);
-              let channel = client.channels.cache.get(database.channelLog);
-              if(channel) {
-                   channel.send({ embeds: [new EmbedBuilder()
-                      .setColor(database.colors.vang)
-                      .setFooter({ text: `${database.name}`, iconURL: `${database.avatar}`})
-                      .setTimestamp(Date.now())
-                      .setDescription(` \`Tên Discord : ${message.guild.name}\`\n\`Tên Kênh  SD: ${message.channel.name}\`\n\`Tên Người SD: ${message.author.tag}\`\n \`Lệnh được SD: ${message.content}\``)
-                  ]});
-              };                
+      if(command.owner && message.author.id !== config.developer) return message.reply({ 
+        embeds: [embed.setDescription(`Lệnh này chỉ <@${config.developer}> mới có thể sử dụng`)]
+      });
+      /*--------------------
+      # kết thúc
+      --------------------*/
+      command.run(client, message, args, database, prefix = client.prefix);        
+      client.channels.cache.get(database.channelLog).send({ embeds: [new EmbedBuilder()
+        .setColor(database.colors.vang)
+        .setFooter({ text: `${database.name}`, iconURL: `${database.avatar}`})
+        .setTimestamp(Date.now())
+        .setDescription(` \`Tên Discord : ${message.guild.name}\`\n\`Tên Kênh  SD: ${message.channel.name}\`\n\`Tên Người SD: ${message.author.tag}\`\n \`Lệnh được SD: ${message.content}\``)
+      ]});                          
     } catch(error) {
       console.log(error.toString());
       message.reply({ content: `[MessageCreate]: lỗi đã được gởi đi` });
     };
-  } else {
-    return message.reply({ content: `\`sai lệnh. vui lòng \n${client.prefix}help để xem lại tất cả các lệnh\`` }).then((msg) => {
-      setTimeout(() => msg.delete(), 10000);
-    });
-  }; 
+  } else return message.reply({ content: `\`sai lệnh. vui lòng \n${client.prefix}help để xem lại tất cả các lệnh\`` }).then((msg) => {
+    setTimeout(() => msg.delete(), 10000);
+  });
 };

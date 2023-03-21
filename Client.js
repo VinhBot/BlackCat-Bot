@@ -1,11 +1,66 @@
-const { Client, Partials, GatewayIntentBits, ActivityType, Collection, Routes, REST } = require("discord.js");
-const { readdirSync } = require("fs");
+var __importDefault = (this && this.__importDefault) || function (mod) {
+  return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+const Discord = __importDefault(require("discord.js"));
+const mongoose = __importDefault(require("mongoose"));
+const path_1 = __importDefault(require("node:path"));
+const fs = __importDefault(require("fs"));
 const ascii = require("ascii-table");
-const mongoose = require("mongoose");
-const path = require("node:path");
 require("colors");
-
-const BlackCat = class extends Client {
+/*========================================================
+# Language Package
+========================================================*/
+const I18nProvider = class {
+    constructor() {
+        var _a;
+        this.FilepathPrefix = 'file:';
+        this.DefaultLocale = 'vi';
+        const localesPath = path_1.default.join((_a = global.__dirname) !== null && _a !== void 0 ? _a : __dirname, '.', 'Events', "Language");
+        this.availableLocales = new Map(fs.default.readdirSync(localesPath).map(file => [path_1.default.basename(file, '.json'), path_1.default.resolve(localesPath, file)]));
+    }
+    loadFromLocale(locale) {
+        let filepath = this.availableLocales.get(locale !== null && locale !== void 0 ? locale : this.DefaultLocal);
+        let loaded = filepath !== undefined;
+        if(!loaded && locale && locale.startsWith(this.FilepathPrefix)) {
+            filepath = path_1.default.resolve(process.cwd(), locale.slice(this.FilepathPrefix.length));
+        };
+        try {
+            if(filepath) {
+                this.localeData = I18nProvider.flatten(JSON.parse(fs.default.readFileSync(filepath, 'utf-8')));
+                loaded = true;
+            };
+        } catch(e) { };
+        if (!loaded) {
+            this.loadFromLocale(this.DefaultLocal);
+            console.warn(`Không thể tải tập tin ngôn ngữ ${filepath !== null && filepath !== void 0 ? filepath : locale}. Sử dụng một mặc định.`);
+        };
+    }
+    __switchLanguage(key, replacements) {
+        if (this.localeData && this.localeData[key]) {
+            let message = this.localeData[key];
+            if (replacements) {
+                Object.entries(replacements).forEach((replacement) => message = message.replace(`{${replacement[0]}}`, replacement[1].toString()));
+            };
+            return message;
+        } else {
+            console.warn(`xin lỗi ngôn ngữ ${key} của bạn không được hỗ trợ. Thay vào đó, hãy sử dụng ngôn ngữ khác.`);
+            return key;   
+        };
+    }
+    static flatten(object, objectPath = null, separator = '.') {
+        return Object.keys(object).reduce((acc, key) => {
+            const newObjectPath = [objectPath, key].filter(Boolean).join(separator);
+            return typeof (object === null || object === void 0 ? void 0 : object[key]) === 'object' ? Object.assign(Object.assign({}, acc), I18nProvider.flatten(object[key], newObjectPath, separator)) : Object.assign(Object.assign({}, acc), { [newObjectPath]: object[key] });
+        }, { });
+    }
+};
+                                                      
+const lc = __importDefault(new I18nProvider());
+const switchLanguage = (id, replacements) => lc.default.__switchLanguage(id, replacements);
+/*========================================================
+# Events dành cho bot
+========================================================*/
+const BlackCat = class extends Discord.default.Client {
   constructor(options) {
     super({
       messageCacheLifetime: 60,
@@ -18,8 +73,8 @@ const BlackCat = class extends Client {
         parse: ["roles", "users", "everyone"],
         repliedUser: options.setReply,
       },
-      intents: Object.keys(GatewayIntentBits),
-      partials: Object.keys(Partials),
+      intents: Object.keys(Discord.default.GatewayIntentBits),
+      partials: Object.keys(Discord.default.Partials),
     });
     // setToken bot
     this.tokenBot = options.setToken;
@@ -29,31 +84,33 @@ const BlackCat = class extends Client {
     this.login(this.tokenBot);
     // kết nối tới mongodb 
     this._mongodb(options);
+    // set ngôn ngữ cho package
+    lc.default.loadFromLocale(options.setLanguage);
   };
   init() {
-    this.aliases = new Collection();
-    this.commands = new Collection();
-    this.slashCommands = new Collection(); 
+    this.aliases = new Discord.default.Collection();
+    this.commands = new Discord.default.Collection();
+    this.slashCommands = new Discord.default.Collection(); 
   };
   /*========================================================
   # mongourl 
   ========================================================*/
   _mongodb(options) { 
     if(options.setConnectMongoDB) {
-      mongoose.connect(options.setMongoDB, { 
+      mongoose.default.connect(options.setMongoDB, { 
         useNewUrlParser: true, 
         useUnifiedTopology: true,
         useCreateIndex: true,
         useFindAndModify: false
       }).then(() => {
-        console.log("Bot được kết nối với cơ sở dữ liệu!".blue)
+        console.log(`${switchLanguage("mongodb.connected")}`.blue);
       }).catch((err) => {
-        console.error(`Lỗi kết nối Mongoose: \n${err.stack}`.red);
+        console.error(`${switchLanguage("mongodb.error")}\n${err.stack}`.red);
       });
-      mongoose.connection.on("disconnected", () => {
-        console.warn("Kết nối Mongoose khoing thành công".red);
+      mongoose.default.connection.on("disconnected", () => {
+        console.warn(`${switchLanguage("mongodb.disconnected")}`.red);
       });
-      mongoose.set('strictQuery', false);
+      mongoose.default.set('strictQuery', false);
     };
   };
   /*========================================================
@@ -62,15 +119,14 @@ const BlackCat = class extends Client {
   handlerReadyEvents(options, client = this) {
     client.on("ready", () => {
       console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
+      const status = options.setActivities[Math.floor(Math.random() * options.setActivities.length)];
+      const type = Discord.default.ActivityType.Watching;
       setInterval(() => {
         client.user.setPresence({
-          activities: [{ 
-            name: options.setStatus[Math.floor(Math.random() * options.setStatus.length)], 
-            type: ActivityType.Watching 
-          }],
-          status: 'dnd',
+          activities: [{ name: status, type: type }],
+          status: options.setStatus || 'online',
         });
-  	  }, 5000);
+  	  }, options.setTime || 5000);
     });
   };
   /*========================================================
@@ -79,7 +135,7 @@ const BlackCat = class extends Client {
   handlerInteractionCreate(options, client = this) {
     const { EmbedBuilder, PermissionsBitField, InteractionType } = require("discord.js");
     if(options.setHandlerInteraction) {
-      console.log("Bạn đang sử dụng interactionCreate của BlackCat-djs".red);
+      console.log("interactionCreate ready".red);
       client.on("interactionCreate", async(interaction) => {
         if(interaction.type === InteractionType.ApplicationCommand) {
           if(!client.slashCommands.has(interaction.commandName) || !interaction.guild) return;
@@ -118,7 +174,7 @@ const BlackCat = class extends Client {
   ========================================================*/
   handlerMessageCreate(options, client = this) {
     if(options.setHandlerMessageCreate) {
-      console.log("Bạn đang sử dụng messageCreate của BlackCat-djs".red);
+      console.log("messageCreate ready".red);
       client.on("messageCreate", (message) => {
         if(message.content === options.setPrefix + "ping2") {
           message.reply({ content: client.ws.ping + " ms" });
@@ -132,9 +188,9 @@ const BlackCat = class extends Client {
   commandHandler(options, client = this) {
     let tableCmds = new ascii('BlackCat - commands');
     tableCmds.setHeading("Tên file", "Tình trạng");
-    const commandsPath = path.join(__dirname, options.setCommandPath);
-    readdirSync(commandsPath).forEach((dir) => {
-      const commands = readdirSync(`${commandsPath}/${dir}/`).filter(file => file.endsWith(".js"));
+    const commandsPath = path_1.default.join(__dirname, options.setCommandPath);
+    fs.default.readdirSync(commandsPath).forEach((dir) => {
+      const commands = fs.default.readdirSync(`${commandsPath}/${dir}/`).filter(file => file.endsWith(".js"));
       for (let file of commands) {
         let pull = require(`${commandsPath}/${dir}/${file}`);
         if(pull.name) {
@@ -158,10 +214,10 @@ const BlackCat = class extends Client {
   slashHandler(options, client = this) {
     const SlashCmds = new ascii("BlackCat - Slash");
     SlashCmds.setHeading('Slash Commands', 'Trạng thái').setBorder('|', '=', "0", "0");
-    const slashCommandsPath = path.join(__dirname, options.setSlashCommandPath);
+    const slashCommandsPath = path_1.default.join(__dirname, options.setSlashCommandPath);
     const data = [];
-    readdirSync(slashCommandsPath).forEach((dir) => {
-      const slashCommandFile = readdirSync(`${slashCommandsPath}/${dir}/`).filter((files) => files.endsWith(".js"));
+    fs.default.readdirSync(slashCommandsPath).forEach((dir) => {
+      const slashCommandFile = fs.default.readdirSync(`${slashCommandsPath}/${dir}/`).filter((files) => files.endsWith(".js"));
       for (const file of slashCommandFile) {
         const slashCommand = require(`${slashCommandsPath}/${dir}/${file}`);
         client.slashCommands.set(slashCommand.name, slashCommand);
@@ -180,14 +236,16 @@ const BlackCat = class extends Client {
         });
       };
     });
-    const rest = new REST({ version: "10" }).setToken(this.tokenBot);
-    client.on("ready", async() => {
+    const rest = new Discord.default.REST({ version: "10" }).setToken(this.tokenBot);
+    client.on("ready", () => {
       (async() => {
         try {
-          await rest.put(Routes.applicationCommands(client.user.id), { body: data });
-          console.info(`[BlackCat-Club] Đã tải lại thành công lệnh (/).`.blue);
-        } catch(error) {
-          return console.info(error);
+          await rest.put(Discord.default.Routes.applicationCommands(client.user.id), { 
+             body: data
+          });
+          console.log(`[BlackCat-Club] Đã tải lại thành công lệnh (/).`.blue);
+        } catch(err) {
+          console.log(err);
         };
       })();
     });
@@ -202,8 +260,8 @@ const BlackCat = class extends Client {
     Events.setHeading("Tên file", "Trạng thái");
     const loadDir = (dir) => {
       let amount = 0, allevents = [];
-      const EventsPath = path.join(__dirname, options.EventPath);
-      const eventFiles = readdirSync(`${EventsPath}/${dir}`).filter((file) => file.endsWith(".js"));
+      const EventsPath = path_1.default.join(__dirname, options.EventPath);
+      const eventFiles = fs.default.readdirSync(`${EventsPath}/${dir}`).filter((file) => file.endsWith(".js"));
       for (const file of eventFiles) {
         try {
           const event = require(`${EventsPath}/${dir}/${file}`);

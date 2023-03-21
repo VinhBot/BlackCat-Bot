@@ -1,6 +1,7 @@
 const Client = require("./Client");
 const config = require("./config.json");
 const handlers = new Client({
+  setLanguage: "vi",
   setReply: false, // đặt chế độ reply cho bot
   setToken: process.env.token || config.token, // token của bot
   setConnectMongoDB: true, // bật tắt kết nối mongourl || đang thử nhiệm xem có cần thiết hay là không 
@@ -8,12 +9,14 @@ const handlers = new Client({
 });
 // xem bot đã on hay chưa, client.on("ready" .......) :)))
 handlers.handlerReadyEvents({
-  setStatus: [
+  setActivities: [
     "bot discord v14",
     "BlackCat-Club",
     `${config.prefix}help để xem tất cả các lệnh`,
     "@botname help"
-  ]
+  ],
+  setStatus: "dnd",
+  setTime: 2000,
 });
 // Khởi chạy Events 
 handlers.eventHandler({
