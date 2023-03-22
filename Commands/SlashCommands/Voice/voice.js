@@ -17,7 +17,7 @@ module.exports = {
         required: true, 
         choices: [
           { name: "70 tuổi", value: "1" },
-          { name: "name", value: "value" },
+          { name: "name", value: "2" },
         ],
       }],
     },{
@@ -26,7 +26,7 @@ module.exports = {
       type: ApplicationCommandOptionType.Subcommand, 
     },
   ],
-  run: async(client, interaction, Options) => {
+  run: async(client, interaction) => {
    if(interaction.options.getSubcommand() === "sounds") {
      const toggle = interaction.options.getString("tên_sound");
      const channel = interaction.member.voice.channel;
@@ -37,14 +37,14 @@ module.exports = {
 			  guildId: interaction.guild.id,
 		  	adapterCreator: interaction.guild.voiceAdapterCreator,
 		 });
-     if(toggle === "1") {
-        player.play(createAudioResource('https://tiengdong.com/toi-nam-nay-hon-70-tuoi'));
-        interaction.reply({ content: "đang chạy sounds 70 tuổi" });
-     };
      connection.subscribe(player);
 		 player.on(AudioPlayerStatus.Idle, () => {
 			connection.destroy();
 		 });
+     if(toggle === "1") {
+        player.play(createAudioResource(`${process.cwd()}/Events/Sounds/70tuoi.mp3`));
+        interaction.reply({ content: "đang chạy sounds 70 tuổi" });
+     };
    } else if(interaction.options.getSubcommand() === "create") {
      interaction.reply({ content: "test create" });
    };
