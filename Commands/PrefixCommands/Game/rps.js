@@ -9,11 +9,10 @@ module.exports = {
   owner: false, //: tắt // true : bật
   category:"Game", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
     if(!message.mentions.users.first()) return message.reply("chỉ định ai đó");
     const noidungthachdau = `${args[0] ? args.join(" ") : "Không có nội dung thách đấu"}`;
     new RPSGame({
-      
           message: message,
           slashCommand: false,
           opponent: message.mentions.users.first(),

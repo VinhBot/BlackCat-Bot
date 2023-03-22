@@ -9,7 +9,7 @@ module.exports = {
     owner: false, //: tắt // true : bật
     category:"Utility", // tên folder chứa lệnh
     cooldown: 5, // thời gian có thể tái sử dụng lệnh
-    run: async(client, message, args, prefix, database) => {
+    run: async(client, message, args, prefix) => {
     const pingImageArr = [
          "https://cdn.discordapp.com/attachments/892794857905602560/892794900863660062/63e1657a8a6249a2fc9c062b17f27ce0.gif",
          "https://cdn.discordapp.com/attachments/892794857905602560/892795017104613376/dc87c9ea90b4b7d02a0cbe5de256d385.gif",

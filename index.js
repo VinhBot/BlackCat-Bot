@@ -1,22 +1,22 @@
 const { ActivityType } = require("discord.js");
+const { readdirSync } = require("node:fs");
 const Client = require("blackcat-djs");
 const config = require("./config.json");
-const handlers = new Client({
+const client = new Client({
   setLanguage: "vi",
   setReply: false, // đặt chế độ reply cho bot
   setToken: process.env.token || config.token, // token của bot
-  setConnectMongoDB: true, // bật tắt kết nối mongourl || đang thử nhiệm xem có cần thiết hay là không 
-  setMongoDB: process.env.mongourl || config.mongourl, // mongourl
+  setDeveloper: config.developer,
 });
 // xem bot đã on hay chưa, client.on("ready" .......) :)))
-handlers.on("ready", () => {
-  console.log(`${handlers.user.username} đã sẵn sàng hoạt động`.red); 
+client.on("ready", () => {
+  console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
   const setActivities = [
-    `${handlers.guilds.cache.size} Guilds, ${handlers.guilds.cache.map(c => c.memberCount).filter(v => typeof v === "number").reduce((a, b) => a + b, 0)} member`,
+    `${client.guilds.cache.size} Guilds, ${client.guilds.cache.map(c => c.memberCount).filter(v => typeof v === "number").reduce((a, b) => a + b, 0)} member`,
     `BlackCat-Club`
   ];
   setInterval(() => {
-    handlers.user.setPresence({
+    client.user.setPresence({
       activities: [{
         name: setActivities[Math.floor(Math.random() * setActivities.length)], 
         type: ActivityType.Playing
@@ -25,20 +25,18 @@ handlers.on("ready", () => {
     });
   }, 5000);
 });
-// Khởi chạy Events 
-handlers.eventHandler({
-  EventPath: `${process.cwd()}/Events/Guild`, // đường dẫn của events
-  Events: ["Guilds", "Client"] // tên folder
-});
 // khởi chạy các lệnh slash (/)
-handlers.slashHandler({
+client.slashHandler({
   setHandlerInteraction: true, // bật tắt hỗ trợ interactionCreate || nếu tắt tính năng này bạn sẽ phải tự custom interactionCreate của discord
-  setDeveloper: config.developer, // id của owner || nếu setHandlerInteraction: false, thì cái này sẽ vô dụng :))
   setSlashCommandPath: `${process.cwd()}/Commands/SlashCommands`, // đường dẫn đến file slashCommands
 });
 // khởi chạy các lệnh prefix commands
-handlers.commandHandler({
-  setHandlerMessageCreate: false, // bật hoặc tắt messageCreate của package
-  setPrefix: "!", // nếu lhi tắt setHandlerMessageCreate: false, thì cái này vô dụng
+client.commandHandler({
+  setHandlerMessageCreate: true, // bật hoặc tắt messageCreate của package
+  setPrefix: config.prefix, // nếu lhi tắt setHandlerMessageCreate: false, thì cái này vô dụng
   setCommandPath: `${process.cwd()}/Commands/PrefixCommands` // set đường dẫn đến commands
+});
+// chạy các events bên ngoài
+readdirSync('./Events/HandlerEvnets').forEach((BlackCat) => {
+  require(`./Events/HandlerEvnets/${BlackCat}`)(client);
 });

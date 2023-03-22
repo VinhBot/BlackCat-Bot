@@ -8,7 +8,7 @@ module.exports = {
   owner: false, //: tắt // true : bật
   category:"Game", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
     const slotemoji = ":money_mouth:"; 
     let items = ['💵', '💍', '💯'];
     let $ = items[Math.floor(items.length * Math.random())];

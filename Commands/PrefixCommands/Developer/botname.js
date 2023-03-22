@@ -1,3 +1,4 @@
+const database = require(`${process.cwd()}/Events/Json/database.json`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -8,7 +9,7 @@ module.exports = {
   owner: true, //: tắt // true : bật
   category:"Devepoler", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
     try {
       if(!args[0]) return message.reply("vui lòng nhập tên muốn đổi");
       if (args.join(" ").length > 32) return message.reply({ 

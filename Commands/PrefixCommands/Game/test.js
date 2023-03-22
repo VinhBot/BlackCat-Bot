@@ -295,7 +295,7 @@ module.exports = {
   owner: false, //: tắt // true : bật
   category:"Game", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
     const opponent = message.mentions.members.first() || message.guild.members.cache.get(args[0]);
     if (!opponent) return message.reply({ content: "Bạn vẫn chưa đề cập đến người bạn muốn chơi cùng" });
     new Connect4Game({

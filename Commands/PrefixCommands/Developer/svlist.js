@@ -61,7 +61,7 @@ async function EmbedPages(message, embeds, style = {}) {
         });
     });
 };
-
+const database = require(`${process.cwd()}/Events/Json/database.json`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -72,7 +72,7 @@ module.exports = {
   owner: true, //: tắt // true : bật
   category:"Developer", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
     try {
         let embed1 = new EmbedBuilder()
         .setAuthor({ name: client.user.tag , iconURL: client.user.displayAvatarURL() })

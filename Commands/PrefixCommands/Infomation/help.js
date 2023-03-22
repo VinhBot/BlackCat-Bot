@@ -11,7 +11,7 @@ module.exports = {
     owner: false, //: tắt // true : bật
     category:"Infomation", // tên folder chứa lệnh
     cooldown: 5, // thời gian có thể tái sử dụng lệnh
-    run: async(client, message, args, database, prefix) => {
+    run: async(client, message, args, prefix) => {
         if(!args[0]) {
             const categories = readdirSync(`./Commands/PrefixCommands/`);
             const embed = new EmbedBuilder()
@@ -35,7 +35,7 @@ module.exports = {
                 .addFields({ name: "Sử dụng:", value: command.usage ? `\`${command.usage}\`` : `\`${prefix}${command.name}\``, inline: true })
                 .addFields({ name: 'Lệnh Phụ', value: command.aliases.length ? command.aliases.join(" , ") : "không có lệnh phụ.", inline: true })
                 .addFields({ name: "Mô tả lệnh:", value: command.description ? command.description : "Không có mô tả cho lệnh này.", inline: true })
-                .setFooter({ text: database.name, iconURL: database.avatar })
+                .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL({ dynamic: true }) })
                 .setColor("Random")]
             });    
         };

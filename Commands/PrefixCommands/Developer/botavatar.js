@@ -1,3 +1,4 @@
+const database = require(`${process.cwd()}/Events/Json/database.json`);
 const fetch = require("node-fetch");
 const path = require("node:path");
 const fs = require("fs");
@@ -10,7 +11,7 @@ module.exports = {
   owner: true, //: tắt // true : bật
   category:"Developer", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
-  run: async(client, message, args, database, prefix) => {
+  run: async(client, message, args, prefix) => {
   try {
       var url;
       if (message.attachments.size > 0) {
