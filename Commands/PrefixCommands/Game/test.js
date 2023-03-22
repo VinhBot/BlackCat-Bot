@@ -114,13 +114,7 @@ class Connect4Game {
                 if (column > 3) {
                     msg.components[1].components[column % 4].disabled = true;
                 } else {
-                  try {
                     msg.components[0].components[column].disabled = true;
-                  } catch(e) {
-                    this.message.reply({ content: "Bạn đã vượt quá số ô cho phép" }).then((msg) => {
-                      setTimeout(() => msg.delete(), 3000);
-                    });
-                  };
                 };
             };
             

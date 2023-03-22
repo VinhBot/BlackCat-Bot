@@ -1,7 +1,0 @@
-{
-  "mongodb": {
-    "connected": "Bot được kết nối với cơ sở dữ liệu!",
-    "disconnected": "Kết nối Mongoose không thành công",
-    "error": "Lỗi kết nối Mongoose: "
-  }
-}

@@ -1,7 +1,0 @@
-{
-  "mongodb": {
-    "connected": "Bot is connected to the database!",
-    "disconnected": "Mongoose connection failed",
-    "error": "Mongoose connection error: "
-  }
-}

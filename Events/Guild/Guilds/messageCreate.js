@@ -4,9 +4,10 @@ const config = require(`${process.cwd()}/config.json`);
 const { GPrefix } = require(`../../OptionsSchema.js`);
 const database = require("../../Json/database.json");
 
+
 module.exports = async(client, message) => {
   if(message.author.bot || !message.guild) return;
-  let PREFIX = config.prefix;
+  var PREFIX = config.prefix;
   const GuildPrefix = await GPrefix.findOne({ guild: message.guild.id });
   if(GuildPrefix && GuildPrefix.prefix) PREFIX = GuildPrefix.prefix;
   client.prefix = PREFIX;
