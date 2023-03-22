@@ -1,3 +1,4 @@
+const { ActivityType } = require("discord.js");
 const Client = require("./Client");
 const config = require("./config.json");
 const handlers = new Client({
@@ -8,15 +9,21 @@ const handlers = new Client({
   setMongoDB: process.env.mongourl || config.mongourl, // mongourl
 });
 // xem bot đã on hay chưa, client.on("ready" .......) :)))
-handlers.handlerReadyEvents({
-  setActivities: [
-    "bot discord v14",
-    "BlackCat-Club",
-    `${config.prefix}help để xem tất cả các lệnh`,
-    "@botname help"
-  ],
-  setStatus: "dnd",
-  setTime: 2000,
+handlers.on("ready", () => {
+  console.log(`${handlers.user.username} đã sẵn sàng hoạt động`.red); 
+  const setActivities = [
+    `${handlers.guilds.cache.size} Guilds, ${handlers.guilds.cache.map(c => c.memberCount).filter(v => typeof v === "number").reduce((a, b) => a + b, 0)} member`,
+    `BlackCat-Club`
+  ];
+  setInterval(() => {
+    handlers.user.setPresence({
+      activities: [{
+        name: setActivities[Math.floor(Math.random() * setActivities.length)], 
+        type: ActivityType.Playing
+      }],
+      status: 'dnd',
+    });
+  }, 5000);
 });
 // Khởi chạy Events 
 handlers.eventHandler({
@@ -26,7 +33,7 @@ handlers.eventHandler({
 // khởi chạy các lệnh slash (/)
 handlers.slashHandler({
   setHandlerInteraction: true, // bật tắt hỗ trợ interactionCreate || nếu tắt tính năng này bạn sẽ phải tự custom interactionCreate của discord
-  setDeveloper: config.developer, // id của owner || nếu setHandlerInteraction: false, thì cái này sẽ vô dụng
+  setDeveloper: config.developer, // id của owner || nếu setHandlerInteraction: false, thì cái này sẽ vô dụng :))
   setSlashCommandPath: "Commands/SlashCommands", // đường dẫn đến file slashCommands
 });
 // khởi chạy các lệnh prefix commands

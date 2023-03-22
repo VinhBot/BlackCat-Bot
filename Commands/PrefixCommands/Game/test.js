@@ -3,12 +3,10 @@ function disableButtons(components) {
   for (let x = 0; x < components.length; x++) {
     for (let y = 0; y < components[x].components.length; y++) {
       components[x].components[y].disabled = true;
-    }
-  }
+    };
+  };
   return components;
 };
-const WIDTH = 7;
-const HEIGHT = 6;
 
 class Connect4Game {
     constructor(options = {}) {
@@ -19,6 +17,8 @@ class Connect4Game {
       this.options = options;
       this.inGame = false;
       this.redTurn = true;
+      this.WIDTH = 7;
+      this.HEIGHT = 6;
     }
 
     sendMessage(content) {
@@ -28,7 +28,7 @@ class Connect4Game {
     }
     
     getGameBoard() {
-        let str = '';
+        let str = '', HEIGHT = this.HEIGHT, WIDTH = this.WIDTH;
         for (let y = 0; y < HEIGHT; y++) {
             for (let x = 0; x < WIDTH; x++) {
                 str += '' + this.gameBoard[y * WIDTH + x];
@@ -39,18 +39,19 @@ class Connect4Game {
         return str;
     }
     async startGame() {
-        if (this.options.slash_command) {
+        if(this.options.slash_command) {
           if(!this.message.deferred) await this.message.deferReply({ ephemeral: false });
           this.message.author = this.message.user;
         };
-        if (this.opponent.bot) return this.sendMessage('Bạn không thể chơi với bot!');
-        // if (this.opponent.id === this.message.author.id) return this.sendMessage('Bạn không thể chơi với chính mình!');
+        if(this.opponent.bot) return this.sendMessage('Bạn không thể chơi với bot!');
+        // if(this.opponent.id === this.message.author.id) return this.sendMessage('Bạn không thể chơi với chính mình!');
         if(await verify(this.options)) {
             this.Connect4Game();
         };
     }
 
     async Connect4Game() {
+        let HEIGHT = this.HEIGHT, WIDTH = this.WIDTH;
         for (let y = 0; y < HEIGHT; y++) {
           for (let x = 0; x < WIDTH; x++) {
             this.gameBoard[y * WIDTH + x] = '⚪';
@@ -85,6 +86,7 @@ class Connect4Game {
     } 
 
     ButtonInteraction(msg) {
+        let HEIGHT = this.HEIGHT, WIDTH = this.WIDTH;
         const collector = msg.createMessageComponentCollector({ idle: 60000 });
         collector.on('collect', async btn => {
             if(btn.user.id !== this.message.author.id && btn.user.id !== this.opponent.id) return btn.reply({
@@ -162,6 +164,7 @@ class Connect4Game {
         });
     }
     hasWon(placedX, placedY) {
+        let HEIGHT = this.HEIGHT, WIDTH = this.WIDTH;
         const chip = this.getChip();
         const gameBoard = this.gameBoard;
         //Kiểm tra ngang
@@ -207,6 +210,7 @@ class Connect4Game {
     }
 
     isBoardFull() {
+      let HEIGHT = this.HEIGHT, WIDTH = this.WIDTH;
       for (let y = 0; y < HEIGHT; y++) {
         for (let x = 0; x < WIDTH; x++) {
           if(this.gameBoard[y * WIDTH + x] === '⚪') return false;

@@ -12,7 +12,7 @@ module.exports = {
     category:"Infomation", // tên folder chứa lệnh
     cooldown: 5, // thời gian có thể tái sử dụng lệnh
     run: async(client, message, args, database, prefix) => {
-        if (!args[0]) {
+        if(!args[0]) {
             const categories = readdirSync(`./Commands/PrefixCommands/`);
             const embed = new EmbedBuilder()
                 .setAuthor({ name: `❯ ・ Commands list - ${client.commands.size} Commands`, iconURL: client.user.displayAvatarURL() })
@@ -25,22 +25,19 @@ module.exports = {
             return message.channel.send({ embeds: [embed] });
         } else {
             const command = client.commands.get(args[0].toLowerCase()) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(args[0].toLowerCase()));
-            if (!command) {
-                const embed = new EmbedBuilder()
-                .setDescription(`Lệnh không hợp lệ! Sử dụng \`${prefix}help\` cho tất cả các lệnh của tôi!`)
-                .setColor("Random")
-                return message.channel.send({ embeds: [embed] });
-            };
-            const embed = new EmbedBuilder()
+            if(!command) return message.channel.send({ 
+               content: "Ồ có vẻ như tôi không có lệnh đó"
+            });
+            return message.channel.send({ embeds: [new EmbedBuilder()
                 .setTitle("Chi tiết lệnh:")
                 .setThumbnail('https://hzmi.xyz/assets/images/question_mark.png')
                 .addFields({ name: "Tên lệnh:", value: command.name ? `\`${command.name}\`` : "Không có tên cho lệnh này.", inline: true })
                 .addFields({ name: "Sử dụng:", value: command.usage ? `\`${command.usage}\`` : `\`${prefix}${command.name}\``, inline: true })
-                .addFields({ name: 'Lệnh Phụ', value: `\`${command.aliases.length ? command.aliases.join(" | ") : "không có."}\``, inline: true })
+                .addFields({ name: 'Lệnh Phụ', value: command.aliases.length ? command.aliases.join(" , ") : "không có lệnh phụ.", inline: true })
                 .addFields({ name: "Mô tả lệnh:", value: command.description ? command.description : "Không có mô tả cho lệnh này.", inline: true })
                 .setFooter({ text: database.name, iconURL: database.avatar })
-                .setColor("Random");
-            return message.channel.send({ embeds: [embed] });    
+                .setColor("Random")]
+            });    
         };
     },
 };

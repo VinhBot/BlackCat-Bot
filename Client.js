@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 const Discord = __importDefault(require("discord.js"));
 const mongoose = __importDefault(require("mongoose"));
 const path_1 = __importDefault(require("node:path"));
-const fs = __importDefault(require("fs"));
+const fs = __importDefault(require("node:fs"));
 const ascii = require("ascii-table");
 require("colors");
 /*========================================================
@@ -112,22 +112,6 @@ const BlackCat = class extends Discord.default.Client {
       });
       mongoose.default.set('strictQuery', false);
     };
-  };
-  /*========================================================
-  # ready bot
-  ========================================================*/
-  handlerReadyEvents(options, client = this) {
-    client.on("ready", () => {
-      console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
-      const status = options.setActivities[Math.floor(Math.random() * options.setActivities.length)];
-      const type = Discord.default.ActivityType.Watching;
-      setInterval(() => {
-        client.user.setPresence({
-          activities: [{ name: status, type: type }],
-          status: options.setStatus || 'online',
-        });
-  	  }, options.setTime || 5000);
-    });
   };
   /*========================================================
   # interactionCretae

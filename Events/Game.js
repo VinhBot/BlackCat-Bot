@@ -10,6 +10,7 @@ function disableButtons(components) {
 };
 const RPSGame = class {
   constructor(options = {}) {
+      // cái này sẽ được sử dụng khi trong commands không có các giá trị đối 
       // các đối số và giá trị của: mention, messageCreate, interactionCreate
       if (!options.message) throw new TypeError('KHÔNG CÓ TIN NHẮN: Vui lòng cung cấp đối số thông báo')
       if(!options.opponent) throw new TypeError('KHÔNG CÓ ĐỐI THỦ: Vui lòng cung cấp đối số của đối thủ')
@@ -33,11 +34,11 @@ const RPSGame = class {
       if (!options.askMessage) options.askMessage = 'Đây {đối thủ}, {người thách thức} đã thách thức bạn trò chơi oẳn tù tì!';
       if (!options.cancelMessage) options.cancelMessage = 'Hình như họ từ chối chơi trò oẳn tù tì. \:(';
       if (!options.timeEndMessage) options.timeEndMessage = 'Vì đối thủ không trả lời, tôi đã bỏ trò chơi!';
-                      
+      //
       if (!options.othersMessage) options.othersMessage = 'Bạn không được phép sử dụng các nút cho tin nhắn này!';
       if (!options.chooseMessage) options.chooseMessage = 'bạn chọn {emoji}!';     
       if (!options.noChangeMessage) options.noChangeMessage = 'Bạn không thể thay đổi lựa chọn của mình!';
-      
+      //
       if (!options.gameEndMessage) options.gameEndMessage = 'Trò chơi chưa hoàn thành :(';
       if (!options.winMessage) options.winMessage = '{winner} thắng trận đấu!';
       if (!options.drawMessage) options.drawMessage = 'Đó là một trận hòa!';
@@ -56,8 +57,8 @@ const RPSGame = class {
 
   async startGame() {
       if(this.options.slashCommand) {
-          if(!this.message.deferred) await this.message.deferReply({ ephemeral: false });
-          this.message.author = this.message.user;
+        if(!this.message.deferred) await this.message.deferReply({ ephemeral: false });
+        this.message.author = this.message.user;
       };
       if(this.opponent.bot) return this.sendMessage('Bạn không thể chơi với bot!');
       if(this.opponent.id === this.message.author.id) return this.sendMessage('Bạn không thể chơi với chính mình!');
@@ -69,7 +70,6 @@ const RPSGame = class {
             .setTitle(options.embed.askTitle || options.embed.title)
             .setDescription(options.askMessage.replace('{challenger}', message.author.toString()).replace('{opponent}', opponent.toString()))
             .setColor(options.colors?.green || options.embed.color)
-    
           const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setLabel(options.buttons?.accept || 'Chấp nhận').setStyle('Success').setCustomId('accept'),
             new ButtonBuilder().setLabel(options.buttons?.reject || 'Từ chối').setStyle('Danger').setCustomId('reject')
@@ -127,22 +127,18 @@ const RPSGame = class {
   async RPSGame() {
       this.inGame = true;
       const emojis = this.options.emojis;
-      const choice = {
-        r: emojis.rock, 
-        p: emojis.paper, 
-        s: emojis.scissors
-      };
-      
-      const msg = await this.sendMessage({ embeds: [new EmbedBuilder()
-        .setTitle(this.options.embed.title)
-        .setDescription(this.options.embed.description)
-        .setColor(this.options.embed.color)
-      ], components: [new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId('r_rps').setStyle('Primary').setLabel(this.options.buttons.rock).setEmoji(emojis.rock),
-        new ButtonBuilder().setCustomId('p_rps').setStyle('Primary').setLabel(this.options.buttons.paper).setEmoji(emojis.paper),
-        new ButtonBuilder().setCustomId('s_rps').setStyle('Primary').setLabel(this.options.buttons.scissors).setEmoji(emojis.scissors)
-      )]});
-
+      const choice = { r: emojis.rock, p: emojis.paper, s: emojis.scissors };
+      const msg = await this.sendMessage({ 
+        embeds: [new EmbedBuilder()
+          .setTitle(this.options.embed.title)
+          .setDescription(this.options.embed.description)
+          .setColor(this.options.embed.color)
+        ], components: [new ActionRowBuilder().addComponents(
+           new ButtonBuilder().setCustomId('r_rps').setStyle('Primary').setLabel(this.options.buttons.rock).setEmoji(emojis.rock),
+           new ButtonBuilder().setCustomId('p_rps').setStyle('Primary').setLabel(this.options.buttons.paper).setEmoji(emojis.paper),
+           new ButtonBuilder().setCustomId('s_rps').setStyle('Primary').setLabel(this.options.buttons.scissors).setEmoji(emojis.scissors)
+        )],
+      });
       let challengerChoice; // sự lựa chọn thách thức
       let opponentChoice; // lựa chọn đối thủ
       const filter = m => m;
@@ -150,7 +146,6 @@ const RPSGame = class {
           filter,
           time: 60000,
       });
-
       collector.on('collect', async btn => {
           if(btn.user.id !== this.message.author.id && btn.user.id !== this.opponent.id) return btn.reply({ 
             content: this.options.othersMessage.replace('{author}', this.message.author.tag + 'Và' + this.opponent.tag), 
@@ -174,7 +169,7 @@ const RPSGame = class {
                 ephemeral: true
               });
               opponentChoice = choice[btn.customId.split('_')[0]];
-              btn.reply({ content: this.options.chooseMessage.replace('{emoji}', opponentChoice),  ephemeral: true })
+              btn.reply({ content: this.options.chooseMessage.replace('{emoji}', opponentChoice),  ephemeral: true });
               if (challengerChoice && opponentChoice) {
                   collector.stop()
                   this.getResult(msg, challengerChoice, opponentChoice)
@@ -182,7 +177,7 @@ const RPSGame = class {
           };
       });
 
-      collector.on('end', async(c, r) => {
+      collector.on('end', async(c,r) => {
         if(r === 'time' && this.inGame == true) return msg.edit({ 
           embeds: [new EmbedBuilder()
             .setTitle(this.options.embed.title)
@@ -204,7 +199,6 @@ const RPSGame = class {
       } else {
           result = this.options.winMessage.replace('{winner}', this.message.author.toString())
       };
-    
       return msg.edit({ embeds: [new EmbedBuilder()
         .setTitle(this.options.embed.title)
         .setColor(this.options.embed.color)

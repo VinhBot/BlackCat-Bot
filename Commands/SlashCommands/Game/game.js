@@ -22,7 +22,7 @@ module.exports = {
       options: [{
           name: "user",
           description: "Bạn muốn chơi cùng với ai ?",
-          type: ApplicationCommandOptionType.Mentionable,
+          type: ApplicationCommandOptionType.User,
           required: true,
       }],
     },
@@ -37,16 +37,16 @@ module.exports = {
         const game = new RPSGame({
           message: interaction,
           slashCommand: true,
-          opponent: interaction.options.getMentionable('user') || interaction.user,
+          opponent: interaction.options.getUser('user'),
           embed: {
             title: 'Oẳn tù tì',
             description: 'Nhấn một nút bên dưới để thực hiện một sự lựa chọn!',
             color: "Red",
           },
           buttons: {
-            rock: 'Rock',
-            paper: 'Paper',
-            scissors: 'Scissors',
+            rock: 'Búa',
+            paper: 'Giấy',
+            scissors: 'Kéo',
           },
           emojis: {
             rock: '🌑',
