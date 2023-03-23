@@ -314,7 +314,7 @@ module.exports = (client) => {
             };
         });
         collector.on('end', async(collected, reason) => {
-          if (reason === "time") {
+          if(reason === "time") {
             nowplay.edit({ components: [] });
           };
         });
