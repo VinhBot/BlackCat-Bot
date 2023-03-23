@@ -160,13 +160,14 @@ module.exports = {
       await queue.seek(Time);
       return interaction.reply({ content: `⏩ **Tìm kiếm \`${Time}\`**`, ephemeral: true });
     } else if(options.getSubcommand() === "lyrics") {
+      const lyricsfinder = require('lyrics-finder');
       try {
         const queue = await client.distube.getQueue(guildId);
         let name = queue.songs.map((song, id) => song.name).slice(0, 1).join("\n");
         let uploader = queue.songs.map((song, id) => song.uploader.name).slice(0, 1).join("\n");
         let thumbnail = queue.songs.map((song, id) => song.thumbnail).slice(0, 1).join("\n");
         let url = queue.songs.map((song, id) => song.url).slice(0, 1).join("\n");
-        let lyrics = (await require("lyrics-finder")(uploader, name)) || "Không tìm thấy lời bài hát!";
+        let lyrics = (await lyricsfinder(uploader, name)) || "Không tìm thấy lời bài hát!";
         interaction.reply({ embeds: [new EmbedBuilder()
           .setAuthor({ name: name, iconURL: thumbnail, url: url })
           .setColor("Random")

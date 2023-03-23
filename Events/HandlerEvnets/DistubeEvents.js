@@ -126,9 +126,7 @@ module.exports = (client) => {
         });
         //array tất cả các lần embed, ở đây chỉ đơn giản hóa 10 lần embed với các số từ 0 - 9
         let lastEdited = false;
-        try {
-          clearInterval(songEditInterval)
-        } catch(e) {};
+        try {clearInterval(songEditInterval)} catch(e) {};
         songEditInterval = setInterval(async() => {
           if(!lastEdited) {
             try {
@@ -143,7 +141,7 @@ module.exports = (client) => {
             lastEdited = true;
             setTimeout(() => lastEdited = false, 7000);
             let { member, guild } = i;
-            if(!member.voice.channel) return i.reply({ content: `${emoji.x} **Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+            if(!member.voice.channel) return i.reply({ content: `❌ **Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
             const test = guild.channels.cache.filter(chnl => (chnl.type == ChannelType.GuildVoice)).find(channel => (channel.members.has(client.user.id)));
             if(test && member.voice.channel.id !== test.id) return interaction.reply({ embeds: [new EmbedBuilder().setDescription(`❌ Tôi đã chơi trong <#${test.id}>`)], ephemeral: true });
             // bỏ qua bài hát
@@ -232,7 +230,7 @@ module.exports = (client) => {
               };
               await i.reply({ embeds: [new EmbedBuilder()
                   .setColor(database.colors.vang).setTimestamp()
-                  .setTitle(`${newQueue.repeatMode == 1 ? `${v} **Lặp bài hát đã bật**`: `${x} **Lặp bài hát đã tắt**`}`)
+                  .setTitle(`${newQueue.repeatMode == 1 ? `✔️ **Lặp bài hát đã bật**`: `❌ **Lặp bài hát đã tắt**`}`)
                   .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               });
               setTimeout(() => i.deleteReply(), 3000);
@@ -245,7 +243,7 @@ module.exports = (client) => {
               };
               await i.reply({ embeds: [new EmbedBuilder()
                   .setColor(database.colors.vang).setTimestamp()
-                  .setTitle(`${newQueue.repeatMode == 2 ? `${v} **Lặp hàng đợi đã bật**`: `${x} **Lặp hàng đợi đã tắt**`}`)
+                  .setTitle(`${newQueue.repeatMode == 2 ? `**Lặp hàng đợi đã bật**`: `**Lặp hàng đợi đã tắt**`}`)
                   .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
                 });
               setTimeout(() => i.deleteReply(), 3000);
@@ -277,9 +275,10 @@ module.exports = (client) => {
               nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
             } else if(i.customId == `lyrics`) {
               try {
+                 await i.deferReply();
                  let thumbnail = newQueue.songs.map((song) => song.thumbnail).slice(0, 1).join("\n");
                  let name = newQueue.songs.map((song) => song.name).slice(0, 1).join("\n");
-                 i.reply({ embeds: [new EmbedBuilder()
+                 i.editReply({ embeds: [new EmbedBuilder()
                   .setAuthor({ name: name, iconURL: thumbnail, url: newQueue.songs.map((song) => song.url).slice(0, 1).join("\n") })
                   .setColor(database.colors.vang)
                   .setThumbnail(thumbnail)
@@ -319,13 +318,13 @@ module.exports = (client) => {
           };
         });
     }).on("finishSong", (queue, song) => {
-        queue.textChannel.messages.fetch(PlayerMap.get(`currentmsg`)).then((msg) => {
+        return queue.textChannel.messages.fetch(PlayerMap.get(`currentmsg`)).then((msg) => {
           msg.edit({ embeds: [new EmbedBuilder()
             .setAuthor({ name: `${song.name}`, iconURL: "https://cdn.discordapp.com/attachments/883978730261860383/883978741892649000/847032838998196234.png", url: song.url })
             .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
             .setFooter({ text: `💯 ${song.user.tag}\n⛔️ Bài hát đã kết thúc!`, iconURL: song.user.displayAvatarURL({ dynamic: true }) })
             .setColor("Random")
-          ], components: []}).catch((e) => {});
+          ], components: []}).catch((e) => { });
         }).catch((e) => { });
     }).on("finish", async(queue) => {
       return await queue.textChannel.send({ embeds: [new EmbedBuilder()
