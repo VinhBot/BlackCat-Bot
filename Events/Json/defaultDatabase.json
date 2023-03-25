@@ -1,0 +1,18 @@
+{
+    "1055150050357022840": {
+        "defaultGuildName": "BlackCat-Club",
+        "setDefaultAutoplay": false,
+        "setDefaultVolume": 50,
+        "setAutoresume": true,
+        "setupMessageId": "1089194887754285187",
+        "setupChannelId": "1089119081304707102"
+    },
+    "1054933019934330930": {
+        "defaultGuildName": "PokéMeow Việt Nam",
+        "setDefaultAutoplay": false,
+        "setDefaultVolume": 50,
+        "setAutoresume": true,
+        "setupMessageId": "",
+        "setupChannelId": ""
+    }
+}
