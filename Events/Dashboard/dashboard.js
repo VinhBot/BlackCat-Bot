@@ -194,30 +194,30 @@ module.exports = (client) => {
       };
       let guildData = await database.get(guild.id);
       if(req.body.prefix) {
-        guildData.setupPrefix = String(req.body.prefix).split(" ")[0];
+        guildData.setDefaultPrefix = String(req.body.prefix).split(" ")[0];
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultvolume) {
-        guildData.setDefaultMusicData.setDefaultVolume = Number(req.body.defaultvolume);
+        guildData.setDefaultMusicData.DefaultVolume = Number(req.body.defaultvolume);
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultautoplay) {
-        guildData.setDefaultMusicData.setDefaultAutoplay = true;
+        guildData.setDefaultMusicData.DefaultAutoplay = true;
         await database.set(guild.id, guildData);
       } else {
-        guildData.setDefaultMusicData.setDefaultAutoplay = false;
+        guildData.setDefaultMusicData.DefaultAutoplay = false;
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultfilters) {
-        guildData.setDefaultMusicData.setDefaultFilters = req.body.defaultfilters;
+        guildData.setDefaultMusicData.DefaultFilters = req.body.defaultfilters;
         await database.set(guild.id, guildData);
       };
       if(req.body.djroles) {
-        guildData.setDefaultMusicData.setupDjroles = req.body.djroles;
+        guildData.setDefaultMusicData.Djroles = req.body.djroles;
         await database.set(guild.id, guildData);
       };
       if(req.body.botchannel) {
-        guildData.setDefaultMusicData.setupChannelId = req.body.botchannel;
+        guildData.setDefaultMusicData.ChannelId = req.body.botchannel;
         await database.set(guild.id, guildData);
       };
       res.render("settings", {

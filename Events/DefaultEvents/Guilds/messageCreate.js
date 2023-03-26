@@ -7,8 +7,8 @@ const config = require(`${process.cwd()}/config.json`);
 
 module.exports = async(client, message) => {
   if(message.author.bot || !message.guild) return;
-  const guildData = await database.get(message.guild.id);
-  const prefix = guildData.setupPrefix;
+  const data = await database.get(message.guild.id);
+  const prefix = data.setDefaultPrefix;
   const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
   if(!prefixRegex.test(message.content)) return;

@@ -1,38 +1,39 @@
 {
     "1055150050357022840": {
         "defaultGuildName": "BlackCat-Club",
+        "setDefaultPrefix": "!",
         "setDefaultMusicData": {
-            "setDefaultAutoresume": true,
-            "setDefaultAutoplay": false,
-            "setDefaultVolume": 119,
-            "setDefaultFilters": [
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": true,
+            "DefaultVolume": 62,
+            "DefaultFilters": [
                 "3d",
-                "bassboost"
+                "bassboost",
+                "echo"
             ],
-            "setupMessageId": "1089510293043937361",
-            "setupChannelId": "1089119081304707102",
-            "setupDjroles": [
+            "MessageId": "1089531354934431814",
+            "ChannelId": "1089119081304707102",
+            "Djroles": [
                 "1088740567657222194",
                 "1089413553615814750",
                 "1089413589267382282"
             ]
-        },
-        "setupPrefix": "!"
+        }
     },
     "1054933019934330930": {
         "defaultGuildName": "PokéMeow Việt Nam",
+        "setDefaultPrefix": "!",
         "setDefaultMusicData": {
-            "setDefaultAutoresume": true,
-            "setDefaultAutoplay": false,
-            "setDefaultVolume": 50,
-            "setDefaultFilters": [
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
                 "bassboost",
                 "3d"
             ],
-            "setupMessageId": "",
-            "setupChannelId": "",
-            "setupDjroles": []
-        },
-        "setupPrefix": "!"
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        }
     }
 }

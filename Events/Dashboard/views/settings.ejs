@@ -31,7 +31,7 @@
                             <form method="POST">
                                 <h5 style="margin-bottom: 0.5rem; margin-top: 10px;color:#828cff">Prefix:</h5>
                                 <p style="font-style: italic;" class="disabled">The prefix that is added to discord messages in order to invoke commands.</p>
-                                <input style="margin-top: -10px;" type="text" class="form-control" name="prefix" value="<%= guildData2.setupPrefix %>" placeholder="Prefix của bạn.">
+                                <input style="margin-top: -10px;" type="text" class="form-control" name="prefix" value="<%= guildData2.setDefaultPrefix %>" placeholder="Prefix của bạn.">
                                 
                                 <br><br>
                                 <h5 style="margin-bottom: 0.5rem; margin-top: 10px;color:#828cff">Default Autoplay:</h5>
@@ -42,9 +42,9 @@
                                         name="defaultautoplay" 
                                         id="defaultautoplay"
                                         style="zoom:2;margin-left: auto;margin-top: auto;margin: auto;"
-                                        <%= guildData.setDefaultAutoplay ? "checked" : "" %> >
+                                        <%= guildData.DefaultAutoplay ? "checked" : "" %> >
                                     
-                                <label class="form-check-label" for="defaultautoplay"> <%= guildData.setDefaultAutoplay ? "Enabled" : "Disabled" %> (Updates on Save)
+                                <label class="form-check-label" for="defaultautoplay"> <%= guildData.DefaultAutoplay ? "Enabled" : "Disabled" %> (Updates on Save)
                                 </label>
                                     
                                 </div>
@@ -52,8 +52,8 @@
                                 <br><br>
                                 <h5 style="margin-bottom: 0.5rem; margin-top: 10px;color:#828cff">Default Volume:</h5>
                                 <p style="font-style: italic;" class="disabled">The Volume to be set on the Queue Initialisation.</p>
-                                <input oninput="this.nextElementSibling.value = this.value" tyle="margin-top: -10px;" type="range" class="form-range" min="1" max="150" step="1" value="<%= guildData.setDefaultVolume %>" name="defaultvolume" id="defaultvolume">
-                                Current Volume: <output><%= guildData.setDefaultVolume %></output>%
+                                <input oninput="this.nextElementSibling.value = this.value" tyle="margin-top: -10px;" type="range" class="form-range" min="1" max="150" step="1" value="<%= guildData.DefaultVolume %>" name="defaultvolume" id="defaultvolume">
+                                Current Volume: <output><%= guildData.DefaultVolume %></output>%
                                 
                                 
                                 <br><br>
@@ -69,7 +69,7 @@
                                 >
                                     <% guild.roles.cache.filter(role=>!role.managed).sort((a, b) => b.rawPosition - a.rawPosition).forEach((role, i) => { %>
                                         <option value="<%= role.id%>" 
-                                            <%= guildData.setupDjroles.includes(role.id) ? "selected" : "" %>> @<%= role.name%>
+                                            <%= guildData.Djroles.includes(role.id) ? "selected" : "" %>> @<%= role.name%>
                                         </option>
                                     <% }) %>
                                 </select>
@@ -92,7 +92,7 @@
                                         .sort((a, b) => a.rawPosition - b.rawPosition)
                                         .forEach((channel, i) => { %>
                                         <option value="<%= channel.id%>" 
-                                            <%=  guildData.setupChannelId.includes(channel.id) ? "selected" : "" %>> #<%= channel.name%>
+                                            <%=  guildData.ChannelId.includes(channel.id) ? "selected" : "" %>> #<%= channel.name%>
                                         </option>
                                     <% }) %>
                                 </select>
@@ -114,7 +114,7 @@
                                     <% Object.keys(BotFilters)
                                         .forEach((filter, i) => { %>
                                         <option value="<%= filter %>" 
-                                            <%= guildData.setDefaultFilters.includes(filter) ? "selected" : "" %>> <%= filter%>
+                                            <%= guildData.DefaultFilters.includes(filter) ? "selected" : "" %>> <%= filter%>
                                         </option>
                                     <% }) %>
                                 </select>

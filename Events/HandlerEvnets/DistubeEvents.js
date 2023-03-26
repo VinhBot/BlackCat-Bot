@@ -237,17 +237,17 @@ module.exports = (client) => {
     const defaultData = await database.get(queue.id);
     const data = defaultData.setDefaultMusicData;
     if(!queue) return;
-    if(data.setupChannelId && data.setupChannelId.length > 5) {
+    if(data.ChannelId && data.ChannelId.length > 5) {
       // cố gắng để có được guild
       let guild = client.guilds.cache.get(queue.id);
       if(!guild) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy Guild!`)
       // cố gắng để có được channel
-      let channel = guild.channels.cache.get(data.setupChannelId);
-      if(!channel) channel = await guild.channels.fetch(data.setupChannelId).catch(() => {}) || false;
+      let channel = guild.channels.cache.get(data.ChannelId);
+      if(!channel) channel = await guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
       if(!channel) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy kênh!`)
       // cố gắng để có được kênh
-      let message = channel.messages.cache.get(data.setupMessageId);
-      if (!message) message = await channel.messages.fetch(data.setupMessageId).catch(() => {}) || false;
+      let message = channel.messages.cache.get(data.MessageId);
+      if (!message) message = await channel.messages.fetch(data.MessageId).catch(() => {}) || false;
       if (!message) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy tin nhắn!`)
       //chỉnh sửa tin nhắn sao cho đúng!
       message.edit(generateQueueEmbed(client, queue.id, leave)).catch((e) => {
@@ -352,7 +352,7 @@ module.exports = (client) => {
       PlayerMap.set("currentmsg", message.id);
       return message;
     }).catch((e) => console.log(e));
-    if(queue.textChannel?.id === defaultData.setDefaultMusicData.setupChannelId) return;
+    if(queue.textChannel?.id === defaultData.setDefaultMusicData.ChannelId) return;
     var collector = nowplay?.createMessageComponentCollector({
       filter: (i) => i.isButton() && i.user && i.message.author.id == client.user.id,
       time: track.duration > 0 ? track.duration * 1000 : 600000
@@ -625,14 +625,14 @@ module.exports = (client) => {
   }).on("initQueue", async(queue) => {
     const defaultData = await database.get(queue.id);
     const data = defaultData.setDefaultMusicData;
-    let channelId = data.setupChannelId;
-    let messageId = data.setupMessageId;
+    let channelId = data.ChannelId;
+    let messageId = data.MessageId;
     if(PlayerMap.has(`deleted-${queue.id}`)) {
       PlayerMap.delete(`deleted-${queue.id}`)
     };
-    queue.autoplay = Boolean(data.setDefaultAutoplay);
-    queue.volume = Number(data.setDefaultVolume);
-    queue.filters.set(data.setDefaultFilters);
+    queue.autoplay = Boolean(data.DefaultAutoplay);
+    queue.volume = Number(data.DefaultVolume);
+    queue.filters.set(data.DefaultFilters);
     queue.voice.setSelfDeaf(true); 
     /** 
      * Kiểm tra các thông báo có liên quan bên trong Kênh yêu cầu hệ thống âm nhạc
@@ -685,7 +685,7 @@ module.exports = (client) => {
      */
     var autoresumeinterval = setInterval(async() => {
       var newQueue = client.distube.getQueue(queue.id);
-      if(newQueue && newQueue.id && data.setDefaultAutoresume) {
+      if(newQueue && newQueue.id && data.DefaultAutoresume) {
         const makeTrackData = (track) => {
           return {
             memberId: track.member.id, 
@@ -759,15 +759,15 @@ module.exports = (client) => {
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
     if(!guild) return;
     //nếu chưa setup, return
-    if(!data.setupChannelId || data.setupChannelId.length < 5) return;
-    if(!data.setupMessageId || data.setupMessageId.length < 5) return;
+    if(!data.ChannelId || data.ChannelId.length < 5) return;
+    if(!data.MessageId || data.MessageId.length < 5) return;
     // nếu kênh không tồn tại, hãy thử lấy và trả về nếu vẫn không tồn tại
     if(!channel) channel = guild.channels.cache.get(interaction.channelId);
     if(!channel) return;
     // nếu không đúng kênh quay lại
-    if(data.setupChannelId != channel.id) return;
+    if(data.ChannelId != channel.id) return;
     //nếu không đúng tin nhắn, return
-    if(data.setupMessageId != message.id) return;
+    if(data.MessageId != message.id) return;
     if(!member) member = guild.members.cache.get(user.id);
     if(!member) member = await guild.members.fetch(user.id).catch(() => {});
     if(!member) return;
@@ -895,8 +895,8 @@ module.exports = (client) => {
     await client.createExSetup(message);
     const defaultData = await database.get(message.guild.id);
     const data = defaultData.setDefaultMusicData;
-    if(!data.setupChannelId || data.setupChannelId.length < 5) return;
-    let textChannel = message.guild.channels.cache.get(data.setupChannelId) || await message.guild.channels.fetch(data.setupChannelId).catch(() => {}) || false;
+    if(!data.ChannelId || data.ChannelId.length < 5) return;
+    let textChannel = message.guild.channels.cache.get(data.ChannelId) || await message.guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
     if(!textChannel) return console.log("Không có channel nào được thiết lập");
     if(textChannel.id != message.channel.id) return;
     // xoá tin nhắn 

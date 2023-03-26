@@ -74,29 +74,29 @@ module.exports = {
      const guildData = await database.get(interaction.guild.id);
      if(interaction.options.getSubcommand() === "prefix") {
        const newPrefix = interaction.options.getString("newprefix");
-       defaultData.setupPrefix = newPrefix;
-       await database.set(interaction.guild.id, defaultData);
+       guildData.setDefaultPrefix = newPrefix;
+       await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Prefix đã được đặt thành ${newPrefix}` });
     } else if(interaction.options.getSubcommand() === "default_volume") {
        const newVolume = interaction.options.getNumber("volume");
-       guildData.setDefaultMusicData.setDefaultVolume = newVolume;
+       guildData.setDefaultMusicData.DefaultVolume = newVolume;
        await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Volume mặc định của guilds sẽ là ${newVolume}` });
     } else if(interaction.options.getSubcommand() === "default_autoresume") {
        const settings = interaction.options.getString("settings");
        if(settings === "1") {
-         guildData.setDefaultMusicData.setDefaultAutoresume = Boolean(true);
+         guildData.setDefaultMusicData.DefaultAutoresume = Boolean(true);
        } else if(settings === "2") {
-         guildData.setDefaultMusicData.setDefaultAutoresume = Boolean(false);
+         guildData.setDefaultMusicData.DefaultAutoresume = Boolean(false);
        };
        await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Đã thiết lập chế độ Autoresume cho guilds thành: ${settings}` });
     } else if(interaction.options.getSubcommand() === "default_autoplay") {
        const settings = interaction.options.getString("settings");
        if(settings === "1") {
-         guildData.setDefaultMusicData.setDefaultAutoplay = Boolean(true);
+         guildData.setDefaultMusicData.DefaultAutoplay = Boolean(true);
        } else if(settings === "2") {
-         guildData.setDefaultMusicData.setDefaultAutoplay = Boolean(false);
+         guildData.setDefaultMusicData.DefaultAutoplay = Boolean(false);
        };
        await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Đã thiết lập chế độ autoplay cho guilds thành: ${settings}` });
@@ -139,8 +139,8 @@ module.exports = {
           new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
         ]),
       ]}).then(async(msg) => {
-        guildData.setDefaultMusicData.setupChannelId = channel.id;
-        guildData.setDefaultMusicData.setupMessageId = msg.id;
+        guildData.setDefaultMusicData.ChannelId = channel.id;
+        guildData.setDefaultMusicData.MessageId = msg.id;
         await database.set(interaction.guild.id, guildData);
         return interaction.reply({ content: `**Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });
       });
