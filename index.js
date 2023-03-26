@@ -26,6 +26,7 @@ client.on("ready", () => {
   }, 5000);
   require("./Events/Dashboard/dashboard.js")(client);
 });
+
 // Khởi chạy evnets
 client.eventHandler({
   EventPath: `${process.cwd()}/Events/DefaultEvents`, // path of events

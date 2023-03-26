@@ -234,7 +234,8 @@ module.exports = (client) => {
   };
   // 
   const updateMusicSystem = async(queue, leave = false) => {
-    const data = await database.get(queue.id);
+    const defaultData = await database.get(queue.id);
+    const data = defaultData.setDefaultMusicData;
     if(!queue) return;
     if(data.setupChannelId && data.setupChannelId.length > 5) {
       // cố gắng để có được guild
@@ -312,7 +313,7 @@ module.exports = (client) => {
         });
         let newQueue = distube.getQueue(guild.id);
         for(const track of tracks.slice(1)){
-          newQueue.songs.push(await makeTrack(track))
+          newQueue.songs.push(await makeTrack(track));
         };
         console.log(`Autoresume`.brightCyan + ` - Đã thêm ${newQueue.songs.length} vài hát vào hành đợi và bắt đầu phát ${newQueue.songs[0].name} trong ${guild.name}`);
         // ĐIỀU CHỈNH CÀI ĐẶT HÀNG ĐỢI
@@ -344,14 +345,14 @@ module.exports = (client) => {
   client.distube = distube;
   client.on("ready", () => setTimeout(() => autoconnect(), 2 * client.ws.ping));
   distube.on("playSong", async(queue, track) => {
-    const data = await database.get(queue.id);
+    const defaultData = await database.get(queue.id);
     var newQueue = distube.getQueue(queue.id);
     updateMusicSystem(newQueue);
     const nowplay = await queue.textChannel?.send(disspace(newQueue, track)).then((message) => {
       PlayerMap.set("currentmsg", message.id);
       return message;
     }).catch((e) => console.log(e));
-    if(queue.textChannel?.id === data.setupChannelId) return;
+    if(queue.textChannel?.id === defaultData.setDefaultMusicData.setupChannelId) return;
     var collector = nowplay?.createMessageComponentCollector({
       filter: (i) => i.isButton() && i.user && i.message.author.id == client.user.id,
       time: track.duration > 0 ? track.duration * 1000 : 600000
@@ -595,7 +596,7 @@ module.exports = (client) => {
           ])
       ]}).then((msg) => setTimeout(() => msg.delete(), 30000));
   }).on("deleteQueue", async(queue) => {
-        if(!PlayerMap.has(`deleted-${queue.id}`)) {
+    if(!PlayerMap.has(`deleted-${queue.id}`)) {
           PlayerMap.set(`deleted-${queue.id}`, true);
           if(maps.has(`beforeshuffle-${queue.id}`)){
             maps.delete(`beforeshuffle-${newQueue.id}`);
@@ -619,10 +620,11 @@ module.exports = (client) => {
               .setTitle(`⛔️ HÀNG ĐỢI ĐÃ ĐƯỢC XÓA`)
               .setDescription(`:headphones: **Hàng đợi đã bị xóa**`)
               .setTimestamp()
-          ]})
-        }
-  }).on(`initQueue`, async(queue) => {
-    const data = await database.get(queue.id);
+          ]}).then((i) => setTimeout(() => i.delete(), 15000)).catch(() => {});
+    };
+  }).on("initQueue", async(queue) => {
+    const defaultData = await database.get(queue.id);
+    const data = defaultData.setDefaultMusicData;
     let channelId = data.setupChannelId;
     let messageId = data.setupMessageId;
     if(PlayerMap.has(`deleted-${queue.id}`)) {
@@ -683,7 +685,7 @@ module.exports = (client) => {
      */
     var autoresumeinterval = setInterval(async() => {
       var newQueue = client.distube.getQueue(queue.id);
-      if(newQueue && newQueue.id &&  true) {
+      if(newQueue && newQueue.id && data.setDefaultAutoresume) {
         const makeTrackData = (track) => {
           return {
             memberId: track.member.id, 
@@ -752,7 +754,8 @@ module.exports = (client) => {
   client.on("interactionCreate", async(interaction) => {
     if(!interaction.isButton() && !interaction.isStringSelectMenu()) return;
     var { guild, message, channel, member, user, customId } = interaction;
-    const data = await database.get(interaction.guild.id);
+    const defaultData = await database.get(interaction.guild.id);
+    const data = defaultData.setDefaultMusicData;
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
     if(!guild) return;
     //nếu chưa setup, return
@@ -776,7 +779,7 @@ module.exports = (client) => {
     let newQueue = client.distube.getQueue(guild.id);
     if(interaction.isButton()) {
       if(!newQueue || !newQueue.songs || !newQueue.songs[0]) return interaction.reply({
-        content: `Chưa chơi gì`,
+        content: "Hiện tại không phát bài hát nào :))",
         ephemeral: true
       });
       if(customId === "Stop") {
@@ -877,12 +880,12 @@ module.exports = (client) => {
         //heavy metal
         if (interaction.values[0].toLowerCase().startsWith(`h`)) link = `https://open.spotify.com/playlist/37i9dQZF1DX9qNs32fujYe`;
       };
-      await interaction.reply({	content: `Đang tải **'${interaction.values[0]}' MusicMix**`, ephemeral: true });
+      await interaction.reply({	content: `Đang tải **${interaction.values[0]}**`, ephemeral: true });
 			try {
 				await client.distube.play(member.voice.channel, link, { member: member });
-				return interaction.editReply({	content: `${newQueue?.songs?.length > 0 ? `👍 Thêm vào` : `🎶 Đang phát`}: **'${interaction.values[0]}'**`, ephemeral: true });
-			} catch (e) {
-				console.log(e)
+				return interaction.editReply({	content: `${newQueue?.songs?.length > 0 ? "👍 Thêm vào" : "🎶 Đang phát"}: **'${interaction.values[0]}'**`, ephemeral: true });
+			} catch(e) {
+				console.log(e);
 			};
     };
   });
@@ -890,7 +893,8 @@ module.exports = (client) => {
   client.on("messageCreate", async(message) => {
     if(!message.guild || !message.guild.available) return;
     await client.createExSetup(message);
-    const data = await database.get(message.guild.id);
+    const defaultData = await database.get(message.guild.id);
+    const data = defaultData.setDefaultMusicData;
     if(!data.setupChannelId || data.setupChannelId.length < 5) return;
     let textChannel = message.guild.channels.cache.get(data.setupChannelId) || await message.guild.channels.fetch(data.setupChannelId).catch(() => {}) || false;
     if(!textChannel) return console.log("Không có channel nào được thiết lập");
@@ -899,12 +903,12 @@ module.exports = (client) => {
     if (message.author.id === client.user.id) {
       setTimeout(() => {
         if(!message.deleted) {
-          message.delete().catch((e) => console.log(e));
+          message.delete().catch(() => null);
         };
       }, 3000)
     } else {
       if(!message.deleted) {
-        message.delete().catch((e) => console.log(e))
+        message.delete().catch(() => null)
       };
     };
     if(message.author.bot) return;

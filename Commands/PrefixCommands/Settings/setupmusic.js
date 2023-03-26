@@ -55,8 +55,8 @@ module.exports = {
     ]}).then(async(msg) => {
         const guildData = await database.get(message.guild.id);
         // Cập nhật thuộc tính setDefaultVolume với giá trị mới
-        guildData.setupChannelId = channel.id;
-        guildData.setupMessageId = msg.id;
+        guildData.setDefaultMusicData.setupChannelId = channel.id;
+        guildData.setDefaultMusicData.setupMessageId = msg.id;
         // thiết lập thuộc tính với giá trị mới
         await database.set(message.guild.id, guildData);
         return message.reply({ content: ` **Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });

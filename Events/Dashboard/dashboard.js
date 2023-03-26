@@ -1,14 +1,14 @@
 const { PermissionsBitField, ChannelType } = require("discord.js");
-const Strategy = require(`passport-discord`).Strategy;
+const Strategy = require("passport-discord").Strategy;
+const session = require("express-session");
+const bodyParser = require("body-parser");
+const passport = require("passport");
 const express = require("express");
-const http = require("http");  
-const url = require(`url`);
+const http = require("node:http");  
 const path = require("node:path");
+const url = require("node:url");
 const fs = require("node:fs");
 const ejs = require("ejs");
-const passport = require(`passport`);
-const bodyParser = require("body-parser");
-const session = require(`express-session`);
 const MemoryStore = require("memorystore")(session);
 const { Database } = require("st.db");
 const httpApp = express();
@@ -163,7 +163,8 @@ module.exports = (client) => {
           user: req.isAuthenticated() ? req.user : null,
           guild: client.guilds.cache.get(req.params.guildID),
           botClient: client,
-          guildData: guildData,
+          guildData: guildData.setDefaultMusicData,
+          guildData2: guildData,
           ChannelType: ChannelType,
           Permissions: PermissionsBitField,
           bot: settings.website,
@@ -197,26 +198,26 @@ module.exports = (client) => {
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultvolume) {
-        guildData.setDefaultVolume = Number(req.body.defaultvolume);
+        guildData.setDefaultMusicData.setDefaultVolume = Number(req.body.defaultvolume);
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultautoplay) {
-        guildData.setDefaultAutoplay = true;
+        guildData.setDefaultMusicData.setDefaultAutoplay = true;
         await database.set(guild.id, guildData);
       } else {
-        guildData.setDefaultAutoplay = false;
+        guildData.setDefaultMusicData.setDefaultAutoplay = false;
         await database.set(guild.id, guildData);
       };
       if(req.body.defaultfilters) {
-        guildData.setDefaultFilters = req.body.defaultfilters;
+        guildData.setDefaultMusicData.setDefaultFilters = req.body.defaultfilters;
         await database.set(guild.id, guildData);
       };
       if(req.body.djroles) {
-        guildData.setupDjroles = req.body.djroles;
+        guildData.setDefaultMusicData.setupDjroles = req.body.djroles;
         await database.set(guild.id, guildData);
       };
       if(req.body.botchannel) {
-        guildData.setupChannelId = req.body.botchannel;
+        guildData.setDefaultMusicData.setupChannelId = req.body.botchannel;
         await database.set(guild.id, guildData);
       };
       res.render("settings", {
@@ -224,7 +225,8 @@ module.exports = (client) => {
           user: req.isAuthenticated() ? req.user : null,
           guild: client.guilds.cache.get(req.params.guildID),
           botClient: client,
-          guildData: guildData,
+          guildData: guildData.setDefaultMusicData,
+          guildData2: guildData,
           ChannelType: ChannelType,
           Permissions: PermissionsBitField,
           bot: settings.website,
@@ -271,6 +273,6 @@ module.exports = (client) => {
     
     const http = require(`http`).createServer(app);
     http.listen(settings.config.http.port, () => {
-        console.log(`[${settings.website.domain}]: HTTP-Website đang chạy trên cổng ${settings.config.http.port}.`)
+        console.log(`HTTP-Website đang chạy trên cổng ${settings.config.http.port}.`.red);
     });
 };

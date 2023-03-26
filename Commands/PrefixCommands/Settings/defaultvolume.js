@@ -23,7 +23,7 @@ module.exports = {
     // Lấy dữ liệu guilds hiện tại từ cơ sở dữ liệu
     const guildData = await database.get(message.guild.id);
     // Cập nhật thuộc tính setDefaultVolume với giá trị mới
-    guildData.setDefaultVolume = volume;
+    guildData.setDefaultMusicData.setDefaultVolume = volume;
     // thiết lập thuộc tính với giá trị mới
     await database.set(message.guild.id, guildData);
     return message.reply({
