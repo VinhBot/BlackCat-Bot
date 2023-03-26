@@ -21,6 +21,21 @@ module.exports = {
         required: true
       }],
     },{ 
+      name: "welcome_goodbye", 
+      description: "Thiết lập kênh welcome, goodbye dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+          name: "welcome", 
+          description: "Vui lòng chọn channel bạn muốn thiết lập kênh chào mừng", 
+          type: ApplicationCommandOptionType.Channel,
+          required: false
+      },{
+          name: "goodbye", 
+          description: "Vui lòng chọn channel bạn muốn thiết lập kênh tạm biệt", 
+          type: ApplicationCommandOptionType.Channel,
+          required: false
+      }],
+    },{ 
       name: "prefix", 
       description: "Thiết lập prefix dành cho guilds", 
       type: ApplicationCommandOptionType.Subcommand, 
@@ -71,12 +86,23 @@ module.exports = {
     },
   ],
   run: async(client, interaction) => {
-     const guildData = await database.get(interaction.guild.id);
-     if(interaction.options.getSubcommand() === "prefix") {
+    let guildData = await database.get(interaction.guild.id);
+    if(interaction.options.getSubcommand() === "prefix") {
        const newPrefix = interaction.options.getString("newprefix");
        guildData.setDefaultPrefix = newPrefix;
        await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Prefix đã được đặt thành ${newPrefix}` });
+    } else if(interaction.options.getSubcommand() === "welcome_goodbye") {
+       const welcome = interaction.options.getChannel("welcome");
+       const goodbye = interaction.options.getChannel("goodbye");
+       if(welcome) {
+         guildData.setDefaultWelcomeGoodbyeData.DefaultWelcomeChannel = welcome.id;
+         interaction.reply({ content: `Kênh welcome của bạn đã được đặt ở ${welcome}` });
+       } else if(goodbye) {
+         guildData.setDefaultWelcomeGoodbyeData.DefaultGoodbyeChannel = goodbye.id;
+         interaction.reply({ content: `Kênh goodbye của bạn đã được đặt ở ${goodbye}` });
+       };
+       await database.set(interaction.guild.id, guildData);
     } else if(interaction.options.getSubcommand() === "default_volume") {
        const newVolume = interaction.options.getNumber("volume");
        guildData.setDefaultMusicData.DefaultVolume = newVolume;

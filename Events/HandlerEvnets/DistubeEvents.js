@@ -892,7 +892,6 @@ module.exports = (client) => {
   
   client.on("messageCreate", async(message) => {
     if(!message.guild || !message.guild.available) return;
-    await client.createExSetup(message);
     const defaultData = await database.get(message.guild.id);
     const data = defaultData.setDefaultMusicData;
     if(!data.ChannelId || data.ChannelId.length < 5) return;

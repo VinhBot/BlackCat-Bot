@@ -24,7 +24,7 @@ client.on("ready", () => {
       status: 'dnd',
     });
   }, 5000);
-  require("./Events/Dashboard/dashboard.js")(client);
+  // require("./Events/Dashboard/dashboard.js")(client);
 });
 
 // Khởi chạy evnets
