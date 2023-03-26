@@ -24,6 +24,12 @@ client.on("ready", () => {
       status: 'dnd',
     });
   }, 5000);
+  require("./Events/Dashboard/dashboard.js")(client);
+});
+// Khởi chạy evnets
+client.eventHandler({
+  EventPath: `${process.cwd()}/Events/DefaultEvents`, // path of events
+  Events: ["Guilds"] // folder name
 });
 // khởi chạy các lệnh slash (/)
 client.slashHandler({
@@ -32,7 +38,7 @@ client.slashHandler({
 });
 // khởi chạy các lệnh prefix commands
 client.commandHandler({
-  setHandlerMessageCreate: true, // bật hoặc tắt messageCreate của package
+  setHandlerMessageCreate: false, // bật hoặc tắt messageCreate của package
   setPrefix: config.prefix, // nếu lhi tắt setHandlerMessageCreate: false, thì cái này vô dụng
   setCommandPath: `${process.cwd()}/Commands/PrefixCommands` // set đường dẫn đến commands
 });

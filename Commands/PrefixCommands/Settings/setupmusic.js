@@ -1,5 +1,9 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
 const path = require("node:path");
+const { Database } = require("st.db");
+const database = new Database("./Events/Json/defaultDatabase.json", { 
+  databaseInObject: true
+});
 module.exports = {
   name: path.parse(__filename).name,
   usage: `${path.parse(__filename).name}`,
@@ -49,7 +53,12 @@ module.exports = {
           new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
         ]),
     ]}).then(async(msg) => {
-        await client.createSetup(message, channel.id, msg.id);
+        const guildData = await database.get(message.guild.id);
+        // Cập nhật thuộc tính setDefaultVolume với giá trị mới
+        guildData.setupChannelId = channel.id;
+        guildData.setupMessageId = msg.id;
+        // thiết lập thuộc tính với giá trị mới
+        await database.set(message.guild.id, guildData);
         return message.reply({ content: ` **Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });
     });
   },

@@ -6,7 +6,7 @@ module.exports = {
   name: path.parse(__filename).name,
   usage: `${path.parse(__filename).name}`,
   aliases: ["", ""], // lệnh phụ
-  description: "", // mô tả lệnh
+  description: "xem sever bot hỗ trợ", // mô tả lệnh
   userPerms: [], // Administrator, ....
   owner: true, //: tắt // true : bật
   category:"Developer", // tên folder chứa lệnh

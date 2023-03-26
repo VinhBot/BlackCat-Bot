@@ -4,7 +4,7 @@ module.exports = {
   name: path.parse(__filename).name,
   usage: `${path.parse(__filename).name}`,
   aliases: ["", ""], // lệnh phụ
-  description: "", // mô tả lệnh
+  description: "Chơi game kéo búa bao với bạn bè", // mô tả lệnh
   userPerms: [], // Administrator, ....
   owner: false, //: tắt // true : bật
   category:"Game", // tên folder chứa lệnh

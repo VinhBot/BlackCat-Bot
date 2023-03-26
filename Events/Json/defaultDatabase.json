@@ -1,18 +1,44 @@
 {
-    "1055150050357022840": {
-        "defaultGuildName": "BlackCat-Club",
-        "setDefaultAutoplay": false,
-        "setDefaultVolume": 50,
-        "setAutoresume": true,
-        "setupMessageId": "1089194887754285187",
-        "setupChannelId": "1089119081304707102"
-    },
     "1054933019934330930": {
         "defaultGuildName": "PokéMeow Việt Nam",
         "setDefaultAutoplay": false,
         "setDefaultVolume": 50,
-        "setAutoresume": true,
+        "setDefaultFilters": [
+            "bassboost",
+            "3d"
+        ],
+        "setupDjroles": [],
+        "setDefaultAutoresume": true,
         "setupMessageId": "",
-        "setupChannelId": ""
+        "setupChannelId": "",
+        "setupPrefix": "!"
+    },
+    "1055150050357022840": {
+        "defaultGuildName": "BlackCat-Club",
+        "setDefaultAutoplay": false,
+        "setDefaultVolume": 55,
+        "setDefaultFilters": [
+            "3d",
+            "bassboost"
+        ],
+        "setupDjroles": [],
+        "setDefaultAutoresume": true,
+        "setupMessageId": "1089445965443899532",
+        "setupChannelId": "1089119081304707102",
+        "setupPrefix": "!"
+    },
+    "884047380176048159": {
+        "defaultGuildName": "Cỏ lúa bằng nhau",
+        "setDefaultAutoresume": true,
+        "setDefaultAutoplay": false,
+        "setDefaultVolume": 50,
+        "setDefaultFilters": [
+            "bassboost",
+            "3d"
+        ],
+        "setupMessageId": "",
+        "setupChannelId": "",
+        "setupDjroles": [],
+        "setupPrefix": "!"
     }
 }

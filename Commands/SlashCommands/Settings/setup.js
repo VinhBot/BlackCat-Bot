@@ -1,4 +1,8 @@
 const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder } = require("discord.js");
+const { Database } = require("st.db");
+const database = new Database("./Events/Json/defaultDatabase.json", { 
+  databaseInObject: true
+});
 module.exports = {
   name: "setup", // Tên lệnh 
   description: "Thiết lập commands", // Mô tả lệnh
@@ -16,10 +20,87 @@ module.exports = {
         type: ApplicationCommandOptionType.Channel,
         required: true
       }],
+    },{ 
+      name: "prefix", 
+      description: "Thiết lập prefix dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+        name: "newprefix", 
+        description: "Prefix bạn muốn thiết lập", 
+        type: ApplicationCommandOptionType.String,
+        required: true
+      }],
+    },{ 
+      name: "default_volume", 
+      description: "Thiết lập default volume dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+        name: "volume", 
+        description: "số volume mà bạn muốn thiết lập (1 => 150)", 
+        type: ApplicationCommandOptionType.Number,
+        required: true
+      }],
+    },{ 
+      name: "default_autoresume", 
+      description: "Thiết lập default autoresume dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+        name: "settings", 
+        description: "tính năng mà bạn muốn thiết lập", 
+        type: ApplicationCommandOptionType.String,
+        required: true,
+        choices: [
+          { name: "Bật", value: "1" },
+          { name: "Tắt", value: "2" }
+        ],
+      }],
+    },{ 
+      name: "default_autolay", 
+      description: "Thiết lập default autoplay dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+        name: "settings", 
+        description: "tính năng mà bạn muốn thiết lập", 
+        type: ApplicationCommandOptionType.String,
+        required: true,
+        choices: [
+          { name: "Bật", value: "1" },
+          { name: "Tắt", value: "2" }
+        ],
+      }],
     },
   ],
   run: async(client, interaction) => {
-     if(interaction.options.getSubcommand() === "music") {
+     let guildData = await database.get(interaction.guild.id);
+     if(interaction.options.getSubcommand() === "prefix") {
+       const newPrefix = interaction.options.getString("newprefix");
+       guildData.setupPrefix = newPrefix;
+       await database.set(interaction.guild.id, guildData);
+       return interaction.reply({ content: `Prefix đã được đặt thành ${newPrefix}` });
+    } else if(interaction.options.getSubcommand() === "default_volume") {
+       const newVolume = interaction.options.getNumber("volume");
+       guildData.setDefaultVolume = newVolume;
+       await database.set(interaction.guild.id, guildData);
+       return interaction.reply({ content: `Volume mặc định của guilds sẽ là ${newVolume}` });
+    } else if(interaction.options.getSubcommand() === "default_autoresume") {
+       const settings = interaction.options.getString("settings");
+       if(settings === "1") {
+         guildData.setDefaultAutoresume = Boolean(true);
+       } else if(settings === "2") {
+         guildData.setDefaultAutoresume = Boolean(false);
+       };
+       await database.set(interaction.guild.id, guildData);
+       return interaction.reply({ content: `Đã thiết lập chế độ Autoresume cho guilds thành: ${settings}` });
+    } else if(interaction.options.getSubcommand() === "default_autoplay") {
+       const settings = interaction.options.getString("settings");
+       if(settings === "1") {
+         guildData.setDefaultAutoplay = Boolean(true);
+       } else if(settings === "2") {
+         guildData.setDefaultAutoplay = Boolean(false);
+       };
+       await database.set(interaction.guild.id, guildData);
+       return interaction.reply({ content: `Đã thiết lập chế độ autoplay cho guilds thành: ${settings}` });
+    } else if(interaction.options.getSubcommand() === "music") {
       var Emojis = [`0️⃣`, `1️⃣`, `2️⃣`, `3️⃣`, `4️⃣`, `5️⃣`, `6️⃣`, `7️⃣`, `8️⃣`, `9️⃣`, `🔟`, `🟥`,`🟧`, `🟨`, `🟩`, `🟦`, `🟪`, `🟫`];
       let channel = interaction.options.getChannel("channel");
       channel.send({ embeds: [new EmbedBuilder()
@@ -58,8 +139,10 @@ module.exports = {
           new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
         ]),
       ]}).then(async(msg) => {
-        await client.createSetup(interaction, channel.id, msg.id);
-        return interaction.reply({ content: ` **Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });
+        guildData.setupChannelId = channel.id;
+        guildData.setupMessageId = msg.id;
+        await database.set(interaction.guild.id, guildData);
+        return interaction.reply({ content: `**Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });
       });
     };
   },

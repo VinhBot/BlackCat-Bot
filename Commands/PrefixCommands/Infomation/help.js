@@ -6,7 +6,7 @@ module.exports = {
     name: path.parse(__filename).name,
     usage: `${path.parse(__filename).name}`,
     aliases: ["cmd", "h"], // lệnh phụ
-    description: "", // mô tả lệnh
+    description: "Hiển thị danh sách lệnh", // mô tả lệnh
     userPerms: [], // Administrator, ....
     owner: false, //: tắt // true : bật
     category:"Infomation", // tên folder chứa lệnh
