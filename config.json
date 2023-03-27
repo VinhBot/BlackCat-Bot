@@ -3,8 +3,14 @@
   "prefix": "!",
   "developer": "788208207465938954",
   "_______________________": "________________________________",
+  "name" : "XLC is the best",
+  "avatar" : "https://cdn.discordapp.com/avatars/885451756593618944/fad45b659b3de3650d502ddd21ba2577.jpg",
   "discordBot": "https://discord.com/api/oauth2/authorize?client_id=881709146695667773&permissions=8&scope=bot%20applications.commands",
   "discord": "https://discord.gg/tSTY36dPWa",
+  "colors": {
+    "vang" : "#FFF700",
+    "color0": "#ff4d4d"
+  },
   "_______________________": "⛔các event hỗ trợ cho music ^-^",
   "clientSecret": "a2a3e65a22b64357a6791b66cd1de4b5",
   "clientId": "fc0d728b397c4f8398d2a13345c6d47c",

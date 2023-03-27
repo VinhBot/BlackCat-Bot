@@ -61,7 +61,7 @@ async function EmbedPages(message, embeds, style = {}) {
         });
     });
 };
-const database = require(`${process.cwd()}/Events/Json/database.json`);
+const database = require(`${process.cwd()}/config.json`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,

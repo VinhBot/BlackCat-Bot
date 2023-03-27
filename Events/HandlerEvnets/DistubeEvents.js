@@ -10,7 +10,6 @@ const maps = new Map();
 let songEditInterval = null;
 let lastEdited = false;
 // Json Data
-const configData = require(`${process.cwd()}/Events/Json/database.json`);
 const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Events/Json/defaultDatabase.json", { 
   databaseInObject: true 
@@ -70,8 +69,8 @@ module.exports = (client) => {
     let volumeDown = new ButtonBuilder().setStyle('Primary').setCustomId('volumeDown').setEmoji('🔉').setLabel(`-10`);
     let discord = new ButtonBuilder().setStyle("Link").setEmoji('🏤').setLabel(`Vào discord`).setURL(`${config.discord}`);
     let invitebot = new ButtonBuilder().setStyle("Link").setEmoji('🗿').setLabel(`Mời Bot`).setURL(`${config.discordBot}`);
-    if(!newQueue) return new EmbedBuilder().setColor(database.colors.vang).setTitle(`Không thể tìm kiếm bài hát`);
-    if(!newTrack) return new EmbedBuilder().setColor(database.colors.vang).setTitle(`Không thể tìm kiếm bài hát`);
+    if(!newQueue) return new EmbedBuilder().setColor(config.colors.vang).setTitle(`Không thể tìm kiếm bài hát`);
+    if(!newTrack) return new EmbedBuilder().setColor(config.colors.vang).setTitle(`Không thể tìm kiếm bài hát`);
     if(!newQueue.playing) {
       pause = pause.setStyle('Success').setEmoji('▶️').setLabel(`Tiếp tục`)
     } else if(newQueue.autoplay) {
@@ -99,7 +98,7 @@ module.exports = (client) => {
     return { 
       embeds: [new EmbedBuilder()
         .setAuthor({ name: `${newTrack.name}`, iconURL: "https://i.pinimg.com/originals/ab/4d/e0/ab4de08ece783245be1fb1f7fde94c6f.gif", url: newTrack.url })
-        .setImage(`https://img.youtube.com/vi/${newTrack.id}/mqdefault.jpg`).setColor(configData.colors.vang)
+        .setImage(`https://img.youtube.com/vi/${newTrack.id}/mqdefault.jpg`).setColor(config.colors.vang)
         .addFields([
           { name: `Thời lượng:`, value: `>>> \`${newQueue.formattedCurrentTime} / ${newTrack.formattedDuration}\`` },
           { name: `Hàng chờ:`, value: `>>> \`${newQueue.songs.length} bài hát\`\n\`${newQueue.formattedDuration}\`` },
@@ -387,7 +386,7 @@ module.exports = (client) => {
                   clearInterval(songEditInterval);
                   await distube.stop(i.guild.id);
                   return await i.reply({ embeds: [new EmbedBuilder()
-                    .setColor(configData.colors.vang).setTimestamp()
+                    .setColor(config.colors.vang).setTimestamp()
                     .setTitle(`⏹ **Dừng phát nhạc**`)
                     .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({ dynamic: true })}`})]
                   }).then((i) => {
@@ -397,7 +396,7 @@ module.exports = (client) => {
               try {
                   await distube.skip(i.guild.id) 
                   await i.reply({ embeds: [new EmbedBuilder()
-                     .setColor(configDat.colors.vang).setTimestamp()
+                     .setColor(config.colors.vang).setTimestamp()
                      .setTitle(`⏭ **Bỏ qua bài hát!**`)
                      .setFooter({ text: `Yesu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}` })
                   ]}).then((i) => {
@@ -420,7 +419,7 @@ module.exports = (client) => {
                 await distube.pause(i.guild.id);
                 nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
                 await i.reply({ embeds: [new EmbedBuilder()
-                    .setColor(configData.colors.vang).setTimestamp()
+                    .setColor(config.colors.vang).setTimestamp()
                     .setTitle(`⏸ **Tạm dừng**`)
                     .setFooter({ text: `yêu cầu bởi ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
                 }).then((i) => {
@@ -430,7 +429,7 @@ module.exports = (client) => {
                 await distube.resume(i.guild.id);
                 nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
                 await i.reply({ embeds: [new EmbedBuilder()
-                    .setColor(configDat.colors.vang).setTimestamp()
+                    .setColor(config.colors.vang).setTimestamp()
                     .setTitle(`▶️ **tiếp tục**`)
                     .setFooter({ text: `Yêu cầu bởi ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
                 }).then((i) => {
@@ -445,7 +444,7 @@ module.exports = (client) => {
                 nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {});
               };
               await i.reply({ embeds: [new EmbedBuilder()
-                  .setColor(configData.colors.vang).setTimestamp()
+                  .setColor(config.colors.vang).setTimestamp()
                   .setTitle(`${newQueue.autoplay ? `✔️ **Đã bật chế độ tự động phát**`: `❌ **Đã tắt chế độ tự động phát**`}`)
                   .setFooter({ text: `yêu cầu bởi ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => {
@@ -455,7 +454,7 @@ module.exports = (client) => {
               maps.set(`beforeshuffle-${newQueue.id}`, newQueue.songs.map(track => track).slice(1));
               await newQueue.shuffle()
               await i.reply({ embeds: [new EmbedBuilder()
-                .setColor(configData.colors.vang).setTimestamp()
+                .setColor(config.colors.vang).setTimestamp()
                 .setTitle(`🔀 **Xáo trộn ${newQueue.songs.length} bài hát!**`)
                 .setFooter({ text: `YC bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => {
@@ -468,7 +467,7 @@ module.exports = (client) => {
                 await newQueue.setRepeatMode(1);
               };
               await i.reply({ embeds: [new EmbedBuilder()
-                  .setColor(configData.colors.vang).setTimestamp()
+                  .setColor(config.colors.vang).setTimestamp()
                   .setTitle(`${newQueue.repeatMode == 1 ? `✔️ **Lặp bài hát đã bật**`: `❌ **Lặp bài hát đã tắt**`}`)
                   .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
@@ -480,7 +479,7 @@ module.exports = (client) => {
                 await newQueue.setRepeatMode(2);
               };
               await i.reply({ embeds: [new EmbedBuilder()
-                .setColor(configData.colors.vang).setTimestamp()
+                .setColor(config.colors.vang).setTimestamp()
                 .setTitle(`${newQueue.repeatMode == 2 ? `**Lặp hàng đợi đã bật**`: `**Lặp hàng đợi đã tắt**`}`)
                 .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
@@ -491,7 +490,7 @@ module.exports = (client) => {
               await newQueue.seek(Number(seektime))
               collector.resetTimer({ time: (newQueue.songs[0].duration - newQueue.currentTime) * 1000 })
               await i.reply({ embeds: [new EmbedBuilder()
-                  .setColor(configData.colors.vang).setTimestamp()
+                  .setColor(config.colors.vang).setTimestamp()
                   .setTitle(`⏩ **+10 Giây!**`)
                   .setFooter({ text: `yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
@@ -503,7 +502,7 @@ module.exports = (client) => {
               await newQueue.seek(Number(seektime))
               collector.resetTimer({ time: (newQueue.songs[0].duration - newQueue.currentTime) * 1000})
               await i.reply({ embeds: [new EmbedBuilder()
-                  .setColor(database.colors.vang).setTimestamp()
+                  .setColor(config.colors.vang).setTimestamp()
                   .setTitle(`⏪ **-10 Giây!**`)
                   .setFooter({ text: `yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
@@ -515,7 +514,7 @@ module.exports = (client) => {
                  let name = newQueue.songs.map((song) => song.name).slice(0, 1).join("\n");
                  i.editReply({ embeds: [new EmbedBuilder()
                   .setAuthor({ name: name, iconURL: thumbnail, url: newQueue.songs.map((song) => song.url).slice(0, 1).join("\n") })
-                  .setColor(configData.colors.vang)
+                  .setColor(config.colors.vang)
                   .setThumbnail(thumbnail)
                   .setDescription((await require("lyrics-finder")(newQueue.songs.map((song) => song.uploader.name).slice(0, 1).join("\n"), name)) || "Không tìm thấy lời bài hát!")
                  ], ephemeral: true });
@@ -526,7 +525,7 @@ module.exports = (client) => {
               try {
                 const volumeUp = Number(newQueue.volume) + 10;
                 if (volumeUp < 0 || volumeUp > 100) return i.reply({
-                  embeds: [new EmbedBuilder().setColor(configData.colors.vang).setDescription("Bạn chỉ có thể đặt âm lượng từ 0 đến 100.").setTimestamp()], ephemeral: true 
+                  embeds: [new EmbedBuilder().setColor(config.colors.vang).setDescription("Bạn chỉ có thể đặt âm lượng từ 0 đến 100.").setTimestamp()], ephemeral: true 
                 });
 			          await newQueue.setVolume(volumeUp);
 			          await i.reply({ content: `:white_check_mark: | Âm lượng tăng lên ${volumeUp}%` }).then((i) => {
@@ -538,7 +537,7 @@ module.exports = (client) => {
             } else if(i.customId == "volumeDown") {
               try {
                 const volumeDown = Number(newQueue.volume) - 10;
-                const invalidVolume = new EmbedBuilder().setColor(configData.colors.vang).setDescription(":x: | Không thể giảm âm lượng của bạn nữa nếu tiếp tục giảm bạn sẽ không nghe thấy gì").setTimestamp();
+                const invalidVolume = new EmbedBuilder().setColor(config.colors.vang).setDescription(":x: | Không thể giảm âm lượng của bạn nữa nếu tiếp tục giảm bạn sẽ không nghe thấy gì").setTimestamp();
                 if(volumeDown <= 0) return i.reply({ embeds: [invalidVolume], ephemeral: true });
 			          await newQueue.setVolume(volumeDown);
 			          await i.reply({ content: `:white_check_mark: | Âm lượng giảm xuống ${volumeDown}%` }).then((i) => {
@@ -571,7 +570,7 @@ module.exports = (client) => {
   }).on("addList", async(queue, playlist) => {
       return queue.textChannel?.send({ embeds: [new EmbedBuilder()
         .setTitle("Đã thêm vài hát vào hàng đợi")                                                
-        .setColor(configData.colors.vang)
+        .setColor(config.colors.vang)
         .setThumbnail(playlist.thumbnail.url ? playlist.thumbnail.url : `https://img.youtube.com/vi/${playlist.songs[0].id}/mqdefault.jpg`)
         .setFooter({ text: `💯 ${playlist.user.tag}`, iconURL: `${playlist.user.displayAvatarURL({ dynamic: true })}`})
         .setDescription(`👍 Danh sách: [\`${playlist.name}\`](${playlist.url ? playlist.url : ``})  -  \`${playlist.songs.length} Bài hát ${playlist.songs.length > 0 ? `` : ``}\``)
@@ -582,7 +581,7 @@ module.exports = (client) => {
       ]}).then((msg) => setTimeout(() => msg.delete(), 11000));
   }).on("addSong", async(queue, song) => {
       return queue.textChannel?.send({ embeds: [new EmbedBuilder()
-          .setColor(configData.colors.vang)
+          .setColor(config.colors.vang)
           .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
           .setFooter({ text: `💯 ${song.user.tag}`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`})
           .setAuthor({ name: `Bài hát đã được thêm!`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`, url: `${song.url}` })
@@ -840,7 +839,7 @@ module.exports = (client) => {
         let name = newQueue.songs.map((song) => song.name).slice(0, 1).join("\n");
         return interaction.editReply({ embeds: [new EmbedBuilder()
           .setAuthor({ name: name, iconURL: thumbnail, url: newQueue.songs.map((song) => song.url).slice(0, 1).join("\n") })
-          .setColor(configData.colors.vang)
+          .setColor(config.colors.vang)
           .setThumbnail(thumbnail)
           .setDescription((await require("lyrics-finder")(newQueue.songs.map((song) => song.uploader.name).slice(0, 1).join("\n"), name)) || "Không tìm thấy lời bài hát!")
         ], ephemeral: true });

@@ -1,4 +1,4 @@
-const database = require(`${process.cwd()}/Events/Json/database.json`);
+const database = require(`${process.cwd()}/config.json`);
 const fetch = require("node-fetch");
 const path = require("node:path");
 const fs = require("fs");

@@ -13,14 +13,31 @@ const MemoryStore = require("memorystore")(session);
 const { Database } = require("st.db");
 const httpApp = express();
 const app = express();
+const categories = fs.readdirSync(`./Commands/PrefixCommands/`);
 const database = new Database("./Events/Json/defaultDatabase.json", { 
   databaseInObject: true
 });
-const BotFilters = require("./filters.json");
 const settings = require("./config.json");
 
+const BotFilters = {
+  "3d": "3d",
+  "bassboost": "bassboost",
+  "echo": "echo",
+  "karaoke": "karaoke",
+  "nightcore": "nightcore",
+  "vaporwave": "vaporwave",
+  "flanger": "flanger",
+  "gate": "gate",
+  "haas": "haas",
+  "reverse": "reverse",
+  "surround": "surround",
+  "mcompand": "mcompand",
+  "phaser": "phaser",
+  "tremolo": "tremolo",
+  "earwax": "earwax"
+};
+
 module.exports = (client) => {
-    client.categories = fs.readdirSync(`./Commands/PrefixCommands/`);
     // - Khởi tạo thiết lập đăng nhập Discord!
     passport.serializeUser((user, done) => done(null, user));
     passport.deserializeUser((obj, done) => done(null, obj));
@@ -34,10 +51,10 @@ module.exports = (client) => {
     }));
     // - THÊM TIẾT KIỆM PHIÊN
     app.use(session({
-        store: new MemoryStore({ checkPeriod: 86400000 }),
-        secret: `#@%#&^$^$%@$^$&%#$%@#$%$^%&$%^#$%@#$%#E%#%@$FEErfgr3g#%GT%536c53cc6%5%tv%4y4hrgrggrgrgf4n`,
-        resave: false,
-        saveUninitialized: false,
+      store: new MemoryStore({ checkPeriod: 86400000 }),
+      secret: `#@%#&^$^$%@$^$&%#$%@#$%$^%&$%^#$%@#$%#E%#%@$FEErfgr3g#%GT%536c53cc6%5%tv%4y4hrgrggrgrgf4n`,
+      resave: false,
+      saveUninitialized: false,
     }));
     // khởi tạo phần mềm trung gian hộ chiếu.
     app.use(passport.initialize());
@@ -57,7 +74,7 @@ module.exports = (client) => {
     }));
     // Chúng tôi khai báo một phần mềm trung gian chức năng checkAuth để kiểm tra xem người dùng đã đăng nhập hay chưa và nếu không thì chuyển hướng anh ta.
     const checkAuth = (req, res, next) => {
-      if (req.isAuthenticated()) return next();
+      if(req.isAuthenticated()) return next();
       req.session.backURL = req.url;
       res.redirect("/login");
     };
@@ -65,7 +82,7 @@ module.exports = (client) => {
     app.get(`/login`, (req, res, next) => {
         if (req.session.backURL) {
           req.session.backURL = req.session.backURL; 
-        } else if (req.headers.referer) {
+        } else if(req.headers.referer) {
           const parsed = url.parse(req.headers.referer);
           if (parsed.hostname === app.locals.domain) {
             req.session.backURL = parsed.path;
@@ -96,7 +113,7 @@ module.exports = (client) => {
           Permissions: PermissionsBitField,
           bot: settings.website,
           callback: settings.config.callback,
-          categories: client.categories, 
+          categories: categories, 
           commands: client.commands, 
           BotFilters: BotFilters
         });
@@ -110,7 +127,7 @@ module.exports = (client) => {
         Permissions: PermissionsBitField,
         bot: settings.website,
         callback: settings.config.callback,
-        categories: client.categories, 
+        categories: categories, 
         commands: client.commands, 
         BotFilters: BotFilters,
       });
@@ -135,7 +152,7 @@ module.exports = (client) => {
           Permissions: PermissionsBitField,
           bot: settings.website,
           callback: settings.config.callback,
-          categories: client.categories, 
+          categories: categories, 
           commands: client.commands, 
           BotFilters: BotFilters,
         });
@@ -169,7 +186,7 @@ module.exports = (client) => {
           Permissions: PermissionsBitField,
           bot: settings.website,
           callback: settings.config.callback,
-          categories: client.categories, 
+          categories: categories, 
           commands: client.commands, 
           BotFilters: BotFilters,
       });
@@ -231,7 +248,7 @@ module.exports = (client) => {
           Permissions: PermissionsBitField,
           bot: settings.website,
           callback: settings.config.callback,
-          categories: client.categories, 
+          categories: categories, 
           commands: client.commands, 
           BotFilters: BotFilters,
         });
@@ -247,7 +264,7 @@ module.exports = (client) => {
         Permissions: PermissionsBitField,
         bot: settings.website,
         callback: settings.config.callback,
-        categories: client.categories, 
+        categories: categories, 
         commands: client.commands, 
         BotFilters: BotFilters
       });
@@ -265,14 +282,14 @@ module.exports = (client) => {
         Permissions: PermissionsBitField,
         bot: settings.website,
         callback: settings.config.callback,
-        categories: client.categories, 
+        categories: categories, 
         commands: client.commands, 
         BotFilters: BotFilters
       });
     });
     
     const http = require(`http`).createServer(app);
-    http.listen(settings.config.http.port, () => {
-        console.log(`HTTP-Website đang chạy trên cổng ${settings.config.http.port}.`.red);
+    http.listen(settings.config.httpPort, () => {
+        console.log(`HTTP-Website đang chạy trên cổng ${settings.config.httpPort}.`.red);
     });
 };

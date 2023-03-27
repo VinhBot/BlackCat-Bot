@@ -38,5 +38,25 @@
             "DefaultWelcomeChannel": "1089615977559375954",
             "DefaultGoodbyeChannel": "1089615977559375954"
         }
+    },
+    "884047380176048159": {
+        "defaultGuildName": "Cỏ lúa bằng nhau",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "DefaultWelcomeChannel": "",
+            "DefaultGoodbyeChannel": ""
+        }
     }
 }
