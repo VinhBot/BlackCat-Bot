@@ -1,6 +1,6 @@
 const { EmbedBuilder, PermissionsBitField } = require("discord.js");
 const { Database } = require("st.db");
-const database = new Database("./Events/Json/defaultDatabase.json", { 
+const database = new Database("./Events/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
 const config = require(`${process.cwd()}/config.json`);
@@ -8,7 +8,7 @@ const config = require(`${process.cwd()}/config.json`);
 module.exports = async(client, message) => {
   if(message.author.bot || !message.guild) return;
   const data = await database.get(message.guild.id);
-  const prefix = data.setDefaultPrefix || "";
+  const prefix = data.setDefaultPrefix || config.prefix;
   const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
   if(!prefixRegex.test(message.content)) return;

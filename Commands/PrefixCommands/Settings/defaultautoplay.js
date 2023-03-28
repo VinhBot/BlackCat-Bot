@@ -10,21 +10,25 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const database = new Database("./Events/Json/defaultDatabase.json", { 
+    const database = new Database("./Events/Database/defaultDatabase.json", { 
        databaseInObject: true
     });
     if(!args[0]) return message.reply({
       content: "Vui lòng chọn true: bật hoặc false: tắt"
     });
-    let autoplay = Boolean(args[0]);
-    // Lấy dữ liệu guilds hiện tại từ cơ sở dữ liệu
     const guildData = await database.get(message.guild.id);
-    // Cập nhật thuộc tính setDefaultVolume với giá trị mới
-    guildData.setDefaultMusicData.DefaultAutoplay = autoplay;
-    // thiết lập thuộc tính với giá trị mới
+    if(args[0] === "bật") {
+      var autoplay = Boolean(args[0]);
+      // Cập nhật thuộc tính setDefaultVolume với giá trị mới
+      guildData.setDefaultMusicData.DefaultAutoplay = autoplay;
+    } else {
+      var autoplay = Boolean(args[1]);
+      // Cập nhật thuộc tính setDefaultVolume với giá trị mới
+      guildData.setDefaultMusicData.DefaultAutoplay = autoplay;
+    };
     await database.set(message.guild.id, guildData);
     return message.reply({
-      content: ` Chế độ tự động phát được đặt thành ${autoplay}`
+      content: ` Chế độ tự động phát đã được ${autoplay ? "bật" : "tắt"}`
     }); 
   },
 };

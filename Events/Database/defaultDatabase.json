@@ -1,0 +1,151 @@
+{
+    "717168653300269116": {
+        "defaultGuildName": "- 𝑺𝒖 𝑺𝒖 -  𝐒𝐞𝐫𝐯𝐞𝐫 [OLD]",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "847531356476276816": {
+        "defaultGuildName": "bombom",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "884047380176048159": {
+        "defaultGuildName": "Cỏ lúa bằng nhau",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "888330272385409034": {
+        "defaultGuildName": "Thiền Am Bên Bờ Vũ Trụ",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "894577205194133546": {
+        "defaultGuildName": "KLOG HOME | #KOH",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "1054933019934330930": {
+        "defaultGuildName": "PokéMeow Việt Nam",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
+    },
+    "1055150050357022840": {
+        "defaultGuildName": "BlackCat-Club",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": true,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "1090110650849697832",
+            "ChannelId": "1089119081304707102",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "1089615977559375954",
+            "GoodbyeChannel": "1089615977559375954",
+            "AutoAddRoleWel": [
+              "1088740567657222194"
+            ]
+        }
+    }
+}

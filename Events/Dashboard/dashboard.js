@@ -14,11 +14,21 @@ const { Database } = require("st.db");
 const httpApp = express();
 const app = express();
 const categories = fs.readdirSync(`./Commands/PrefixCommands/`);
-const database = new Database("./Events/Json/defaultDatabase.json", { 
+const database = new Database("./Events/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
-const settings = require("./config.json");
-
+const settings = {
+    "website" : {
+      "support": "https://discord.gg/tSTY36dPWa",
+      "domain": "https://BlackCat-Bot.vinhbot.repl.co"
+    },
+    "config": {
+        "httpPort": 80,
+        "callback": "https://BlackCat-Bot.vinhbot.repl.co/callback",
+        "clientID": "881709146695667773",
+        "secret": "1_4Nz4IBGxdlnW4xOCJDjlXAHy4YGoLr"
+    }
+};
 const BotFilters = {
   "3d": "3d",
   "bassboost": "bassboost",

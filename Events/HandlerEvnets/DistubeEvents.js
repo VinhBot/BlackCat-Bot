@@ -11,10 +11,10 @@ let songEditInterval = null;
 let lastEdited = false;
 // Json Data
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Events/Json/defaultDatabase.json", { 
+const database = new Database("./Events/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
-const autoresume = new Database("./Events/Json/autoresumeDatabase.json", { 
+const autoresume = new Database("./Events/Database/autoresumeDatabase.json", { 
   databaseInObject: true 
 });
 // export module :))) 
@@ -895,7 +895,7 @@ module.exports = (client) => {
     const data = defaultData.setDefaultMusicData;
     if(!data.ChannelId || data.ChannelId.length < 5) return;
     let textChannel = message.guild.channels.cache.get(data.ChannelId) || await message.guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
-    if(!textChannel) return console.log("Không có channel nào được thiết lập");
+    if(!textChannel) return;
     if(textChannel.id != message.channel.id) return;
     // xoá tin nhắn 
     if (message.author.id === client.user.id) {

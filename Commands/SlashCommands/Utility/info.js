@@ -1,4 +1,4 @@
-const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
+const { PermissionFlagsBits, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
 
 module.exports = {
   name: "info",
@@ -34,6 +34,16 @@ module.exports = {
           name: "roles",
           description: "Bạn muốn nhận thông tin từ roles nào?",
           type: ApplicationCommandOptionType.Role,
+          required: true,
+      }],
+  },{
+      name: "permissions",
+      description: "Xem các quyền hạn của bạn hoặc của thành viên",
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [{
+          name: "user",
+          description: "Bạn muốn nhận thông tin từ ai nào?",
+          type: ApplicationCommandOptionType.User,
           required: true,
       }],
   }],
@@ -139,6 +149,62 @@ module.exports = {
                 { name: "> Ngày bạn tham gia", value: `<t:${parseInt(interaction.guild.createdAt / 1000)}:F>(<t:${parseInt(interaction.guild.createdAt / 1000)}:R>)`, inline: true }
             ]);
         interaction.reply({ embeds: [Thong_tin_server] });
+      } else if(interaction.options.getSubcommand() === "permissions") {
+        const Member = interaction.options.getMember("user")
+        const USER = interaction.options.getUser("user")
+
+        let Embed = new EmbedBuilder().setColor("DarkRed");
+        if(!Member) return interaction.reply({
+            embeds: [Embed.setDescription("Thành viên không thể được tìm thấy")], ephemeral: true
+        });
+        return interaction.reply({ embeds: [new EmbedBuilder()
+            .setColor("Blue")
+            .setTitle(`🛠 | Permissions`)
+            .setDescription(`Permissions của ${Member}\`\`\`CreateInstantInvite ${Member.permissions.has([PermissionFlagsBits.CreateInstantInvite]) ? "✅" : "❌"}\
+            \nKickMembers ${Member.permissions.has([PermissionFlagsBits.KickMembers]) ? "✅" : "❌"}\
+            \nBanMember ${Member.permissions.has([PermissionFlagsBits.BanMembers]) ? "✅" : "❌"}\
+            \nAdministrator ${Member.permissions.has([PermissionFlagsBits.Administrator]) ? "✅" : "❌"}\
+            \nManageChannels ${Member.permissions.has([PermissionFlagsBits.ManageChannels]) ? "✅" : "❌"}\
+            \nManageGuild ${Member.permissions.has([PermissionFlagsBits.ManageGuild]) ? "✅" : "❌"}\
+            \nAddReactions ${Member.permissions.has([PermissionFlagsBits.AddReactions]) ? "✅" : "❌"}\
+            \nViewAuditLog ${Member.permissions.has([PermissionFlagsBits.ViewAuditLog]) ? "✅" : "❌"}\
+            \nPrioritySpeaker ${Member.permissions.has([PermissionFlagsBits.PrioritySpeaker]) ? "✅" : "❌"}\
+            \nStream ${Member.permissions.has([PermissionFlagsBits.Stream]) ? "✅" : "❌"}\
+            \nViewChannel ${Member.permissions.has([PermissionFlagsBits.ViewChannel]) ? "✅" : "❌"}\
+            \nSendMessages ${Member.permissions.has([PermissionFlagsBits.SendMessages]) ? "✅" : "❌"}\
+            \nSendTTSMessages ${Member.permissions.has([PermissionFlagsBits.SendTTSMessages]) ? "✅" : "❌"}\
+            \nManageMessages ${Member.permissions.has([PermissionFlagsBits.ManageMessages]) ? "✅" : "❌"}\
+            \nEmbedLinks ${Member.permissions.has([PermissionFlagsBits.EmbedLinks]) ? "✅" : "❌"}\
+            \nAttachFiles ${Member.permissions.has([PermissionFlagsBits.AttachFiles]) ? "✅" : "❌"}\
+            \nReadMessageHistory ${Member.permissions.has([PermissionFlagsBits.ReadMessageHistory]) ? "✅" : "❌"}\
+            \nMentionEveryone ${Member.permissions.has([PermissionFlagsBits.MentionEveryone]) ? "✅" : "❌"}\
+            \nUseExternalEmojis ${Member.permissions.has([PermissionFlagsBits.UseExternalEmojis]) ? "✅" : "❌"}\
+            \nViewGuildInsights ${Member.permissions.has([PermissionFlagsBits.ViewGuildInsights]) ? "✅" : "❌"}\
+            \nConnect ${Member.permissions.has([PermissionFlagsBits.Connect]) ? "✅" : "❌"}\
+            \nSpeak ${Member.permissions.has([PermissionFlagsBits.Speak]) ? "✅" : "❌"}\
+            \nMuteMembers ${Member.permissions.has([PermissionFlagsBits.MuteMembers]) ? "✅" : "❌"}\
+            \nDeafenMembers ${Member.permissions.has([PermissionFlagsBits.DeafenMembers]) ? "✅" : "❌"}\
+            \nMoveMembers ${Member.permissions.has([PermissionFlagsBits.MoveMembers]) ? "✅" : "❌"}\
+            \nUseVAD ${Member.permissions.has([PermissionFlagsBits.UseVAD]) ? "✅" : "❌"}\
+            \nChangeNickname ${Member.permissions.has([PermissionFlagsBits.ChangeNickname]) ? "✅" : "❌"}\
+            \nManageNicknames ${Member.permissions.has([PermissionFlagsBits.ManageNicknames]) ? "✅" : "❌"}\
+            \nManageRoles ${Member.permissions.has([PermissionFlagsBits.ManageRoles]) ? "✅" : "❌"}\
+            \nManageWebhooks ${Member.permissions.has([PermissionFlagsBits.ManageWebhooks]) ? "✅" : "❌"}\
+            \nManageEmojisAndStickers ${Member.permissions.has([PermissionFlagsBits.ManageEmojisAndStickers]) ? "✅" : "❌"}\
+            \nUseApplicationCommands ${Member.permissions.has([PermissionFlagsBits.UseApplicationCommands]) ? "✅" : "❌"}\
+            \nRequestToSpeak ${Member.permissions.has([PermissionFlagsBits.RequestToSpeak]) ? "✅" : "❌"}\
+            \nManageEvents ${Member.permissions.has([PermissionFlagsBits.ManageEvents]) ? "✅" : "❌"}\
+            \nManageThreads ${Member.permissions.has([PermissionFlagsBits.ManageThreads]) ? "✅" : "❌"}\
+            \nCreatePublicThreads ${Member.permissions.has([PermissionFlagsBits.CreatePublicThreads]) ? "✅" : "❌"}\
+            \nCreatePrivateThreads ${Member.permissions.has([PermissionFlagsBits.CreatePrivateThreads]) ? "✅" : "❌"}\
+            \nUseExternalStickers ${Member.permissions.has([PermissionFlagsBits.UseExternalStickers]) ? "✅" : "❌"}\
+            \nSendMessagesInThreads ${Member.permissions.has([PermissionFlagsBits.SendMessagesInThreads]) ? "✅" : "❌"}\
+            \nUseEmbeddedActivities ${Member.permissions.has([PermissionFlagsBits.UseEmbeddedActivities]) ? "✅" : "❌"}\
+            \nModerateMembers ${Member.permissions.has([PermissionFlagsBits.ModerateMembers]) ? "✅" : "❌"}\
+            \n\`\`\``)
+            .setFooter({ text: `${USER.tag}`, iconURL: Member.displayAvatarURL() })
+            .setTimestamp()],
+        });
       };
     } catch (e) {
       console.log(String(e.stack).bgRed);

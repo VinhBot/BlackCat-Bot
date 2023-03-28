@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder } = require("discord.js");
 const { Database } = require("st.db");
-const database = new Database("./Events/Json/defaultDatabase.json", { 
+const database = new Database("./Events/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
 module.exports = {
@@ -96,10 +96,10 @@ module.exports = {
        const welcome = interaction.options.getChannel("welcome");
        const goodbye = interaction.options.getChannel("goodbye");
        if(welcome) {
-         guildData.setDefaultWelcomeGoodbyeData.DefaultWelcomeChannel = welcome.id;
+         guildData.setDefaultWelcomeGoodbyeData.WelcomeChannel = welcome.id;
          interaction.reply({ content: `Kênh welcome của bạn đã được đặt ở ${welcome}` });
        } else if(goodbye) {
-         guildData.setDefaultWelcomeGoodbyeData.DefaultGoodbyeChannel = goodbye.id;
+         guildData.setDefaultWelcomeGoodbyeData.GoodbyeChannel = goodbye.id;
          interaction.reply({ content: `Kênh goodbye của bạn đã được đặt ở ${goodbye}` });
        };
        await database.set(interaction.guild.id, guildData);
