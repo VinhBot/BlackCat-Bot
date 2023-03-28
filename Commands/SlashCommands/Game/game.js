@@ -4,6 +4,7 @@ const { RPSGame } = require(`${process.cwd()}/Events/Game`);
 module.exports = {
   name: "game",
   description: "play game",
+  userPerms: [],
   options: [
     {
       name: "tictactoe",

@@ -31,18 +31,6 @@ const setupDatabase = async(guild) => {
   };
 };
    
-const profile = {
-  "dot":"https://cdn.discordapp.com/attachments/869133321010032731/889068805060435979/dot.png",
-  "status": {
-    "online": "https://cdn.discordapp.com/attachments/869133321010032731/889033864297713664/online.png",
-    "offline": "https://cdn.discordapp.com/attachments/869133321010032731/889033861630152734/offline.png",
-    "idle": "https://cdn.discordapp.com/attachments/869133321010032731/889041955248549898/idle.png",
-    "dnd": "https://cdn.discordapp.com/attachments/869133321010032731/889033858601857024/dnd.png"
-  },
-  "main_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889093992367673354/main_profile.png",
-  "raw_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889033867724468224/raw_profile.png"
-};
-
 module.exports = (client) => {
   /*
   client.on("messageCreate", async(message) => {
@@ -83,6 +71,17 @@ module.exports = (client) => {
   ========================================================*/
   // gởi tin nhắn lhi có member gia nhập guilds
   client.on("guildMemberAdd", async(member) => {
+      const profile = {
+         "dot":"https://cdn.discordapp.com/attachments/869133321010032731/889068805060435979/dot.png",
+         "status": {
+           "online": "https://cdn.discordapp.com/attachments/869133321010032731/889033864297713664/online.png",
+           "offline": "https://cdn.discordapp.com/attachments/869133321010032731/889033861630152734/offline.png",
+           "idle": "https://cdn.discordapp.com/attachments/869133321010032731/889041955248549898/idle.png",
+           "dnd": "https://cdn.discordapp.com/attachments/869133321010032731/889033858601857024/dnd.png"
+        },
+        "main_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889093992367673354/main_profile.png",
+        "raw_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889033867724468224/raw_profile.png"
+      };
       const { setDefaultWelcomeGoodbyeData: data } = await database.get(member.guild.id);
       const channel = member.guild.channels.cache.find(c => c.id === data.WelcomeChannel);
       if(!channel) return;

@@ -69,6 +69,7 @@ module.exports = (client) => {
     // khởi tạo phần mềm trung gian hộ chiếu.
     app.use(passport.initialize());
     app.use(passport.session());
+  
     app.set('view engine', 'ejs');
     app.set('views', path.join(__dirname, './views'))
     // Những cái cho app.use(s) là đầu vào của phương thức post (cập nhật cài đặt)

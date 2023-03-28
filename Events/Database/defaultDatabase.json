@@ -130,11 +130,11 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": true,
+            "DefaultAutoplay": false,
             "DefaultVolume": 50,
             "DefaultFilters": [
-                "bassboost",
-                "3d"
+                "3d",
+                "bassboost"
             ],
             "MessageId": "1090110650849697832",
             "ChannelId": "1089119081304707102",
@@ -144,7 +144,7 @@
             "WelcomeChannel": "1089615977559375954",
             "GoodbyeChannel": "1089615977559375954",
             "AutoAddRoleWel": [
-              "1088740567657222194"
+                "1088740567657222194"
             ]
         }
     }
