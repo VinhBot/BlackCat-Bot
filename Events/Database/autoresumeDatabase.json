@@ -1,1 +1,35 @@
-{}
+{
+    "1055150050357022840": {
+        "guild": "1055150050357022840",
+        "voiceChannel": "1055150050357022844",
+        "textChannel": "1089119081304707102",
+        "currentTime": 200.3,
+        "repeatMode": 0,
+        "autoplay": false,
+        "playing": true,
+        "volume": 80,
+        "filters": [
+            "bassboost",
+            "3d"
+        ],
+        "songs": [
+            {
+                "memberId": "788208207465938954",
+                "source": "youtube",
+                "duration": 261,
+                "formattedDuration": "04:21",
+                "id": "WLYAiKNdiJY",
+                "isLive": false,
+                "name": "PHAI DẤU CUỘC TÌNH 2 - Lyrics - 黃昏 (Hoàng Hôn-Vietnamese Ver.) #Hianhtrai",
+                "thumbnail": "https://i.ytimg.com/vi/WLYAiKNdiJY/maxresdefault.jpg?sqp=-oaymwEmCIAKENAF8quKqQMa8AEB-AHUBoAC4AOKAgwIABABGGUgZShlMA8=&rs=AOn4CLByvVbu4zr1201TVNgO3N0zHiAOKg",
+                "type": "video",
+                "uploader": {
+                    "name": "Hi Anh Trai",
+                    "url": "https://www.youtube.com/channel/UCly9xfjmJbt7_6_yCwO_U5g"
+                },
+                "url": "https://www.youtube.com/watch?v=WLYAiKNdiJY",
+                "views": 7671698
+            }
+        ]
+    }
+}

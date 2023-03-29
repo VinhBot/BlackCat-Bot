@@ -1,4 +1,4 @@
-const { AttachmentBuilder, EmbedBuilder, ChannelType, PermissionsBitField } = require("discord.js");
+const { AttachmentBuilder, EmbedBuilder, ChannelType, PermissionsBitField, ActionRowBuilder, ButtonBuilder } = require("discord.js");
 const { join } = require('node:path');
 const Canvas = require('canvas');
 const axios = require('axios');
@@ -58,6 +58,7 @@ module.exports = (client) => {
     // Tin nhắn gửi đến channel mà bot có thể gửi. :)) 
     guild.channels.cache.find((channel) => channel.type === ChannelType.GuildText).send({ 
       embeds: [new EmbedBuilder()
+        .setAuthor({ name: client.user.username })
         .setDescription(config.prefix + 'help để xem tất cả các lệnh')
         .setColor('Blue')
       ]
