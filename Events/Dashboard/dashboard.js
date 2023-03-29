@@ -48,6 +48,29 @@ const BotFilters = {
 };
 
 module.exports = (client) => {
+    // - THÊM TIẾT KIỆM PHIÊN
+    app.use(session({
+      store: new MemoryStore({ checkPeriod: 86400000 }),
+      secret: `#@%#&^$^$%@$^$&%#$%@#$%$^%&$%^#$%@#$%#E%#%@$FEErfgr3g#%GT%536c53cc6%5%tv%4y4hrgrggrgrgf4n`,
+      resave: false,
+      saveUninitialized: false,
+    }));
+    app.use(passport.initialize());
+    app.use(passport.session());
+    app.set('view engine', 'ejs');
+    /*========================================================
+    ========================================================*/
+    app.set('views', path.join(__dirname, './views'));
+    app.use(express.static(path.join(__dirname, './public')));
+    // Những cái cho app.use(s) là đầu vào của phương thức post (cập nhật cài đặt)
+    app.use(bodyParser.json());
+    app.use(bodyParser.urlencoded({ extended: true }));
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    //Tải .well-known (nếu có)
+    app.use(express.static(path.join(__dirname, '/'), {
+      dotfiles: 'allow'
+    }));
     // - Khởi tạo thiết lập đăng nhập Discord!
     passport.serializeUser((user, done) => done(null, user));
     passport.deserializeUser((obj, done) => done(null, obj));
@@ -58,30 +81,6 @@ module.exports = (client) => {
       scope: [`identify`, `guilds`, `guilds.join`]
     }, (accessToken, refreshToken, profile, done) => { 
       process.nextTick(() => done(null, profile));
-    }));
-    // - THÊM TIẾT KIỆM PHIÊN
-    app.use(session({
-      store: new MemoryStore({ checkPeriod: 86400000 }),
-      secret: `#@%#&^$^$%@$^$&%#$%@#$%$^%&$%^#$%@#$%#E%#%@$FEErfgr3g#%GT%536c53cc6%5%tv%4y4hrgrggrgrgf4n`,
-      resave: false,
-      saveUninitialized: false,
-    }));
-    // khởi tạo phần mềm trung gian hộ chiếu.
-    app.use(passport.initialize());
-    app.use(passport.session());
-  
-    app.set('view engine', 'ejs');
-    app.set('views', path.join(__dirname, './views'))
-    // Những cái cho app.use(s) là đầu vào của phương thức post (cập nhật cài đặt)
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    //TẢI TÀI SẢN
-    app.use(express.static(path.join(__dirname, './public')));
-    //Load .well-known (if available)
-    app.use(express.static(path.join(__dirname, '/'), {
-      dotfiles: 'allow'
     }));
     // Chúng tôi khai báo một phần mềm trung gian chức năng checkAuth để kiểm tra xem người dùng đã đăng nhập hay chưa và nếu không thì chuyển hướng anh ta.
     const checkAuth = (req, res, next) => {
@@ -104,7 +103,7 @@ module.exports = (client) => {
         next();
     }, passport.authenticate(`discord`, { prompt: `none` }));
     // Điểm cuối gọi lại cho dữ liệu đăng nhập
-    app.get(`/callback`, passport.authenticate(`discord`, { failureRedirect: "/" }), async (req, res) => {
+    app.get(`/callback`, passport.authenticate(`discord`, { failureRedirect: "/" }), async(req, res) => {
         let banned = false; // req.user.id
         if(banned) {
           req.session.destroy(() => {
@@ -223,31 +222,25 @@ module.exports = (client) => {
       let guildData = await database.get(guild.id);
       if(req.body.prefix) {
         guildData.setDefaultPrefix = String(req.body.prefix).split(" ")[0];
-        await database.set(guild.id, guildData);
       };
       if(req.body.defaultvolume) {
         guildData.setDefaultMusicData.DefaultVolume = Number(req.body.defaultvolume);
-        await database.set(guild.id, guildData);
       };
       if(req.body.defaultautoplay) {
         guildData.setDefaultMusicData.DefaultAutoplay = true;
-        await database.set(guild.id, guildData);
       } else {
         guildData.setDefaultMusicData.DefaultAutoplay = false;
-        await database.set(guild.id, guildData);
       };
       if(req.body.defaultfilters) {
         guildData.setDefaultMusicData.DefaultFilters = req.body.defaultfilters;
-        await database.set(guild.id, guildData);
       };
       if(req.body.djroles) {
         guildData.setDefaultMusicData.Djroles = req.body.djroles;
-        await database.set(guild.id, guildData);
       };
       if(req.body.botchannel) {
         guildData.setDefaultMusicData.ChannelId = req.body.botchannel;
-        await database.set(guild.id, guildData);
       };
+      await database.set(guild.id, guildData);
       res.render("settings", {
           req: req,
           user: req.isAuthenticated() ? req.user : null,

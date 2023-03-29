@@ -131,14 +131,18 @@
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
             "DefaultAutoplay": false,
-            "DefaultVolume": 50,
+            "DefaultVolume": 65,
             "DefaultFilters": [
                 "3d",
                 "bassboost"
             ],
             "MessageId": "1090110650849697832",
             "ChannelId": "1089119081304707102",
-            "Djroles": []
+            "Djroles": [
+                "1088740567657222194",
+                "1089413553615814750",
+                "1089413589267382282"
+            ]
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "1089615977559375954",

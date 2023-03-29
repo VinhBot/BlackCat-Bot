@@ -1,8 +1,11 @@
+@import url("https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css");
+
 body {
     background: #23272A;
     color: white;
     height: 100%;
 }
+
 .btn-outline-success {
     border-radius: 5px;
     zoom: 2;
@@ -62,7 +65,7 @@ form.d-flex button:hover {
     background-color: #5663F7;
 }
 
-/* MAIN BODY */
+
 
 .head {
     padding-top: 260px;
@@ -125,7 +128,11 @@ form.d-flex button:hover {
 }
 
 
-/* MEDIA */
+
+
+
+
+
 
 @media screen and (max-width: 967px) {
     .custom-1 img {
@@ -323,7 +330,7 @@ select {
 
 .current-song {
   margin-top: -20%;
-  min-height: 100vh; /* minimum height = screen height */
+  min-height: 100vh;  
   display: flex;
   justify-content: center;
   align-items: center;
