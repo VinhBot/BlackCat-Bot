@@ -4,7 +4,7 @@ const Client = require("blackcat-djs");
 const { Database } = require("st.db");
 const { onCoolDown } = require(`./Events/functions`);
 const config = require("./config.json");
-const database = new Database("./Events/Database/defaultDatabase.json", { 
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
 const client = new Client({

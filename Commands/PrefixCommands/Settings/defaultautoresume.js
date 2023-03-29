@@ -10,7 +10,7 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const database = new Database("./Events/Database/defaultDatabase.json", { 
+    const database = new Database("./Assets/Database/defaultDatabase.json", { 
        databaseInObject: true
     });
     if(!args[0]) return message.reply({

@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder } = require("discord.js");
 const { Database } = require("st.db");
-const database = new Database("./Events/Database/defaultDatabase.json", { 
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
 module.exports = {

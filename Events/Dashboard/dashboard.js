@@ -14,7 +14,7 @@ const { Database } = require("st.db");
 const httpApp = express();
 const app = express();
 const categories = fs.readdirSync(`./Commands/PrefixCommands/`);
-const database = new Database("./Events/Database/defaultDatabase.json", { 
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true
 });
 const settings = {

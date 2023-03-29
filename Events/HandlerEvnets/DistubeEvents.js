@@ -11,10 +11,10 @@ let songEditInterval = null;
 let lastEdited = false;
 // Json Data
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Events/Database/defaultDatabase.json", { 
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
-const autoresume = new Database("./Events/Database/autoresumeDatabase.json", { 
+const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
   databaseInObject: true 
 });
 // export module :))) 

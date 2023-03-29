@@ -4,7 +4,7 @@ const Canvas = require('canvas');
 const axios = require('axios');
 const { Database } = require("st.db");
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Events/Database/defaultDatabase.json", { 
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
 const setupDatabase = async(guild) => {
