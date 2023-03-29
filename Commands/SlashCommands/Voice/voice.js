@@ -42,7 +42,7 @@ module.exports = {
 			connection.destroy();
 		 });
      if(toggle === "1") {
-        player.play(createAudioResource(`${process.cwd()}/Events/Sounds/70tuoi.mp3`));
+        player.play(createAudioResource(`${process.cwd()}/Assets/Sounds/70tuoi.mp3`));
         interaction.reply({ content: "đang chạy sounds 70 tuổi" });
      } else if(toggle === "2") {
         interaction.reply({ content: "chỉ có 70 tuổi mới có sounds thôi khà khà" });
