@@ -19,10 +19,12 @@
     "blackcat-djs": "^1.0.7",
     "body-parser": "^1.20.2",
     "canvas": "^2.9.0",
+    "discord-giveaways": "^6.0.1",
     "discord-tictactoe": "^4.1.1",
     "discord.js": "^14.8.0",
     "distube": "^4.0.4",
     "ejs": "^3.1.9",
+    "enhanced-ms": "^2.2.0",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "ffmpeg-static": "^5.1.0",
@@ -33,6 +35,7 @@
     "node-fetch": "^2.6.9",
     "passport": "^0.6.0",
     "passport-discord": "^0.1.4",
+    "sourcebin_js": "^0.0.3-ignore",
     "st.db": "^6.0.1"
   }
 }

@@ -113,11 +113,9 @@ module.exports = (client) => {
         { name: `⏱ Thời gian:`, value: `\`${newQueue.formattedCurrentTime}\` ${createBar(newQueue.songs[0].duration, newQueue.currentTime, 13)} \`${newQueue.songs[0].formattedDuration}\``, inline: true },
         { name: `💡 Yêu cầu bởi:`, value: `>>> ${newQueue.songs[0].user}`, inline: true }
       )
-      // lấy đúng bài hát của bài hát hiện tại
       var maxTracks = 10; // bài hát / Trang hàng đợi
-      // lấy một quelist trong đó có 10 bản nhạc
       embeds[0] = new EmbedBuilder()
-      .setTitle(`📃 hàng đợi của __${guild.name}__  -  [${newQueue.songs.length} bài hát]`)
+      .setTitle(`📃 hàng đợi của __${guild.name}__ - [${newQueue.songs.length} bài hát]`)
       .setColor("Random")
       .setDescription(String(newQueue.songs.slice(0, maxTracks).map((track, index) => `**\` ${++index}. \` ${track.url ? `[${track.name.substr(0, 60).replace(/\[/igu, `\\[`).replace(/\]/igu, `\\]`)}](${track.url})` : track.name}** - \`${track.isStream ? "Trực Tiếp" : track.formattedDuration}\`\n> *Được yêu cầu bởi: __${track.user?.tag}__*`).join(`\n`)).substr(0, 2048));
       if(newQueue.songs.length > 10)
@@ -608,14 +606,12 @@ module.exports = (client) => {
     if(!member) return;
     // nếu thành viên không được kết nối với voice, return
     if(!member.voice.channel) return interaction.reply({
-      ephemeral: true,
-      content: `**Vui lòng kết nối với kênh voice trước!**`
+      content: `**Vui lòng kết nối với kênh voice trước!**`, ephemeral: true,
     });
     let newQueue = client.distube.getQueue(guild.id);
     if(interaction.isButton()) {
       if(!newQueue || !newQueue.songs || !newQueue.songs[0]) return interaction.reply({
-        content: "Hiện tại không phát bài hát nào :))",
-        ephemeral: true
+        content: "Hiện tại không phát bài hát nào :))", ephemeral: true
       });
       if(customId === "Stop") {
         if(newQueue) {
@@ -634,7 +630,7 @@ module.exports = (client) => {
           return interaction.reply({ content: "Bạn chỉ có 1 bài hát trong danh sách phát" });
         };
       } else if(customId === "Pause") {
-        if (newQueue.paused) {
+        if(newQueue.paused) {
           newQueue.resume();
           return interaction.reply({ content: "Tiếp tục phát nhạc" });
         } else {
@@ -690,8 +686,8 @@ module.exports = (client) => {
         };
       } else if(customId === "Rewind") {
         let seektime = newQueue.currentTime - 10;
-				if (seektime < 0) seektime = 0;
-				if (seektime >= newQueue.songs[0].duration - newQueue.currentTime) seektime = 0;
+				if(seektime < 0) seektime = 0;
+				if(seektime >= newQueue.songs[0].duration - newQueue.currentTime) seektime = 0;
         await newQueue.seek(seektime);
         return interaction.reply({ content: "Đã tua bài hát về sau 10 giây" });
       } else if(customId === "Lyrics") {
