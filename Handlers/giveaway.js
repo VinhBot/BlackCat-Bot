@@ -1,49 +1,71 @@
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const { GiveawaysManager } = require("discord-giveaways");
-const { Database } = require("st.db");
-const giveawayDB = new Database("./Assets/Database/giveawayDatabase.json", { 
-  databaseInObject: true 
-});
 
 module.exports = (client) => {
-  class DatabaseGiveaways extends GiveawaysManager {
-    constructor(client) {
-      super(client, {
-        default: {
-          botsCanWin: false,
-          embedColor: "Yellow",
-          embedColorEnd: "Red",
-          reaction: "🎁",
-        },
-      }, false /*chưa khởi tạo trình quản lý*/);
-    };
-    // Hàm này được gọi khi người quản lý cần lấy tất cả giveaway được lưu trữ trong cơ sở dữ liệu.
-    async getAllGiveaways() {
-      // Lấy tất cả giveaway từ cơ sở dữ liệu
-      return giveawayDB.all();
-    };
-    // Hàm này được gọi khi một giveaway cần được lưu trong cơ sở dữ liệu.
-    async saveGiveaway(messageId, giveawayData) {
-      // Thêm giveaway vào cơ sở dữ liệu
-      giveawayDB.set(messageId, giveawayData);
-      // Đừng quên trả lại thứ gì đó!
-      return true;
-    };
-    // Hàm này được gọi khi cần chỉnh sửa giveaway trong cơ sở dữ liệu.
-    async editGiveaway(messageId, giveawayData) {
-      // Thay thế giveaway chưa chỉnh sửa bằng giveaway đã chỉnh sửa
-      giveawayDB.set(messageId, giveawayData);
-      // Đừng quên trả lại một cái gì đó!
-      return true;
-    };
-    // Hàm này được gọi khi cần xóa giveaway trong cơ sở dữ liệu.
-    async deleteGiveaway(messageId) {
-      // Xóa giveaway khỏi cơ sở dữ liệu
-      giveawayDB.delete(messageId);
-      // Đừng quên trả lại một cái gì đó!
-      return true;
-    };
-  };
-  const giveawayHandler = new DatabaseGiveaways(client);
-  giveawayHandler._init();
-  client.giveawaysManager = giveawayHandler
+  const giveawayHandler = new GiveawaysManager(client, {
+    storage: `${process.cwd()}/Assets/Database/giveawayDatabase.json`,
+    default: {
+        botsCanWin: false,
+        embedColor: "#FF0000",
+        reaction: "<a:hehehe:1091770710915022858>",
+        lastChance: {
+            enabled: true,
+            content: '⚠️ ** CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA !** ⚠️',
+            threshold: 10000,
+            embedColor: '#FF0000'
+        }
+    }
+  });
+  // gởi tin nhắn đến cho người chiến thắng 
+  giveawayHandler.on("giveawayRerolled", (giveaway, winners) => {
+     winners.forEach((member) => {
+       member.send({ embeds: [new EmbedBuilder() 
+          .setTile("🎉・Giveaway đã kết thúc")
+          .setDescription(`Xin chúc mừng ${member.user.username}! Bạn đã trở thành người chiến thắng!`)
+          .addFields(
+            { name: "🎁┆Phần thưởng", value: `${giveaway.prize}`, inline: true },
+            { name: "🥳┆Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
+          )
+       ]}).catch((ex) => {});
+     });
+  });
+  // gởi tin nhắn đến cho thành viên khi react với icon giveway
+  giveawayHandler.on("giveawayReactionAdded", (giveaway, member, reaction) => {
+    const ChannelGiveaway = new ButtonBuilder().setLabel("Xem giveaway").setStyle("Link").setURL(`https://discordapp.com/channels/${giveaway.message?.guildId}/${giveaway.message?.channelId}/${giveaway.message?.id}`);
+    member.send({ 
+      content: `Yêu cầu của bạn vào giveaway này đã được phê duyệt.`,
+      components: [new ActionRowBuilder().addComponents([ ChannelGiveaway ])]
+    }).catch((ex) => {});
+  }); 
+  // gởi tin nhắn cho thành viên khi họ out khỏi giveaway 
+  giveawayHandler.on('giveawayReactionRemoved', (giveaway, member, reaction) => {
+    const ChannelGiveaway = new ButtonBuilder().setLabel("Xem giveaway").setStyle("Link").setURL(`https://discordapp.com/channels/${giveaway.message?.guildId}/${giveaway.message?.channelId}/${giveaway.message?.id}`);
+    return member.send({
+      content: "Bạn đã hủy lượt tham gia dành giải thưởng",
+      components: [new ActionRowBuilder().addComponents([ ChannelGiveaway ])]
+    });
+  });
+  // gởi tin nhắn đến cho người chiến thắng 
+  giveawayHandler.on("giveawayEnded", (giveaway, winners) => {
+    winners.forEach((member) => {
+      member.send({ embeds: [new EmbedBuilder() 
+        .setTile("🎉・Giveaway đã kết thúc")
+        .setDescription(`Xin chúc mừng ${member.user.username}! Bạn đã trở thành người chiến thắng!`)
+        .addFields(
+          { name: "🎁┆Phần thưởng", value: `${giveaway.prize}`, inline: true },
+          { name: "🥳┆Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
+        )
+      ]}).catch((ex) => {});
+    });
+  });
+  // gởi tin nhắm cho thành viên khi giveaway đã kết thúc mà thành viên vẫn react với emojis
+  giveawayHandler.on("endedGiveawayReactionAdded", (giveaway, member, reaction) => {
+    member.send({ content: "Thật không may, giveaway đã kết thúc! Bạn không thể tham gia nữa" }).catch((ex) => {});
+  });
+  // Xuất hiện khi giveaway đã bị xoá
+  giveawayHandler.on('giveawayDeleted', (giveaway) => {
+    console.log(`Giveaway với id ${giveaway.messageId} đã bị xoá`)
+  });
+  // evnets giveaways
+  client.giveawaysManager = giveawayHandler;
 };

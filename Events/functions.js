@@ -1,6 +1,7 @@
 const { EmbedBuilder, parseEmoji, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType, Collection, SelectMenuBuilder } = require("discord.js");
 const { Database } = require("st.db");
 const ems = require("enhanced-ms");
+const fetch = require("node-fetch");
 const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
@@ -8,7 +9,8 @@ const database = new Database("./Assets/Database/defaultDatabase.json", {
 /*========================================================
 ========================================================*/
 const setupDatabase = async(guild) => {
-  if(!await database.has(guild.id)) {          // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
+  const checkData = await database.has(guild.id);
+  if(!checkData) {          // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
     console.log(`Đã tạo database cho: ${guild.name}`); // thông báo ra bảng điều khiển
     await database.set(guild.id, {             // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
       defaultGuildName: guild.name,            // tên guilds
@@ -124,6 +126,18 @@ const disspace = function(newQueue, newTrack, queue) {
   };
 };
 /*========================================================
+# baseURL
+========================================================*/
+const baseURL = async(url, options) => {
+  const response = options ? await fetch(url, options) : await fetch(url);
+  const json = await response.json();
+  return {
+    success: response.status === 200 ? true : false,
+    status: response.status,
+    data: json,
+  };
+};
+/*========================================================
 # Giveaways
 ========================================================*/
 const GiveawayClass = class {
@@ -148,7 +162,7 @@ const GiveawayClass = class {
           drawing: 'Kết thúc sau: {timestamp}',
           dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
           inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
-          winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\n{this.messageURL}',
+          winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải',
           embedFooter: '{this.winnerCount} người chiến thắng',
           noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
           hostedBy: 'Tổ chức bởi: {this.hostedBy}',
@@ -271,7 +285,7 @@ const GiveawayClass = class {
       content: "Không nhận được phản hồi, đang hủy thiết lập",
       components: [] 
     });
-
+    
     await btnInteraction.showModal(new ModalBuilder({
       customId: "giveaway-modalSetup",
       title: "Thiết lập Giveaway",
@@ -291,7 +305,6 @@ const GiveawayClass = class {
     if(!modal) return sentMsg.edit({ content: "Không nhận được phản hồi, đang hủy thiết lập", components: [] });
     sentMsg.delete().catch(() => {});
     await modal.reply("Thiết lập giveaway...");
-
     const duration = ems(modal.fields.getTextInputValue("duration"));
     if(isNaN(duration)) return modal.editReply("Thiết lập đã bị hủy bỏ. Bạn đã không chỉ định thời hạn hợp lệ");
     // phần thưởng
@@ -358,5 +371,5 @@ const GiveawayClass = class {
 };
 
 module.exports = {
-  onCoolDown, disspace, setupDatabase, GiveawayClass
+  onCoolDown, disspace, setupDatabase, baseURL, GiveawayClass,
 };

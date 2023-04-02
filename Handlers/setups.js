@@ -4,46 +4,44 @@ const config  = require(`${process.cwd()}/config.json`);
 # test ticket
 ========================================================*/
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, StringSelectMenuBuilder, ComponentType,   ModalBuilder, TextInputBuilder, TextInputStyle } = require("discord.js");
-// const sourcebin = require("sourcebin_js");
+const sourcebin = require("sourcebin_js");
 const settings = {
   ticket: {
     limit: 10,
     categories: {
-      _id: false,
-      name: "",
-      staff_roles: [],
+      name: ""
     },
   },
 };
 
-class ticketHandler {
-  constructor() {
-    this.openPerms = ["ManageChannels"];
-    this.closePerms = ["ManageChannels", "ReadMessageHistory"];
+const openPerms = ["ManageChannels"];
+const closePerms = ["ManageChannels", "ReadMessageHistory"];
+function isTicketChannel(channel) {
+  return (channel.type === ChannelType.GuildText && channel.name.startsWith("tіcket-") && channel.topic && channel.topic.startsWith("tіcket|"));
+};
+function getTicketChannels(guild) {
+  return guild.channels.cache.filter((ch) => isTicketChannel(ch));
+};
+function getExistingTicketChannel(guild, userId) {
+  const tktChannels = getTicketChannels(guild);
+  return tktChannels.filter((ch) => ch.topic.split("|")[1] === userId).first();
+};
+
+async function postToBin(content, title) {
+    try {
+      const response = await sourcebin.create([{ name: " ", content, languageId: "text" }], { title, description: " " });
+      return {
+        url: response.url,
+        short: response.short,
+        raw: `https://cdn.sourceb.in/bins/${response.key}/0`,
+      };
+    } catch (ex) {
+      console.log(`postToBin`, ex);
+    };
   };
-  /**
-  * @param {import('discord.js').Channel} channel
-  */
-  isTicketChannel(channel) {
-    return (channel.type === ChannelType.GuildText && channel.name.startsWith("tіcket-") && channel.topic && channel.topic.startsWith("tіcket|"));
-  };
-  /**
-  * @param {import('discord.js').Guild} guild
-  */
-  getTicketChannels(guild) {
-    return guild.channels.cache.filter((ch) => this.isTicketChannel(ch));
-  };
-  /**
-  * @param {import('discord.js').Guild} guild
-  * @param {string} userId
-  */
-  getExistingTicketChannel(guild, userId) {
-    const tktChannels = this.getTicketChannels(guild);
-    return tktChannels.filter((ch) => ch.topic.split("|")[1] === userId).first();
-  };
-  //
-  async closeTicket(channel, closedBy, reason) {
-      if(!channel.deletable || !channel.permissionsFor(channel.guild.members.me).has(this?.closePerms)) return "missingPermissions";
+
+  async function closeTicket(channel, closedBy, reason) {
+      if(!channel.deletable || !channel.permissionsFor(channel.guild.members.me).has(closePerms)) return "missingPermissions";
       try {
         const messages = await channel.messages.fetch();
         const reversed = Array.from(messages.values()).reverse();
@@ -54,7 +52,7 @@ class ticketHandler {
           if(m.attachments.size > 0) content += `${m.attachments.map((att) => att.proxyURL).join(", ")}\n`;
           content += "\n";
         });
-        // const logsUrl = await postToBin(content, `Nhật ký ticket cho ${channel.name}`);
+        const logsUrl = await postToBin(content, `Nhật ký ticket cho ${channel.name}`);
         const parseTicketDetails = async(channel) => {
           if(!channel.topic) return;
           const split = channel.topic?.split("|");
@@ -67,7 +65,7 @@ class ticketHandler {
         const ticketDetails = await parseTicketDetails(channel);
         const components = [];
         if(logsUrl) {
-          components.push(new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel("Transcript").setURL(logsUrl.short).setStyle(ButtonStyle.Link)));
+          components.push(new ActionRowBuilder().addComponents(new ButtonBuilder().setLabel("Lịch sử tin nhắn").setURL(logsUrl.short).setStyle(ButtonStyle.Link)));
         };
         if (channel.deletable) await channel.delete();
         const embed = new EmbedBuilder().setAuthor({ name: "Đóng Ticket" }).setColor("Red");
@@ -87,13 +85,18 @@ class ticketHandler {
         console.log("closeTicket", ex);
         return "ERROR";
       };
-  }; 
+}; 
+
+const ticketHandler = class {
+  constructor() {
+   
+  };
   /**
   * @param {import('discord.js').Guild} guild
   * @param {import('discord.js').User} author
   */
   async closeAllTickets(guild, author) {
-    const channels = this.getTicketChannels(guild);
+    const channels = getTicketChannels(guild);
     let success = 0, failed = 0;
     for (const ch of channels) {
       const status = await this.closeTicket(ch[1], author, "Buộc đóng tất cả các ticket đang mở");
@@ -107,13 +110,13 @@ class ticketHandler {
   * @param {import("discord.js").ButtonInteraction} interaction
   */
   async handleTicketOpen(interaction) {
-    await interaction.reply({ content: "Đang khởi tạo" }).catch((ex) => {});
+    await interaction.deferReply({ ephemeral: true });
     const { guild, user } = interaction;
-    if(!guild.members.me.permissions.has(this?.openPerms)) return interaction.editReply("Không thể tạo kênh ticket, thiếu quyền `Quản lý kênh`. Hãy liên hệ với người quản lý máy chủ để được trợ giúp!");
-    const alreadyExists = this.getExistingTicketChannel(guild, user.id);
+    if(!guild.members.me.permissions.has(openPerms)) return interaction.editReply("Không thể tạo kênh ticket, thiếu quyền `Quản lý kênh`. Hãy liên hệ với người quản lý máy chủ để được trợ giúp!");
+    const alreadyExists = getExistingTicketChannel(guild, user.id);
     if(alreadyExists) return interaction.editReply(`Bạn đã có một ticket đang mở`);
     // kiểm tra giới hạn
-    const existing = this.getTicketChannels(guild).size;
+    const existing = getTicketChannels(guild).size;
     if(existing > settings.ticket.limit) return interaction.editReply("Có quá nhiều ticket đang mở. Hãy thử lại sau");
     // kiểm tra danh mục
     let catName = null;
@@ -180,7 +183,7 @@ class ticketHandler {
   */
   async handleTicketClose(interaction) {
     await interaction.deferReply({ ephemeral: true });
-    const status = await this.closeTicket(interaction.channel, interaction.user);
+    const status = await closeTicket(interaction.channel, interaction.user);
     if(status === "missingPermissions") {
       return interaction.editReply("Không thể đóng ticket, thiếu quyền. Hãy liên hệ với người quản lý máy chủ để được trợ giúp!");
     } else if(status == "ERROR") {
@@ -242,7 +245,7 @@ class ticketHandler {
   /**  */
   async closeAll({ guild }, user) {
     const stats = await this.closeAllTickets(guild, user);
-    return `Hoàn thành!, Thành công: \`${stats[0]}\` Thất bại: \`${stats[1]}\``;
+    return `Xong!, Thành công: \`${stats[0]}\` Thất bại: \`${stats[1]}\``;
   };
   /**  */
   async addToTicket({ channel }, inputId) {
@@ -272,25 +275,6 @@ class ticketHandler {
       return "Không thể xóa người dùng hoặc roles. Bạn có cung cấp ID hợp lệ không?";
     };
   };
-  /**
-  * Đăng nội dung được cung cấp vào BIN
-  * @param {string} content
-  * @param {string} title
-  */
-  static async postToBin(content, title) {
-    try {
-      const response = await sourcebin.create([
-        { name: " ", content, languageId: "text" },
-        ], { title, description: " " });
-      return {
-        url: response.url,
-        short: response.short,
-        raw: `https://cdn.sourceb.in/bins/${response.key}/0`,
-      };
-    } catch (ex) {
-      console.log(`postToBin`, ex);
-    };
-  };
 };
 
 const { handleTicketOpen, handleTicketClose, ticketModalSetup } = new ticketHandler();
@@ -298,7 +282,7 @@ const { handleTicketOpen, handleTicketClose, ticketModalSetup } = new ticketHand
 module.exports = (client) => {
   client.on("messageCreate", async(message) => {
     if(message.content === "ticket") {
-      const ChannelId = "1090852217386442823";
+      const ChannelId = "1091778868442050632";
       return ticketModalSetup(message, ChannelId);
     };
   });

@@ -145,5 +145,26 @@
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
         }
+    },
+    "1091655091938930769": {
+        "defaultGuildName": "XX",
+        "setDefaultPrefix": "!",
+        "setDefaultMusicData": {
+            "DefaultAutoresume": true,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 50,
+            "DefaultFilters": [
+                "bassboost",
+                "3d"
+            ],
+            "MessageId": "",
+            "ChannelId": "",
+            "Djroles": []
+        },
+        "setDefaultWelcomeGoodbyeData": {
+            "WelcomeChannel": "",
+            "GoodbyeChannel": "",
+            "AutoAddRoleWel": []
+        }
     }
 }

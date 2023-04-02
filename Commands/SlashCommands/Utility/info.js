@@ -17,6 +17,16 @@ module.exports = {
       description: "nhận thông tin về server của bạn",
       type: ApplicationCommandOptionType.Subcommand,
   },{
+      name: "userinfo",
+      description: "xem thông tin của thành viên trong guilds",
+      type: ApplicationCommandOptionType.Subcommand,
+      options: [{
+          name: "user",
+          description: "Bạn muốn xem thông tin của ai nào?",
+          type: ApplicationCommandOptionType.User,
+          required: true,
+      }],
+  },{
       name: "avatar",
       description: "xem avatar người dùng",
       type: ApplicationCommandOptionType.Subcommand,
@@ -149,6 +159,60 @@ module.exports = {
                 { name: "> Ngày bạn tham gia", value: `<t:${parseInt(interaction.guild.createdAt / 1000)}:F>(<t:${parseInt(interaction.guild.createdAt / 1000)}:R>)`, inline: true }
             ]);
         interaction.reply({ embeds: [Thong_tin_server] });
+      } else if(interaction.options.getSubcommand() === "userinfo") {
+        const member = await interaction.guild.members.fetch(interaction.options.getUser('user').id);
+        if(!member) return interaction.reply({ content: "Người dùng này không ở trong guilds" });
+        const badgeFlags = {
+          DEVELOPER: "👨‍💻",
+          BUGS: "🐛",
+          MANAGEMENT: "👑",
+          PREMIUM: "👑",
+          SUPPORTER: "👨‍🔧",
+          TEAM: "👨‍👩‍👧‍👦",
+          BOOSTER: "🚀",
+          PARTNER: "🤝",
+          VOTER: "🗳️",
+          SUPPORT: "🔧",
+          MODERATOR: "👮‍♂️",
+          DESIGNER: "🎨",
+          MARKETING: "📈"
+        };
+        const flags = {
+          ActiveDeveloper: "👨‍💻・Active Developer",
+          BugHunterLevel1: "🐛・Discord Bug Hunter",
+          BugHunterLevel2: "🐛・Discord Bug Hunter",
+          CertifiedModerator: "👮‍♂️・Certified Moderator",
+          HypeSquadOnlineHouse1: "🏠・House Bravery Member",
+          HypeSquadOnlineHouse2: "🏠・House Brilliance Member",
+          HypeSquadOnlineHouse3: "🏠・House Balance Member",
+          HypeSquadEvents: "🏠・HypeSquad Events",
+          PremiumEarlySupporter: "👑・Early Supporter",
+          Partner: "👑・Partner",
+          Quarantined: "🔒・Quarantined", // Không chắc chắn cái này còn hoạt động :))
+          Spammer: "🔒・Spammer", // Không chắc chắn cái này còn hoạt động :)
+          Staff: "👨‍💼・Discord Staff",
+          TeamPseudoUser: "👨‍💼・Discord Team",
+          VerifiedBot: "🤖・Verified Bot",
+          VerifiedDeveloper: "👨‍💻・(early)Verified Bot Developer",
+        };
+        const roles = member.roles.cache.sort((a, b) => b.position - a.position).map(role => role.toString()).slice(0, -1);
+        const userFlags = member.user.flags ? member.user.flags.toArray() : [];
+        return interaction.reply({ embeds: [new EmbedBuilder()
+           .setTitle("Xem thông tin người dùng")
+           .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 1024 }))
+           .setDescription(`Thông tin về ${member.user.username}`)
+           .setImage(member.user.bannerURL({ dynamic: true, size: 1024 }))
+           .addFields([
+             { name: "tên thành viên", value: `${member.user.username}`, inline: true },
+             { name: "Số định danh", value: `${member.user.discriminator}`, inline: true },
+             { name: "Biệt danh", value: `${member.nickname || 'không có biệt danh'}`, inline: true },
+             { name: "Id", value: `${member.user.id}`, inline: true },
+             { name: "Huy hiệu của thành viên", value: `${userFlags.length ? userFlags.map(flag => flags[flag]).join(', ') : 'Không có'}`, inline: true },
+             { name: "Ngày tham gia discord", value: `<t:${Math.round(member.user.createdTimestamp / 1000)}>`, inline: true },
+             { name: "Ngày tham gia server", value: `<t:${Math.round(member.joinedAt / 1000)}>`, inline: true },
+             { name: `Roles [${roles.length}]`, value: `${roles.length ? roles.join(', ') : 'Không có'}`, inline: false }
+           ])                     
+        ]});
       } else if(interaction.options.getSubcommand() === "permissions") {
         const Member = interaction.options.getMember("user")
         const USER = interaction.options.getUser("user")
