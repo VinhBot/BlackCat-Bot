@@ -1,4 +1,3 @@
-const { AudioPlayerStatus, joinVoiceChannel, createAudioResource, createAudioPlayer } = require("@discordjs/voice");
 const { ApplicationCommandOptionType } = require("discord.js");
 module.exports = {
   name: "voice", // Tên lệnh 
@@ -16,8 +15,10 @@ module.exports = {
         type: ApplicationCommandOptionType.String,
         required: true, 
         choices: [
-          { name: "70 tuổi", value: "1" },
-          { name: "Đệt mẹ cuộc đời", value: "2" },
+          { name: "70 tuổi", value: "70tuoi" },
+          { name: "Fbi open up", value: "fbi" },
+          { name: "Yeet", value: "yeet" },
+          { name: "Nhạc khiêng hòm", value: "dancememe" },
         ],
       }],
     },{
@@ -29,26 +30,40 @@ module.exports = {
   run: async(client, interaction) => {
    if(interaction.options.getSubcommand() === "sounds") {
      const toggle = interaction.options.getString("tên_sound");
-     const channel = interaction.member.voice.channel;
-		 if(!channel) return interaction.reply({ content: "Bạn chưa tham gia kênh voice channel" });
-     const player = createAudioPlayer();
-		 const connection = joinVoiceChannel({
-        channelId: channel.id,
-			  guildId: interaction.guild.id,
-		  	adapterCreator: interaction.guild.voiceAdapterCreator,
-		 });
-     connection.subscribe(player);
-		 player.on(AudioPlayerStatus.Idle, () => {
-			connection.destroy();
-		 });
-     if(toggle === "1") {
-        player.play(createAudioResource(`${process.cwd()}/Assets/Sounds/70tuoi.mp3`));
-        interaction.reply({ content: "đang chạy sounds 70 tuổi" });
-     } else if(toggle === "2") {
-        interaction.reply({ content: "chỉ có 70 tuổi mới có sounds thôi khà khà" });
+     let response;
+     if(toggle === "70tuoi") {
+        PlaySound(interaction, `${process.cwd()}/Assets/Sounds/70tuoi.mp3`);
+        response = "đang chạy sounds 70 tuổi";
+     } else if(toggle === "fbi") {
+        PlaySound(interaction, "https://www.myinstants.com/media/sounds/fbi-open-up-sfx.mp3");
+        response = "Đang phát fbi open up";
+     } else if(toggle === "dancememe") {
+        PlaySound(interaction, "https://www.myinstants.com/media/sounds/y2mate-mp3cut_sRzY6rh.mp3");
+        response = "Đang phát nhạc khiêng hòm"
+     } else if(toggle === "yeet") {
+        PlaySound(interaction, "https://www.myinstants.com/media/sounds/yeet.mp3");
+        response = "Đang phát Yeet";
      };
+     interaction.reply({ content: `🔊 ${response}` });
    } else if(interaction.options.getSubcommand() === "create") {
      interaction.reply({ content: "test create" });
    };
   },
+};
+
+function PlaySound(interaction, url) {
+  const { AudioPlayerStatus, joinVoiceChannel, createAudioResource, createAudioPlayer } = require("@discordjs/voice");
+  const channel = interaction.member.voice.channel;
+	if(!channel) return interaction.reply({ content: "Bạn chưa tham gia kênh voice channel" });
+  const player = createAudioPlayer();
+	const connection = joinVoiceChannel({
+    channelId: channel.id,
+		guildId: interaction.guild.id,
+		adapterCreator: interaction.guild.voiceAdapterCreator,
+	});
+  player.play(createAudioResource(url));
+  connection.subscribe(player);
+  player.on(AudioPlayerStatus.Idle, () => {
+		connection.destroy();
+	});
 };
