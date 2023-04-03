@@ -5,7 +5,7 @@ const config = require("./config.json");
 const client = new Client({
   setLanguage: "vi", // thiết lập ngôn ngữ cho package
   setReply: false, // đặt chế độ reply cho bot
-  setToken: "ODc4ODczNzgwNTk0ODM1NDc2.GarZ9u.g_isR0rPuwTnCe28A2peQ7bxCo8IoulPs_Hfe0", //process.env.token || config.token, // token của bot
+  setToken: process.env.token || config.token, // token của bot
   setDeveloper: config.developer,
 });
 

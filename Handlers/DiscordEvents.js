@@ -8,40 +8,6 @@ const database = new Database("./Assets/Database/defaultDatabase.json", {
 
 module.exports = async(client) => {
   /*========================================================
-  # kiểm tra và thêm data cho user
-  ========================================================*/
-  client.on("ready", () => {
-    const userData = new Database("./Assets/Database/defaultUserData.json", { 
-      databaseInObject: true 
-    });
-    // tìm kiếm và nhập user từ các sv
-    client.users.cache.forEach(async(user) => { 
-       if(!await userData.has(user.id) !== user.bot) {          // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
-         console.log(`Đã tạo database cho: ${user.username}`); // thông báo ra bảng điều khiển
-         setInterval(async function() {
-           await userData.set(user.id, {             // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
-             Name: user.username, // tên
-             Age: "", // tuổi
-             Actors: "", // diễn viên
-             Artists: "", // nghệ sĩ
-             Gender: "", // giới tính
-             Birthday: "", // sinh nhật
-             Color: "", // màu
-             Pets: "", // thú cưng
-             Food: "", // đồ ăn
-             Songs: "", // bài hát
-             Movies: "", // phim
-             Status: "", // trạng thái
-             Aboutme: "", // thông tin
-             Orgin: "", // quê quán
-             Game: "", // game yêu thích
-             Flags: "", // huy hiệu của bot
-           });
-         }, 10000);
-      };
-    });
-  });
-  /*========================================================
   # interactionCreate.js
   ========================================================*/
   client.on("interactionCreate", async(interaction) => {

@@ -10,7 +10,9 @@ module.exports = {
   owner: false, // true để chuyển thành lệnh của chủ bot, false để tắt
   cooldown: 3, // thời gian hồi lệnh
   options: [
-    { 
+    {
+      
+    },{ 
       name: "profile", 
       description: "xem thông tin của bạn hoặc thành viên trong guild", 
       type: ApplicationCommandOptionType.Subcommand, 
@@ -95,7 +97,34 @@ module.exports = {
     },
   ],
   run: async(client, interaction) => {
-     if(interaction.options.getSubcommand() === "add") {
+     if(interaction.options.getSubcommand() === "create") {
+       const checkData = await database.has(interaction.user.id) 
+       if(!checkData) {          // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
+         console.log(`Đã tạo database cho: ${interaction.user.username}`); // thông báo ra bảng điều khiển
+         setInterval(async function() {
+           await database.set(interaction.user.id, {             // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
+             Name: interaction.user.username, // tên
+             Age: "", // tuổi
+             Actors: "", // diễn viên
+             Artists: "", // nghệ sĩ
+             Gender: "", // giới tính
+             Birthday: "", // sinh nhật
+             Color: "", // màu
+             Pets: "", // thú cưng
+             Food: "", // đồ ăn
+             Songs: "", // bài hát
+             Movies: "", // phim
+             Status: "", // trạng thái
+             Aboutme: "", // thông tin
+             Orgin: "", // quê quán
+             Game: "", // game yêu thích
+             Flags: "", // huy hiệu của bot
+           });
+         }, 10000);
+         return interaction.reply({ content: `Đã tạo database cho ${interaction.user.username}` });
+       };
+       if(checkData) return interaction.reply({ content: "Bạn đã có trong hệ thống database" });
+     } else if(interaction.options.getSubcommand() === "add") {
        const data = await database.get(interaction.user.id);
        const actors = interaction.options.getString('diễn_viên');
        const artist = interaction.options.getString('nghệ_sĩ');

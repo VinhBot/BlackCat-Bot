@@ -5,8 +5,6 @@ module.exports = (client) => {
   /*========================================================
   ========================================================*/
   client.on("messageCreate", async(message) => {
-    if(message.content === "ticket") {
-      const ChannelId = "1091778868442050632";
-    };
+    
   });
 };
