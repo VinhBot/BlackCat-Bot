@@ -39,6 +39,44 @@ module.exports = async(client) => {
     };
   });
   /*========================================================
+  # AutoCreate Voice 
+  ========================================================*/
+  client.on("voiceStateUpdate", async(oldState, newState) => {
+    const guild = client.guilds.cache.get("1055150050357022840");
+    const ChannelId = guild.channels.cache.get("1055150050357022844");
+    if(newState?.channelId === ChannelId.id) {
+      // Khi người dùng kết nối với kênh trung tâm voice, hãy tạo một kênh voice duy nhất có quyền
+      guild.channels.create({
+        name: `🔊 ${newState?.member?.displayName}`,
+        type: ChannelType.GuildVoice,
+        parent: newState.channel.parent,
+        permissionOverwrites: [{
+          id: client.user.id,
+          allow: ['Connect', 'ViewChannel', 'ManageChannels', 'MoveMembers']
+        },{
+          id: guild.id,
+          allow: ['Connect'],
+        }]
+      }).then((newVoiceChannel) => {
+        // Không cho phép người dùng tham gia lại kênh trung tâm. Điều này ngăn việc tạo nhiều kênh voice
+        ChannelId.permissionOverwrites.edit(newState?.member, {
+          Connect: false
+        });
+        // Chuyển người dùng sang kênh voice mới
+        newState.member.voice.setChannel(newVoiceChannel);
+      });
+    } else if(newState?.channelId === null) {
+      // Tìm nạp và lọc các kênh voice để xem có ai trong đó không
+      const fetchedChannels = guild.channels.cache.filter(channel => channel.type === ChannelType.GuildVoice && channel.id !== ChannelId.id && channel.members.size < 1);
+      // Xóa tất cả các kênh voice đã lọc
+      for (const channel of fetchedChannels.values()) {
+        channel.delete();
+      };
+      // Cho phép người dùng tham gia lại voice
+      ChannelId.permissionOverwrites.delete(newState?.member);
+    };
+  });
+  /*========================================================
   # guildCreate.js 👻
   ========================================================*/
   client.on("guildCreate", async(guild) => {

@@ -87,12 +87,32 @@ module.exports = {
     time += 1.5 * 1000;
 
     setTimeout(function () {
-        msg.edit(`🎁----🦖--------🌵🌵-----------`);
+        msg.edit(`-🌵🌵------🦖--------🌵🌵-----------`);
     }, time);
     time += 1.5 * 1000;
 
     setTimeout(function () {
-        msg.edit(`---🎁--🦖----------🌵🌵---------`);
+        msg.edit(`-🌵🌵---🦖-------------🌵🌵---------`);
+    }, time);
+    time += 1.5 * 1000;
+
+    setTimeout(function () {
+        msg.edit(`🦖\n🌵🌵----------------🌵🌵---------`);
+    }, time);
+    time += 1.5 * 1000;
+
+    setTimeout(function () {
+        msg.edit(`---------🦖--🌵🌵----------------`);
+    }, time);
+    time += 1.5 * 1000;
+
+    setTimeout(function () {
+        msg.edit(`🎁--------🦖--------🌵🌵---------`);
+    }, time);
+    time += 1.5 * 1000;
+
+    setTimeout(function () {
+        msg.edit(`---🎁---🦖----------🌵🌵---------`);
     }, time);
     time += 1.5 * 1000;
 

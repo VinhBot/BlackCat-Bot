@@ -136,13 +136,13 @@
                 "bassboost",
                 "3d"
             ],
-            "MessageId": "1090688967915090041",
-            "ChannelId": "1089119081304707102",
+            "MessageId": "1092828039475367946",
+            "ChannelId": "1092827995003166882",
             "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
-            "WelcomeChannel": "",
-            "GoodbyeChannel": "",
+            "WelcomeChannel": "1089615977559375954",
+            "GoodbyeChannel": "1089615977559375954",
             "AutoAddRoleWel": []
         }
     },

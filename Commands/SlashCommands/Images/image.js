@@ -1,4 +1,5 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
+const { baseURL } = require(`${process.cwd()}/Events/functions`);
 const animals = ["cat", "dog", "panda", "fox", "red_panda", "koala", "bird", "raccoon", "kangaroo"];
 
 module.exports = {
@@ -17,27 +18,13 @@ module.exports = {
         description: "bạn muốn xem con gì", 
         type: ApplicationCommandOptionType.String,
         required: true, 
-        choices: animals.map((animal) => ({ 
-          name: animal, 
-          value: animal 
-        })),
+        choices: animals.map((animal) => ({ name: animal, value: animal })),
       }],
     },
   ],
   run: async(client, interaction) => {
     if(interaction.options.getSubcommand() === "animal") {
       const choice = interaction.options.getString("name");
-      const fetch = require("node-fetch");
-const baseURL = async(url, options) => {
-  const response = options ? await fetch(url, options) : await fetch(url);
-  const json = await response.json();
-  return {
-    success: response.status === 200 ? true : false,
-    status: response.status,
-    data: json,
-  };
-};
-
       const response = await baseURL(`https://some-random-api.ml/animal/${choice}`);
       if(!response.success) return interaction.reply({ content: "Đã sảy ra lỗi vui lòng thử lại sau" });
       await interaction.reply({

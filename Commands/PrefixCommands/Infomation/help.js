@@ -33,7 +33,7 @@ module.exports = {
                 .setThumbnail('https://hzmi.xyz/assets/images/question_mark.png')
                 .addFields({ name: "Tên lệnh:", value: command.name ? `\`${command.name}\`` : "Không có tên cho lệnh này.", inline: true })
                 .addFields({ name: "Sử dụng:", value: command.usage ? `\`${command.usage}\`` : `\`${prefix}${command.name}\``, inline: true })
-                .addFields({ name: 'Lệnh Phụ', value: command.aliases.length ? command.aliases : "không có lệnh phụ.", inline: true })
+                .addFields({ name: 'Lệnh Phụ', value: command.aliases ? command.aliases.join(", ") : "không có lệnh phụ.", inline: true })
                 .addFields({ name: "Mô tả lệnh:", value: command.description ? command.description : "Không có mô tả cho lệnh này.", inline: true })
                 .setFooter({ text: client.user.username, iconURL: client.user.displayAvatarURL({ dynamic: true }) })
                 .setColor("Random")]

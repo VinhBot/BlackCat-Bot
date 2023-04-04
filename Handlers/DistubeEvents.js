@@ -1,4 +1,4 @@
-const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, EmbedBuilder, ChannelType, ButtonStyle } = require("discord.js");
+const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, EmbedBuilder, ChannelType, AttachmentBuilder } = require("discord.js");
 const { SoundCloudPlugin } = require("@distube/soundcloud");
 const { SpotifyPlugin } = require("@distube/spotify");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
@@ -54,24 +54,6 @@ module.exports = (client) => {
     emitAddSongWhenCreatingQueue: false,
     emitNewSongOnly: true,
   });
-  const updateMusicSystem = async(queue, leave = false) => {
-    const defaultData = await database.get(queue.id);
-    const data = defaultData.setDefaultMusicData;
-    if(!queue) return;
-    if(data.ChannelId && data.ChannelId.length > 5) {
-      let guild = client.guilds.cache.get(queue.id);
-      if(!guild) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy Guild!`)
-      let channel = guild.channels.cache.get(data.ChannelId);
-      if(!channel) channel = await guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
-      if(!channel) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy kênh!`)
-      let message = channel.messages.cache.get(data.MessageId);
-      if(!message) message = await channel.messages.fetch(data.MessageId).catch(() => {}) || false;
-      if(!message) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy tin nhắn!`)
-      message.edit(generateQueueEmbed(client, queue.id, leave)).catch((e) => {
-        console.log(e);
-      }).then(() => console.log(`- Đã chỉnh sửa tin nhắn do Tương tác của người dùng`));
-    };
-  };
   function generateQueueEmbed(queue, guildId, leave) {
     const createBar = (total, current, size = 25, line = "▬", slider = "🌟") => {
       if(!total) return;
@@ -100,7 +82,7 @@ module.exports = (client) => {
       new EmbedBuilder()
       .setColor("Random")
       .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-      .setImage(guild.banner ? guild.bannerURL({ size: 4096 }) : "https://i.pinimg.com/originals/72/97/52/729752d06f814ebfbcc9a35215e2b897.jpg")
+      .setImage("https://cdn.discordapp.com/attachments/1092828708798214284/1092828811818709113/music.gif")
     ];
     if(!leave && newQueue && newQueue.songs[0]) {
       embeds[1].setImage(`https://img.youtube.com/vi/${newQueue.songs[0].id}/mqdefault.jpg`)
@@ -181,6 +163,24 @@ module.exports = (client) => {
          new ActionRowBuilder().addComponents([ volumeupbutton, volumedownbutton ]),
       ],
     };                                                                                                           
+  };
+  const updateMusicSystem = async(queue, leave = false) => {
+    const defaultData = await database.get(queue.id);
+    const data = defaultData.setDefaultMusicData;
+    if(!queue) return;
+    if(data.ChannelId && data.ChannelId.length > 5) {
+      let guild = client.guilds.cache.get(queue.id);
+      if(!guild) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy Guild!`)
+      let channel = guild.channels.cache.get(data.ChannelId);
+      if(!channel) channel = await guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
+      if(!channel) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy kênh!`)
+      let message = channel.messages.cache.get(data.MessageId);
+      if(!message) message = await channel.messages.fetch(data.MessageId).catch(() => {}) || false;
+      if(!message) return console.log(`Update-Music-System`.brightCyan + ` - Music System - Không tìm thấy tin nhắn!`)
+      message.edit(generateQueueEmbed(client, queue.id, leave)).catch((e) => {
+        console.log(e);
+      }).then(() => console.log(`- Đã chỉnh sửa tin nhắn do Tương tác của người dùng`));
+    };
   };
   /*========================================================
   # Bắt đầu chạy các evnets

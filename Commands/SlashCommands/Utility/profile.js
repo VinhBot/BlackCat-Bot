@@ -11,7 +11,9 @@ module.exports = {
   cooldown: 3, // thời gian hồi lệnh
   options: [
     {
-      
+      name: "create", 
+      description: "Tạo database cho người dùng", 
+      type: ApplicationCommandOptionType.Subcommand, 
     },{ 
       name: "profile", 
       description: "xem thông tin của bạn hoặc thành viên trong guild", 
