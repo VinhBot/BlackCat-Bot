@@ -144,27 +144,35 @@ module.exports = {
        if(actors) {
          data.Actors = actors;
          response = `Đã cập nhật diễn viên yêu thích là: ${actors}`;
+         await database.set(interaction.user.id, data);
        } else if(artist) {
          data.Artists = artist;
          response = `Đã cập nhật nghệ sĩ yêu thích là: ${artist}`;
+         await database.set(interaction.user.id, data);
        } else if(food) {
          data.Food = food;
          response = `Đã cập nhật đồ ăn yêu thích là: ${food}`;
+         await database.set(interaction.user.id, data);
        } else if(game) {
          data.Game = game;
          response = `Đã cập nhật tựa game yêu thích là: ${game}`;
+         await database.set(interaction.user.id, data);
        } else if(movie) {
          data.Movies = movie;
          response = `Đã cập nhật phim yêu thích là: ${movie}`;
+         await database.set(interaction.user.id, data);
        } else if(pet) {
          data.Pets = pet;
          response = `Đã cập nhật thú cưng yêu thích là: ${pet}`;
+         await database.set(interaction.user.id, data);
        } else if(songs) {
          data.Songs = songs;
          response = `Đã cập nhật bài hát yêu thích là: ${songs}`;
+         await database.set(interaction.user.id, data);
        } else if(age) {
          data.Age = age;
          response = `Đã cập nhật độ tuổi của bạn thành: ${artist}`;
+         await database.set(interaction.user.id, data);
        } else if(birthday) {
          const split = birthday.trim().split("/");
          let [day, month] = split;
@@ -179,9 +187,11 @@ module.exports = {
            data.Birthday = bday;
            response = `Đã cập nhật sinh nhật của bạn thành: ${bday}`;
          };
+         await database.set(interaction.user.id, data);
        } else if(color) {
          data.Color = color;
          response = `Đã cập nhật màu sắc của bạn thành: ${color}`;
+         await database.set(interaction.user.id, data);
        } else if(gender) {
          if(gender === "nam") {
            data.Gender = "Nam";
@@ -194,11 +204,12 @@ module.exports = {
            var reslut = "Khác";
          };
          response = `Đã cập nhật độ tuổi của bạn thành: ${reslut}`;
+         await database.set(interaction.user.id, data);
        } else if(status) {
          data.Status = status;
          response = `Đã cập nhật trạng thái của bạn thành: ${status}`;
+         await database.set(interaction.user.id, data);
        };
-       await database.set(interaction.user.id, data);
        return interaction.reply({ content: `✨ ${response} ` })
      } else if(interaction.options.getSubcommand() === "profile") {
        const user = interaction.options.getUser('user');
