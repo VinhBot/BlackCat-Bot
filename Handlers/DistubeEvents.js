@@ -214,16 +214,13 @@ module.exports = (client) => {
       lastEdited = true;
       setTimeout(() => lastEdited = false, 7000);
       let { member, guild } = i;
-      if(!member.voice.channel) return i.reply({ content: `❌ **Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+      // if(!member.voice.channel) return i.reply({ content: `❌ **Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
       const test = guild.channels.cache.filter(chnl => (chnl.type == ChannelType.GuildVoice)).find(channel => (channel.members.has(client.user.id)));
-      if(test && member.voice.channel.id !== test.id) return interaction.reply({ embeds: [new EmbedBuilder().setDescription(`❌ Tôi đã chơi trong <#${test.id}>`)], ephemeral: true });
+      if(test && member.voice.channel.id !== test?.id) return interaction.reply({ embeds: [new EmbedBuilder().setDescription(`❌ Tôi đã chơi trong <#${test?.id}>`)], ephemeral: true });
       // bỏ qua bài hát
       if(i.customId == `skip`) {
-              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kednh voice mới có thể sử dụng lệnh**` });
-              const queue = distube.getQueue(i.guild.id);
-              if(!queue || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" }).then((i) => {
-                  setTimeout(() => i.interaction.deleteReply(), 3000);
-              }).catch((e) => {});
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
               if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
               if(newQueue.songs.length == 0) {
                   clearInterval(songEditInterval);
@@ -252,12 +249,18 @@ module.exports = (client) => {
                 }).catch((e) => { });
               };
             } else if (i.customId == "stop") {
+                if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+                if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+                if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
                 nowplay.edit({ components: [] });
                 await i.reply({ content: "👌 Đã dừng phát nhạc và rời khỏi kênh voice channel theo yêu cầu" }).then((i) => {
                   setTimeout(() => i.interaction.deleteReply(), 3000);
                 }).catch((e) => {});
                 await distube.voices.leave(i.guild.id);
             } else if(i.customId == "pause") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
               if(newQueue.playing) {
                 await distube.pause(i.guild.id);
                 nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
@@ -280,6 +283,9 @@ module.exports = (client) => {
                 }).catch((e) => {});
               };
             } else if (i.customId == "autoplay") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
               await newQueue.toggleAutoplay()
               if(newQueue.autoplay) {
                 nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {});
@@ -294,6 +300,10 @@ module.exports = (client) => {
                 setTimeout(() => i.interaction.deleteReply(), 3000);
               }).catch((e) => {});
             } else if(i.customId == "shuffle") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               maps.set(`beforeshuffle-${newQueue.id}`, newQueue.songs.map(track => track).slice(1));
               await newQueue.shuffle()
               await i.reply({ embeds: [new EmbedBuilder()
@@ -304,6 +314,10 @@ module.exports = (client) => {
                 setTimeout(() => i.interaction.deleteReply(), 3000);
               }).catch((e) => {});
             } else if(i.customId == "song") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               if(newQueue.repeatMode == 1){
                 await newQueue.setRepeatMode(0);
               } else {
@@ -315,7 +329,11 @@ module.exports = (client) => {
                   .setFooter({ text: `Yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
               nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {});
-            } else if(i.customId == "queue"){
+            } else if(i.customId == "queue") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               if(newQueue.repeatMode == 2) {
                 await newQueue.setRepeatMode(0);
               } else {
@@ -328,6 +346,10 @@ module.exports = (client) => {
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
               nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {});
             } else if(i.customId == "seek"){
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               let seektime = newQueue.currentTime + 10;
               if (seektime >= newQueue.songs[0].duration) seektime = newQueue.songs[0].duration - 1;
               await newQueue.seek(Number(seektime))
@@ -338,7 +360,11 @@ module.exports = (client) => {
                   .setFooter({ text: `yêu cầu bởi: ${member.user.tag}`, iconURL: `${member.user.displayAvatarURL({dynamic: true})}`})]
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
               nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
-            } else if(i.customId == "seek2"){
+            } else if(i.customId == "seek2") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               let seektime = newQueue.currentTime - 10;
               if (seektime < 0) seektime = 0;
               if (seektime >= newQueue.songs[0].duration - newQueue.currentTime) seektime = 0;
@@ -351,6 +377,10 @@ module.exports = (client) => {
               }).then((i) => setTimeout(() => i.interaction.deleteReply(), 3000)).catch((e) => {});
               nowplay.edit(disspace(distube.getQueue(newQueue.id), newQueue.songs[0])).catch((e) => {})
             } else if(i.customId == `lyrics`) {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               try {
                  await i.deferReply();
                  let thumbnail = newQueue.songs.map((song) => song.thumbnail).slice(0, 1).join("\n");
@@ -365,6 +395,10 @@ module.exports = (client) => {
                   i.reply({ content: `Lỗi: ${e}`, ephemeral: true });
               };
             } else if(i.customId == "volumeUp") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               try {
                 const volumeUp = Number(newQueue.volume) + 10;
                 if (volumeUp < 0 || volumeUp > 100) return i.reply({
@@ -378,6 +412,10 @@ module.exports = (client) => {
                 console.log(error);
               };
             } else if(i.customId == "volumeDown") {
+              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+              
               try {
                 const volumeDown = Number(newQueue.volume) - 10;
                 const invalidVolume = new EmbedBuilder().setColor("Random").setDescription(":x: | Không thể giảm âm lượng của bạn nữa nếu tiếp tục giảm bạn sẽ không nghe thấy gì").setTimestamp();
@@ -398,7 +436,7 @@ module.exports = (client) => {
      });
   }).on("finishSong", (queue, song) => {
     return queue.textChannel?.messages?.fetch(PlayerMap.get("currentmsg")).then((msg) => {
-      msg?.edit({ embeds: [new EmbedBuilder()
+      msg.edit({ embeds: [new EmbedBuilder()
             .setAuthor({ name: `${song.name}`, iconURL: "https://cdn.discordapp.com/attachments/883978730261860383/883978741892649000/847032838998196234.png", url: song.url })
             .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
             .setFooter({ text: `💯 ${song.user.tag}\n⛔️ Bài hát đã kết thúc!`, iconURL: song.user.displayAvatarURL({ dynamic: true }) })
@@ -406,9 +444,7 @@ module.exports = (client) => {
        ], components: []}).catch((e) => console.log(e));
     }).catch((e) => console.log(e));
   }).on("finish", async(queue) => {
-    return queue.textChannel?.send({ embeds: [new EmbedBuilder()
-      .setColor("Random").setDescription("Đã phát hết nhạc trong hàng đợi,.. rời khỏi kênh voice")
-    ]}).then((msg) => setTimeout(() => msg.delete(), 10000));
+    return queue.textChannel?.send({ embeds: [new EmbedBuilder().setColor("Random").setDescription("Đã phát hết nhạc trong hàng đợi,.. rời khỏi kênh voice")]}).then((msg) => setTimeout(() => msg.delete(), 10000));
   }).on("addList", async(queue, playlist) => {
       return queue.textChannel?.send({ embeds: [new EmbedBuilder()
         .setTitle("Đã thêm vài hát vào hàng đợi")                                                
@@ -458,7 +494,7 @@ module.exports = (client) => {
           };
           updateMusicSystem(queue, true);
           queue.textChannel?.send({ embeds: [new EmbedBuilder().setColor("Random")
-              .setTitle(`⛔️ HÀNG ĐỢI ĐÃ ĐƯỢC XÓA`)
+              .setTitle(`⛔️`)
               .setDescription(`:headphones: **Hàng đợi đã bị xóa**`)
               .setTimestamp()
           ]}).catch((ex) => {});

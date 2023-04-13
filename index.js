@@ -24,6 +24,7 @@ client.commandHandler({
   setPrefix: config.prefix, // nếu lhi tắt setHandlerMessageCreate: false, thì cái này vô dụng
   setCommandPath: `${process.cwd()}/Commands/PrefixCommands` // set đường dẫn đến commands
 });
+
 // chạy các events bên ngoài
 fs.readdirSync('./Handlers').forEach((BlackCat) => {
   require(`./Handlers/${BlackCat}`)(client);
