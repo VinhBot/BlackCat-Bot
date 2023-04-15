@@ -154,15 +154,16 @@ const GiveawayClass = class {
         prize,
         winnerCount: winners,
         hostedBy: host,
+        // image: "url ảnh",
         thumbnail: "https://i.imgur.com/DJuTuxs.png",
         messages: {
           giveaway: '🎉🎉 **GIVEAWAY** 🎉🎉',
           giveawayEnded: '🎉🎉 **GIVEAWAY ENDED** 🎉🎉',
-          title: '{this.prize}',
+          winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải',
+          title: 'Phần thưởng:\n{this.prize}',
           drawing: 'Kết thúc sau: {timestamp}',
           dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
           inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
-          winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải',
           embedFooter: '{this.winnerCount} người chiến thắng',
           noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
           hostedBy: 'Tổ chức bởi: {this.hostedBy}',
@@ -267,7 +268,7 @@ const GiveawayClass = class {
   };
   // 
   async runModalSetup({ member, channel, guild }, targetCh) {
-    if(!targetCh) return channel.send("Giveaway setup has been cancelled. You did not mention a channel");
+    if(!targetCh) return channel.send("Thiết lập giveaway đã bị hủy. Bạn đã không đề cập đến một kênh");
     if(!targetCh.type === ChannelType.GuildText && !targetCh.permissionsFor(guild.members.me).has(["ViewChannel", "SendMessages", "EmbedLinks"])) return channel.send({
       content: `Thiết lập giveaway đã bị hủy.\ntôi cần quyền admin trong ${targetCh}`
     });
@@ -323,8 +324,7 @@ const GiveawayClass = class {
         return modal.editReply("Thiết lập đã bị hủy. Bạn cần cung cấp userId hợp lệ cho máy chủ");
       };
     };
-    const response = await this.start(member, targetCh, duration, prize, winners, host, allowedRoles); 
-    await modal.editReply(response);
+    await modal.editReply(await this.start(member, targetCh, duration, prize, winners, host, allowedRoles));
   };
   // 
   async runModalEdit(message, messageId) {
