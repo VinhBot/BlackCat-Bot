@@ -7,11 +7,24 @@ const giveawayDB = new Database("./Assets/Database/giveawayDatabase.json", {
 const GiveawaysHandlers = class extends GiveawaysManager {
   constructor(client) {
     super(client, {
+      /*========================================================
+      * @property {string} [storage='./giveaways.json'] Đường dẫn lưu trữ giveaway.
+      * @property {number} [forceUpdateEvery=null] Buộc cập nhật thông báo giveaway trong một khoảng thời gian cụ thể.
+      * @property {number} [endedGiveawaysLifetime=null] Số mili giây sau đó giveaway kết thúc sẽ bị xóa khỏi DB. ⚠ giveaway đã xóa khỏi DB không thể được roll lại nữa!
+      * @property {Object} [default] Các tùy chọn mặc định cho giveaway mới.
+      * @property {boolean} [default.botsCanWin=false] Nếu bot có thể giành được giveaway.
+      * @property {Discord.PermissionResolvable[]} [default.exemptPermissions=[]] Thành viên có bất kỳ quyền nào trong số này sẽ không thể giành được giveaway.
+      * @property {ExemptMembersFunction} [default.exemptMembers] Chức năng lọc thành viên. Nếu giá trị true được trả về, thành viên đó sẽ không thể giành được giveaway.
+      * @property {Discord.ColorResolvable} [default.embedColor='#FF0000'] Màu sắc của giveaway embed khi chúng đang chạy.
+      * @property {Discord.ColorResolvable} [default.embedColorEnd='#000000'] Màu của giveaway được embed khi chúng kết thúc.
+      * @property {Discord.EmojiIdentifierResolvable} [default.reaction='🎁'] Phản ứng khi muốn tham gia giveaway.
+      * @property {LastChanceOptions} [default.lastChance] Các tùy chọn cho hệ thống cơ hội cuối cùng.
+      ========================================================*/
       storage: false, // `${process.cwd()}/Assets/Database/giveawayDatabase.json`, // (Nếu như có hiện tượng bot lag thì mở cái này lên vào giveawayDatabase.json xoá sạch dữ liệu rồi thêm dấu [] vào);
       forceUpdateEvery: null,
       endedGiveawaysLifetime: null,
       default: {
-        botsCanWin: false, // 
+        botsCanWin: false,
         exemptPermissions: [],
         exemptMembers: () => false,
         embedColor: '#FF0000',
@@ -27,7 +40,7 @@ const GiveawaysHandlers = class extends GiveawaysManager {
     });
   };
   /*========================================================
-  # Database 💾
+  # một số events 💾
   ========================================================*/
   // Hàm này được gọi khi người quản lý cần lấy tất cả giveaway được lưu trữ trong cơ sở dữ liệu.
   async getAllGiveaways() {
@@ -121,10 +134,10 @@ module.exports = (client) => {
           .setTile("🎉・Giveaway đã kết thúc")
           .setDescription(`Xin chúc mừng ${member.user.username}! Bạn đã trở thành người chiến thắng!`)
           .addFields(
-            { name: "🎁┆Phần thưởng", value: `${giveaway.prize}`, inline: true },
-            { name: "🥳┆Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
+            { name: "🎁┆ Phần thưởng", value: `${giveaway.prize}`, inline: true },
+            { name: "🥳┆ Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
           )
-       ]}).catch((ex) => {});
+       ]}).catch((ex) => console.log(ex));
      });
   });
   // gởi tin nhắn đến cho thành viên khi react với icon giveway
@@ -133,7 +146,7 @@ module.exports = (client) => {
     member.send({ 
       content: `Yêu cầu của bạn vào giveaway này đã được phê duyệt.`,
       components: [new ActionRowBuilder().addComponents([ ChannelGiveaway ])]
-    }).catch((ex) => {});
+    }).catch((ex) => console.log(ex));
   }); 
   // gởi tin nhắn cho thành viên khi họ out khỏi giveaway 
   giveawayHandler.on('giveawayReactionRemoved', (giveaway, member, reaction) => {
@@ -150,10 +163,10 @@ module.exports = (client) => {
         .setTile("🎉・Giveaway đã kết thúc")
         .setDescription(`Xin chúc mừng ${member.user.username}! Bạn đã trở thành người chiến thắng!`)
         .addFields(
-          { name: "🎁┆Phần thưởng", value: `${giveaway.prize}`, inline: true },
-          { name: "🥳┆Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
+          { name: "🎁┆ Phần thưởng", value: `${giveaway.prize}`, inline: true },
+          { name: "🥳┆ Giveaway", value: `[Bấm vào đây](https://discordapp.com/channels/${giveaway.message.guildId}/${giveaway.message.channelId}/${giveaway.message.id})`, inline: true }
         )
-      ]}).catch((ex) => {});
+      ]}).catch((ex) => console.log(ex));
     });
   });
   // gởi tin nhắm cho thành viên khi giveaway đã kết thúc mà thành viên vẫn react với emojis

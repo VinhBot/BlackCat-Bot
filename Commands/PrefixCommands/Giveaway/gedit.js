@@ -11,7 +11,7 @@ module.exports = {
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
     const giveaway = new GiveawayClass(client);
-    if(!args[1]) return message.reply("Cách sử dụng không chính xác! Vui lòng cung cấp id tin nhắn");
-    return await giveaway.runModalEdit(message, args[1]);
+    if(!args[0]) return message.reply("Cách sử dụng không chính xác! Vui lòng cung cấp id tin nhắn");
+    return await giveaway.runModalEdit(message, args[0]);
   },
 };

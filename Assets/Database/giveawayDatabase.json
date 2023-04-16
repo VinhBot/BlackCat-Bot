@@ -1,11 +1,11 @@
 {
-    "1096773205919813652": {
-        "messageId": "1096773205919813652",
+    "1097101339261161584": {
+        "messageId": "1097101339261161584",
         "channelId": "1055150050357022843",
         "guildId": "1055150050357022840",
-        "startAt": 1681561509163,
-        "endAt": 1681561809163,
-        "ended": true,
+        "startAt": 1681639742388,
+        "endAt": 1681640162388,
+        "ended": false,
         "winnerCount": 1,
         "prize": "test",
         "messages": {
@@ -22,39 +22,7 @@
             "endedAt": "Đã kết thúc",
             "hostedBy": "Tổ chức bởi: {this.hostedBy}"
         },
-        "thumbnail": "https://i.imgur.com/DJuTuxs.png",
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ]
-    },
-    "1096775645725474896": {
-        "messageId": "1096775645725474896",
-        "channelId": "1055150050357022843",
-        "guildId": "1055150050357022840",
-        "startAt": 1681562090923,
-        "endAt": 1681562690923,
-        "ended": true,
-        "winnerCount": 1,
-        "prize": "hdbdbdbsjzjsjsjsjsjsj",
-        "messages": {
-            "giveaway": "🎉🎉 **GIVEAWAY** 🎉🎉",
-            "giveawayEnded": "🎉🎉 **GIVEAWAY ENDED** 🎉🎉",
-            "title": "Phần thưởng:\n{this.prize}",
-            "inviteToParticipate": "Phản ứng với 🎁 để tham gia!",
-            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
-            "drawing": "Kết thúc sau: {timestamp}",
-            "dropMessage": "Hãy là người đầu tiên phản ứng với 🎁!",
-            "embedFooter": "{this.winnerCount} người chiến thắng",
-            "noWinner": "Giveaway bị hủy, không có người tham gia hợp lệ.",
-            "winners": "Người chiến thắng:",
-            "endedAt": "Đã kết thúc",
-            "hostedBy": "Tổ chức bởi: {this.hostedBy}"
-        },
-        "thumbnail": "https://i.imgur.com/DJuTuxs.png",
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ]
+        "thumbnail": "https://imgur.io/4FGhUuk.gif",
+        "hostedBy": "<@788208207465938954>"
     }
 }

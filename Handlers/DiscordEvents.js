@@ -54,8 +54,9 @@ module.exports = async(client) => {
   # AutoCreate Voice 
   ========================================================*/
   client.on("voiceStateUpdate", async(oldState, newState) => {
-    const guild = client.guilds.cache.get("1055150050357022840");
-    const ChannelId = guild.channels.cache.get("1055150050357022844");
+    const channelIdData = await database.get(oldState.guild.id);
+    const guild = client.guilds.cache.get(oldState.guild.id);
+    const ChannelId = guild.channels.cache.get(channelIdData.setDefaultMusicData.ChannelAutoCreateVoice);
     if(newState?.channelId === ChannelId.id) {
       // Khi người dùng kết nối với kênh trung tâm voice, hãy tạo một kênh voice duy nhất có quyền
       guild.channels.create({

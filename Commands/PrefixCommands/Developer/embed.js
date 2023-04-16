@@ -1,5 +1,6 @@
 const { StringSelectMenuBuilder, EmbedBuilder, PermissionsBitField, ActionRowBuilder, ButtonBuilder } = require("discord.js");
 const path = require("node:path");
+
 module.exports = {
   name: path.parse(__filename).name,
   usage: path.parse(__filename).name,
@@ -13,6 +14,7 @@ module.exports = {
     embedCreate(client, message);
   },
 };
+
 function embedCreate(client, message, options = {}) {
     var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
       function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -115,7 +117,7 @@ function embedCreate(client, message, options = {}) {
                     : { text: client.user.username, iconURL: client.user.displayAvatarURL() });
                 if ((_f = options.embed) === null || _f === void 0 ? void 0 : _f.author) {
                     embed.setAuthor(options.embed.author);
-                }
+                };
                 let interaction;
                 if (message.commandId) {
                     interaction = message;
@@ -257,14 +259,15 @@ function embedCreate(client, message, options = {}) {
                                         max: 1
                                     });
                                     authclr.on('collect', (m) => __awaiter(this, void 0, void 0, function* () {
+                                        var _j, _k, _l, _m;
                                         titleclr.stop();
                                         m.delete().catch(() => { });
                                         preview.edit({
                                             content: preview.content,
-                                            embeds: [previewEmbed.setAuthor({
-                                              name: m.content|| " ",
-                                             // iconURL: preview.embeds[0].author?.iconURL	? preview.embeds[0].author?.iconURL	: '',
-												                     // url: preview.embeds[0].author?.url ? preview.embeds[0].author?.url : ''
+                                            embeds: [EmbedBuilder.from(preview.embeds[0]).setAuthor({
+                                              name: m.content,
+                                              iconURL: ((_j = EmbedBuilder.from(preview.embeds[0]).author) === null || _j === void 0 ? void 0 : _j.iconURL) ? (_k = EmbedBuilder.from(preview.embeds[0]).author) === null || _k === void 0 ? void 0 : _k.iconURL : null,
+                                              url: ((_l = EmbedBuilder.from(preview.embeds[0]).author) === null || _l === void 0 ? void 0 : _l.url) ? (_m = EmbedBuilder.from(preview.embeds[0]).author) === null || _m === void 0 ? void 0 : _m.url : null
                                             })]
                                         }).catch(() => { });
                                     }));
@@ -282,7 +285,7 @@ function embedCreate(client, message, options = {}) {
                                     });
                                     authclr.on('collect', (m) => __awaiter(this, void 0, void 0, function* () {
                                       try {
-                                        var _o;
+                                        var _o, _p, _q, _r, _s, _t;
                                         const isthumb = m.content.match(/^http[^\?]*.(jpg|jpeg|gif|png|tiff|bmp)(\?(.*))?$/gim) != null || ((_o = m.attachments.first()) === null || _o === void 0 ? void 0 : _o.url) || '';
                                         if(!isthumb) return button.followUp({
                                           content: 'Đây không phải là URL hình ảnh/Đính kèm hình ảnh. Vui lòng cung cấp một hình ảnh hợp lệ.',
@@ -292,13 +295,18 @@ function embedCreate(client, message, options = {}) {
                                         m.delete().catch(() => { });
                                         preview.edit({
                                             content: preview.content,
-                                            embeds: [previewEmbed.setAuthor({
-                                              name: "",//preview.embeds[0].author?.name ? preview.embeds[0].author?.name : '',                                                    
-                                              iconURL: m.content || "", 
-                                              url: ""// preview.embeds[0].author?.url ? preview.embeds[0].author?.url : ''
+                                            embeds: [EmbedBuilder.from(preview.embeds[0]).setAuthor({
+                                                    name: ((_p = EmbedBuilder.from(preview.embeds[0]).author) === null || _p === void 0 ? void 0 : _p.name)
+                                                        ? (_q = EmbedBuilder.from(preview.embeds[0]).author) === null || _q === void 0 ? void 0 : _q.name
+                                                        : '',
+                                                    iconURL: m.content || ((_r = m.attachments.first()) === null || _r === void 0 ? void 0 : _r.url) || '',
+                                                    url: ((_s = EmbedBuilder.from(preview.embeds[0]).author) === null || _s === void 0 ? void 0 : _s.url)
+                                                        ? (_t = EmbedBuilder.from(preview.embeds[0]).author) === null || _t === void 0 ? void 0 : _t.url
+                                                        : ''
                                             })]
                                         }).catch(() => console.log("lỗi author-icon"));
                                       } catch(e) {
+                                        console.log(e)
                                         preview.reply({ content: "Đã sảy ra lỗi vui lòng quay lại sau" });
                                       };
                                     }));
@@ -326,9 +334,13 @@ function embedCreate(client, message, options = {}) {
                                             m.delete().catch(() => { });
                                             preview.edit({
                                                 content: preview.content,
-                                                embeds: [previewEmbed.setAuthor({
-                                                        name: preview.embeds[0].author?.name ? preview.embeds[0].author?.name : '',                                                    
-                                                        // iconURL: ((_w = preview.embeds[0].author) === null || _w === void 0 ? void 0 : _w.iconURL) ? (_x = preview.embeds[0].author) === null || _x === void 0 ? void 0 : _x.iconURL : '',
+                                                embeds: [EmbedBuilder.from(preview.embeds[0]).setAuthor({
+                                                        name: ((_u = EmbedBuilder.from(preview.embeds[0]).author) === null || _u === void 0 ? void 0 : _u.name)
+                                                            ? (_v = EmbedBuilder.from(preview.embeds[0]).author) === null || _v === void 0 ? void 0 : _v.name
+                                                            : '',
+                                                        iconURL: ((_w = EmbedBuilder.from(preview.embeds[0]).author) === null || _w === void 0 ? void 0 : _w.iconURL)
+                                                            ? (_x = EmbedBuilder.from(preview.embeds[0]).author) === null || _x === void 0 ? void 0 : _x.iconURL
+                                                            : '',
                                                         url: m.content || ''
                                                     })
                                                 ]

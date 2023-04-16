@@ -23,7 +23,8 @@ const setupDatabase = async(guild) => {
         DefaultFilters: ['bassboost', '3d'],   // 4: cài đặt filters mặc định cho guils
         MessageId: "",                         // 5: thiết lập id tin nhắn 
         ChannelId: "",                         // 6: thiết lập channelid
-        Djroles: [],                           // 7: thiết lập role chuyên nhạc                  
+        ChannelAutoCreateVoice: "",            // 7: thiết lập id channel voice 
+        Djroles: [],                           // 8: thiết lập role chuyên nhạc                  
       },
       setDefaultWelcomeGoodbyeData: {          // thiết lập welcome, googbye, 
         WelcomeChannel: "",
@@ -155,7 +156,7 @@ const GiveawayClass = class {
         winnerCount: winners,
         hostedBy: host,
         // image: "url ảnh",
-        thumbnail: "https://i.imgur.com/DJuTuxs.png",
+        thumbnail: "https://imgur.io/4FGhUuk.gif",
         messages: {
           giveaway: '🎉🎉 **GIVEAWAY** 🎉🎉',
           giveawayEnded: '🎉🎉 **GIVEAWAY ENDED** 🎉🎉',
@@ -171,7 +172,7 @@ const GiveawayClass = class {
           endedAt: 'Đã kết thúc'
         },
       };
-      if (allowedRoles.length > 0) {
+      if(allowedRoles.length > 0) {
         options.exemptMembers = (member) => !member.roles.cache.find((role) => allowedRoles.includes(role.id));
       };
       await this.client.giveawaysManager.start(giveawayChannel, options);
@@ -181,92 +182,7 @@ const GiveawayClass = class {
       return `Đã xảy ra lỗi khi bắt đầu giveaway: ${error}`;
     };
   };
-  // 
-  async pause(member, messageId) {
-    if (!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
-    if (!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để quản lý giveaway.";
-    const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
-    if (!giveaway) return `Không thể tìm thấy quà tặng cho messageId: ${messageId}`;
-    if (giveaway.pauseOptions.isPaused) return "Giveaway này đã được tạm dừng.";
-    try {
-      await giveaway.pause();
-      return "Thành công! Giveaway đã tạm dừng!";
-    } catch (error) {
-      return `Đã xảy ra lỗi khi tạm dừng giveaway: ${error.message}`;
-    };
-  };
-  // 
-  async resume(member, messageId) {
-    if (!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
-    if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để quản lý giveaway.";
-    const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
-    if (!giveaway) return `Không thể tìm thấy giveaway cho messageId: ${messageId}`;
-    if (!giveaway.pauseOptions.isPaused) return "Giveaway này không được tạm dừng.";
-    try {
-      await giveaway.unpause();
-      return "Thành công! Giveaway đã hủy tạm dừng!";
-    } catch(error) {
-      return `Đã xảy ra lỗi khi hủy tạm dừng giveaway: ${error.message}`;
-    };
-  };
-  //
-  async reroll(member, messageId) {
-    if(!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
-    if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để bắt đầu giveaways.";
-    const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
-    if(!giveaway) return `Không thể tìm thấy giveaway cho messageId: ${messageId}`;
-    if(!giveaway.ended) return "Giveaway vẫn chưa kết thúc.";
-    try {
-      await giveaway.reroll();
-      return "Giveaway rerolled!";
-    } catch (error) {
-      return `Đã xảy ra lỗi khi bắt đầu lại giveaway: ${error.message}`;
-    }
-  };
-  //
-  async list(member) {
-    if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để quản lý quà tặng.";
-    const giveaways = this.client.giveawaysManager.giveaways.filter((g) => g.guildId === member.guild.id && g.ended === false);
-    if(giveaways.length === 0) return "Không có giveaway nào chạy trong máy chủ này.";
-    const description = giveaways.map((g, i) => `${i + 1}. ${g.prize} in <#${g.channelId}>`).join("\n");
-    try {
-      return { embeds: [{ description, color: "Random" }] };
-    } catch (error) {
-      return `Đã xảy ra lỗi khi liệt kê giveaway: ${error.message}`;
-    }
-  };
-  // 
-  async end(member, messageId) {
-    if (!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
-    if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để bắt đầu tặng quà.";
-    const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
-    if(!giveaway) return `Không thể tìm thấy giveaway cho messageId: ${messageId}`;
-    if(giveaway.ended) return "Giveaway đã kết thúc.";
-    try {
-      await giveaway.end();
-      return "Thành công! Giveaway đã kết thúc!";
-    } catch (error) {
-      return `Đã xảy ra lỗi khi kết thúc giveaway: ${error.message}`;
-    };
-  };
-  //
-  async edit(member, messageId, addDuration, newPrize, newWinnerCount) {
-    if (!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
-    if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để bắt đầu giveaway.";
-    const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
-    if(!giveaway) return `Không thể tìm thấy giveaway cho messageId: ${messageId}`;
-    try {
-      await this.client.giveawaysManager.edit(messageId, {
-        addTime: addDuration || 0,
-        newPrize: newPrize || giveaway.prize,
-        newWinnerCount: newWinnerCount || giveaway.winnerCount,
-      });
-      return `Đã cập nhật thành công giveaway!`;
-    } catch (error) {
-      return `Đã xảy ra lỗi khi cập nhật giveaway: ${error.message}`;
-    };
-  };
-  // 
+  ///
   async runModalSetup({ member, channel, guild }, targetCh) {
     if(!targetCh) return channel.send("Thiết lập giveaway đã bị hủy. Bạn đã không đề cập đến một kênh");
     if(!targetCh.type === ChannelType.GuildText && !targetCh.permissionsFor(guild.members.me).has(["ViewChannel", "SendMessages", "EmbedLinks"])) return channel.send({
@@ -356,7 +272,7 @@ const GiveawayClass = class {
     }).catch((ex) => {});
     if(!modal) return sentMsg.edit({ content: "Không nhận được phản hồi, hủy cập nhật", components: [] });
     sentMsg.delete().catch(() => {});
-    await modal.reply("Updating the giveaway...");
+    await modal.reply("Cập nhật giveaway...");
     // thời gian
     const addDuration = ems(modal.fields.getTextInputValue("duration"));
     if(isNaN(addDuration)) return modal.editReply("Cập nhật đã bị hủy bỏ. Bạn đã không chỉ định thời lượng thêm hợp lệ");
@@ -365,7 +281,23 @@ const GiveawayClass = class {
     // số người chiến thắng
     const newWinnerCount = parseInt(modal.fields.getTextInputValue("winners"));
     if(isNaN(newWinnerCount)) return modal.editReply("Cập nhật đã bị hủy bỏ. Bạn đã không chỉ định số lượng người chiến thắng hợp lệ");
-    const response = await this.edit(message.member, messageId, addDuration, newPrize, newWinnerCount);
+    const edit = async(member, messageId, addDuration, newPrize, newWinnerCount) => {
+      if (!messageId) return "Bạn phải cung cấp id tin nhắn hợp lệ.";
+      if(!member.permissions.has("ManageMessages")) return "Bạn cần có quyền quản lý tin nhắn để bắt đầu giveaway.";
+      const giveaway = this.client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
+      if(!giveaway) return `Không thể tìm thấy giveaway cho messageId: ${messageId}`;
+      try {
+        await this.client.giveawaysManager.edit(messageId, {
+          addTime: addDuration || 0,
+          newPrize: newPrize || giveaway.prize,
+          newWinnerCount: newWinnerCount || giveaway.winnerCount,
+        });
+        return `Đã cập nhật thành công giveaway!`;
+      } catch (error) {
+        return `Đã xảy ra lỗi khi cập nhật giveaway: ${error.message}`;
+      };
+    };
+    const response = await edit(message.member, messageId, addDuration, newPrize, newWinnerCount);
     await modal.editReply(response);
   };
 };

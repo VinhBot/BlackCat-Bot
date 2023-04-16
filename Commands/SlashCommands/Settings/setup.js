@@ -83,6 +83,16 @@ module.exports = {
           { name: "Tắt", value: "2" }
         ],
       }],
+    },{ 
+      name: "create_voice", 
+      description: "Thiết lập tự động tạo voice dành cho guilds", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [{
+        name: "channel", 
+        description: "kênh voice bạn muốn thiết lập", 
+        type: ApplicationCommandOptionType.Channel,
+        required: true
+      }],
     },
   ],
   run: async(client, interaction) => {
@@ -126,6 +136,11 @@ module.exports = {
        };
        await database.set(interaction.guild.id, guildData);
        return interaction.reply({ content: `Đã thiết lập chế độ autoplay cho guilds thành: ${settings}` });
+    } else if(interaction.options.getSubcommand() === "create_voice") {
+      const voiceChannel = interaction.options.getChannel("channel");
+      guildData.setDefaultMusicData.ChannelAutoCreateVoice = voiceChannel.id;
+      await database.set(interaction.guild.id, guildData);
+      return interaction.reply({ content: `Đã thiết lập thành công voiceChannel` });
     } else if(interaction.options.getSubcommand() === "music") {
       var Emojis = [`0️⃣`, `1️⃣`, `2️⃣`, `3️⃣`, `4️⃣`, `5️⃣`, `6️⃣`, `7️⃣`, `8️⃣`, `9️⃣`, `🔟`, `🟥`,`🟧`, `🟨`, `🟩`, `🟦`, `🟪`, `🟫`];
       let channel = interaction.options.getChannel("channel");
