@@ -12,7 +12,7 @@ module.exports = {
   run: async(client, message, args, prefix) => {
     const VoiceChannel = message.member.voice.channel;
     if(!VoiceChannel) return message.reply({ content: "Bạn chưa tham gia kênh voice" });
-    let link;
+    let link = "https://open.spotify.com/playlist/2kLGCKLDSXu7d2VvApmiWg";
     if(args[0]) {
       if(args[0].toLowerCase().startsWith("lofi")) {
         link = "https://open.spotify.com/playlist/2kLGCKLDSXu7d2VvApmiWg";

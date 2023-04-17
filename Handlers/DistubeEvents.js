@@ -186,6 +186,7 @@ module.exports = (client) => {
   # Bắt đầu chạy các evnets
   ========================================================*/
   client.distube = distube;
+  client.maps = maps;
   distube.on("playSong", async(queue, track) => {
     const defaultData = await database.get(queue.id);
     var newQueue = distube.getQueue(queue.id);

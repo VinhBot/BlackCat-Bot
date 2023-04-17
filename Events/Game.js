@@ -8,6 +8,9 @@ function disableButtons(components) {
   };
   return components;
 };
+/*========================================================
+# Rps Game
+========================================================*/
 const RPSGame = class {
   constructor(options = {}) {
       // cái này sẽ được sử dụng khi trong commands không có các giá trị đối 
@@ -209,7 +212,100 @@ const RPSGame = class {
       });
   };
 };
-
+/*========================================================
+# Slot
+========================================================*/
+const Slots = class {
+  constructor(client, options = {}) {
+    if(!options.isSlashGame) options.isSlashGame = false;
+    if(!options.message) throw new TypeError('NO_MESSAGE: Không có tùy chọn tin nhắn nào được cung cấp.');
+    if(!options.embed) options.embed = {};
+    if(!options.embed.title) options.embed.title = 'Slot Machine';
+    if(!options.embed.color) options.embed.color = '#5865F2';
+    if(!options.slots) options.slots = ['🍇', '🍊', '🍋', '🍌'];
+    if(!Array.isArray(options.slots)) throw new TypeError('INVALID_SLOTS: tùy chọn vị trí phải là một mảng.');
+    this.client = client;
+    this.options = options;
+    this.message = options.message;
+    this.slot1 = this.slot2 = this.slot3 = 0;
+    this.slots = options.slots;
+    this.result = null;
+  }
+  // 
+  getBoardContent(showResult) {
+    let board = '```\n-------------------\n';
+    board += `${this.wrap(this.slot1, false)}  :  ${this.wrap(this.slot2, false)}  :  ${this.wrap(this.slot3, false)}\n\n`;
+    board += `${this.slots[this.slot1]}  :  ${this.slots[this.slot2]}  :  ${this.slots[this.slot3]} <\n\n`;
+    board += `${this.wrap(this.slot1, true)}  :  ${this.wrap(this.slot2, true)}  :  ${this.wrap(this.slot3, true)}\n`;
+    board += '-------------------\n';
+    if(showResult) {
+      if(this.slot1 === this.slot2 && this.slot1 === this.slot3) {
+        this.client.cs.addMoney({
+          user: this.message.user || this.message.author, // mention
+          amount: 30000,
+          wheretoPutMoney: "wallet"
+        });
+        board += `| : :   "Nổ hũ"   : : |`;
+      } else {
+        this.client.cs.removeMoney({
+          user: this.message.user || this.message.author,
+          amount: 5000,
+          wheretoPutMoney: "wallet",
+        });
+        board += `| : :   "Thua"   : : |`;
+      };
+    };
+    return (board + '```');
+  }
+  // trả về tin nhắn
+  async sendMessage(content) {
+    if(this.options.isSlashGame) {
+      return await this.message.editReply(content);
+    } else return await this.message.channel.send(content);
+  }
+  // bắt đầu chơi game
+  slotMachine() {
+    this.slot1 = Math.floor(Math.random() * this.slots.length);
+    this.slot2 = Math.floor(Math.random() * this.slots.length);
+    this.slot3 = Math.floor(Math.random() * this.slots.length);
+  }
+  async startGame() {
+    if(this.options.isSlashGame || !this.message.author) {
+      if (!this.message.deferred) await this.message.deferReply().catch(e => {});
+      this.message.author = this.message.user;
+      this.options.isSlashGame = true;
+    };
+    this.slotMachine();
+    const embed = new EmbedBuilder()
+    .setColor(this.options.embed.color)
+    .setTitle(this.options.embed.title)
+    .setDescription(this.getBoardContent())
+    .setFooter({ text: this.message.author.tag, iconURL: this.message.author.displayAvatarURL({ dynamic: true }) })
+    const msg = await this.sendMessage({ embeds: [embed], content: "" });
+    setTimeout(async () => {
+      this.slotMachine();
+      embed.setDescription(this.getBoardContent());
+      this.slotMachine();
+      await msg.edit({ embeds: [embed], content: "" });
+      setTimeout(() => {
+        return msg.edit({ 
+          content: `${(this.slot1 === this.slot2 && this.slot1 === this.slot3) ? "Bạn đã thắng được 30k tiền" : "Bạn đã thua 5k tiền"}`,
+          embeds: [new EmbedBuilder()
+          .setColor(this.options.embed.color)
+          .setTitle(this.options.embed.title)
+          .setDescription(this.getBoardContent(true))
+          .setFooter({ text: this.message.author.tag, iconURL: this.message.author.displayAvatarURL({ dynamic: true }) })]
+        });
+      }, 2000);
+    }, 2000);
+  }
+  wrap(s, add) {
+    if (add) return (s+1 > this.slots.length-1) ? this.slots[0] : this.slots[s+1];
+    return (s-1 < 0) ? this.slots[this.slots.length-1] : this.slots[s-1];
+  }
+};
+/*========================================================
+========================================================*/
 module.exports = {
-  RPSGame
+  RPSGame, Slots
 };

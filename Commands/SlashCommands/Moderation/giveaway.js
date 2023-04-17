@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
 const { GiveawayClass } = require(`${process.cwd()}/Events/functions`)
-const ems = require("enhanced-ms");
+const ms = require("enhanced-ms");
 
 module.exports = {
   name: "giveaway", // Tên lệnh 
@@ -145,7 +145,12 @@ module.exports = {
       const giveaway = client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === interaction.guild.id);
       if(!giveaway) return interaction.reply(`Không thể tìm thấy giveaway cho messageId: ${messageId}`);
       if(!giveaway.ended) return interaction.reply("Giveaway vẫn chưa kết thúc.");
-      giveaway.reroll().then(() => {
+      giveaway.reroll({
+        messages: {
+          congrat: ':tada: Người chiến thắng mới: {winners}! Chúc mừng bạn đã chiến thắng **{this.prize}**!\n{this.messageURL}',
+          error: 'Không có sự tham gia hợp lệ, không thể chọn người chiến thắng mới!'
+        }
+      }).then(() => {
         return interaction.reply('Thành công! Giveaway đã được bắt đầu lại!').then(() => {
           setTimeout(() => interaction.deleteReply(), 5000);
         });
@@ -163,7 +168,7 @@ module.exports = {
       });
     } else if(subCommands === "edit") {
       const messageId = interaction.options.getString("message_id");
-      const addDurationMs = ems(interaction.options.getString("add_duration"));
+      const addDurationMs = ms(interaction.options.getString("add_duration"));
       if(!addDurationMs) return interaction.followUp("Không phải là một khoảng thời gian hợp lệ");
       const newPrize = interaction.options.getString("new_prize");
       const newWinnerCount = interaction.options.getInteger("new_winners");

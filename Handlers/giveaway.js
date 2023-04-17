@@ -4,6 +4,36 @@ const { Database } = require("st.db");
 const giveawayDB = new Database("./Assets/Database/giveawayDatabase.json", { 
   databaseInObject: true 
 });
+
+const giveaway = {
+  thumbnail: "https://imgur.io/4FGhUuk.gif",
+  // image: "",
+  messages: {
+    title: 'Phần thưởng:\n{this.prize}',
+    drawing: 'Kết thúc sau: {timestamp}',
+    dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
+    inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
+    embedFooter: '{this.winnerCount} người chiến thắng',
+    noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
+    hostedBy: 'Tổ chức bởi: {this.hostedBy}',
+    winners: 'Người chiến thắng:',
+    endedAt: 'Đã kết thúc'
+  },
+  lastChance: { // Hệ thống cơ hội cuối cùng 
+    enabled: true, // nếu hệ thống cơ hội cuối cùng được bật.
+    content: '⚠️ **CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA!** ⚠️', // Văn bản embed
+    threshold: 10000, // số mili giây trước khi giveaways kết thúc.
+    embedColor: 'Random' // màu của embed.
+  },
+  pauseOptions: {
+    isPaused: false, // nếu embed bị tạm dừng.
+    content: '⚠️ **GIVEAWAY NÀY ĐÃ TẠM DỪNG!** ⚠️', // văn bản embed
+    unpauseAfter: null, // số mili giây hoặc dấu thời gian tính bằng mili giây, sau đó giveaway sẽ tự động bỏ tạm dừng.
+    embedColor: 'Random', // màu embed
+    infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
+  }
+};
+
 const GiveawaysHandlers = class extends GiveawaysManager {
   constructor(client) {
     super(client, {
@@ -15,10 +45,9 @@ const GiveawaysHandlers = class extends GiveawaysManager {
       * @property {boolean} [default.botsCanWin=false] Nếu bot có thể giành được giveaway.
       * @property {Discord.PermissionResolvable[]} [default.exemptPermissions=[]] Thành viên có bất kỳ quyền nào trong số này sẽ không thể giành được giveaway.
       * @property {ExemptMembersFunction} [default.exemptMembers] Chức năng lọc thành viên. Nếu giá trị true được trả về, thành viên đó sẽ không thể giành được giveaway.
-      * @property {Discord.ColorResolvable} [default.embedColor='#FF0000'] Màu sắc của giveaway embed khi chúng đang chạy.
+      * @property {Discord.ColorResolvable} [default.embedColor='#FF0000'] Màu sắc của giveaway embed khi đang chạy.
       * @property {Discord.ColorResolvable} [default.embedColorEnd='#000000'] Màu của giveaway được embed khi chúng kết thúc.
       * @property {Discord.EmojiIdentifierResolvable} [default.reaction='🎁'] Phản ứng khi muốn tham gia giveaway.
-      * @property {LastChanceOptions} [default.lastChance] Các tùy chọn cho hệ thống cơ hội cuối cùng.
       ========================================================*/
       storage: false, // `${process.cwd()}/Assets/Database/giveawayDatabase.json`, // (Nếu như có hiện tượng bot lag thì mở cái này lên vào giveawayDatabase.json xoá sạch dữ liệu rồi thêm dấu [] vào);
       forceUpdateEvery: null,
@@ -27,16 +56,10 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         botsCanWin: false,
         exemptPermissions: [],
         exemptMembers: () => false,
-        embedColor: '#FF0000',
-        embedColorEnd: '#000000',
-        reaction: '<a:hehehe:1091770710915022858>',
-        lastChance: {
-            enabled: false,
-            content: '⚠️ **CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA !** ⚠️',
-            threshold: 5000,
-            embedColor: '#FF0000'
-        }
-      }
+        embedColor: 'Yellow',
+        embedColorEnd: 'Red',
+        reaction: '<a:hehehe:1091770710915022858>'
+      },
     });
   };
   /*========================================================
@@ -53,73 +76,73 @@ const GiveawaysHandlers = class extends GiveawaysManager {
     giveawayDB.set(messageId, giveawayData);
     // Đừng quên trả lại một cái gì đó!
     return true;
-  }
+  };
   // Hàm này được gọi khi cần chỉnh sửa giveaway trong cơ sở dữ liệu.
   async editGiveaway(messageId, giveawayData) {
     // Thay thế giveaway chưa chỉnh sửa bằng giveaway đã chỉnh sửa
     giveawayDB.set(messageId, giveawayData);
     // Đừng quên trả lại một cái gì đó!
     return true;
-  }
+  };
   // Hàm này được gọi khi cần xóa giveaway khỏi cơ sở dữ liệu.
   async deleteGiveaway(messageId) {
     // Xóa giveaway khỏi cơ sở dữ liệu
     giveawayDB.delete(messageId);
     // Đừng quên trả lại một cái gì đó!
     return true;
-  }
+  };
   /*========================================================
   # Tạo embed được hiển thị khi giveaway đang chạy (với thời gian còn lại)
   # @param {boolean} [lastChanceEnabled=false] Có hay không bao gồm văn bản cơ hội cuối cùng
   ========================================================*/
-  generateMainEmbed(giveaway, lastChanceEnabled = false) {
+  generateMainEmbed(giveaways, lastChanceEnabled = false) {
     const embed = new EmbedBuilder()
-    embed.setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaway.prize);
-    embed.setColor(giveaway.isDrop ? giveaway.embedColor : giveaway.pauseOptions.isPaused && giveaway.pauseOptions.embedColor ? giveaway.pauseOptions.embedColor : lastChanceEnabled ? giveaway.lastChance.embedColor : giveaway.embedColor );
+    embed.setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize);
+    embed.setColor(giveaways.isDrop ? giveaways.embedColor : giveaway.pauseOptions.isPaused && giveaway.pauseOptions.embedColor ? giveaway.pauseOptions.embedColor : lastChanceEnabled ? giveaway.lastChance.embedColor : giveaways.embedColor);
     embed.setFooter({ text: giveaway.messages.embedFooter.text ?? (typeof giveaway.messages.embedFooter === 'string' ? giveaway.messages.embedFooter : ''), iconURL: giveaway.messages.embedFooter.iconURL });
-    embed.setDescription(giveaway.isDrop ? giveaway.messages.dropMessage : (giveaway.pauseOptions.isPaused ? giveaway.pauseOptions.content + '\n\n' : lastChanceEnabled ? giveaway.lastChance.content + '\n\n' : '') + giveaway.messages.inviteToParticipate + '\n' + giveaway.messages.drawing.replace('{timestamp}', giveaway.endAt === Infinity ? giveaway.pauseOptions.infiniteDurationText : `<t:${Math.round(giveaway.endAt / 1000)}:R>`) + (giveaway.hostedBy ? '\n' + giveaway.messages.hostedBy : ''));
+    embed.setDescription(giveaways.isDrop ? giveaway.messages.dropMessage : (giveaway.pauseOptions.isPaused ? giveaway.pauseOptions.content + '\n\n' : lastChanceEnabled ? giveaway.lastChance.content + '\n\n' : '') + giveaway.messages.inviteToParticipate + '\n' + giveaway.messages.drawing.replace('{timestamp}', giveaways.endAt === Infinity ? giveaway.pauseOptions.infiniteDurationText : `<t:${Math.round(giveaways.endAt / 1000)}:R>`) + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''));
     embed.setThumbnail(giveaway.thumbnail);
     embed.setImage(giveaway.image);
-    if(giveaway.endAt !== Infinity) {
-      embed.setTimestamp(giveaway.endAt);
+    if(giveaways.endAt !== Infinity) {
+      embed.setTimestamp(giveaways.endAt);
     };
-    return giveaway.fillInEmbed(embed);
+    return giveaways.fillInEmbed(embed);
   };
   /*========================================================
   # Tạo embed được hiển thị khi giveaway kết thúc (với danh sách người chiến thắng)
   # @param {Discord.GuildMember[]} người húp được giveaway
   ========================================================*/
-  generateEndEmbed(giveaway, winners) {
+  generateEndEmbed(giveaways, winners) {
     let formattedWinners = winners.map((w) => `${w}`).join(', ');
     const strings = {
-      winners: giveaway.fillInString(giveaway.messages.winners),
-      hostedBy: giveaway.fillInString(giveaway.messages.hostedBy),
-      endedAt: giveaway.fillInString(giveaway.messages.endedAt),
-      title: giveaway.fillInString(giveaway.messages.title) ?? giveaway.fillInString(giveaway.prize)
+      winners: giveaways.fillInString(giveaway.messages.winners),
+      hostedBy: giveaways.fillInString(giveaway.messages.hostedBy),
+      endedAt: giveaways.fillInString(giveaway.messages.endedAt),
+      title: giveaways.fillInString(giveaway.messages.title) ?? giveaways.fillInString(giveaways.prize)
     };
-    const descriptionString = (formattedWinners) => strings.winners + ' ' + formattedWinners + (giveaway.hostedBy ? '\n' + strings.hostedBy : '');
+    const descriptionString = (formattedWinners) => strings.winners + ' ' + formattedWinners + (giveaways.hostedBy ? '\n' + strings.hostedBy : '');
     for (let i = 1; descriptionString(formattedWinners).length > 4096 || strings.title.length + strings.endedAt.length + descriptionString(formattedWinners).length > 6000; i++) {
       formattedWinners = formattedWinners.slice(0, formattedWinners.lastIndexOf(', <@')) + `, ${i} more`;
     };
     return new EmbedBuilder()
       .setTitle(strings.title)
-      .setColor(giveaway.embedColorEnd)
+      .setColor(giveaways.embedColorEnd)
       .setFooter({ text: strings.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
       .setDescription(descriptionString(formattedWinners))
-      .setTimestamp(giveaway.endAt)
+      .setTimestamp(giveaways.endAt)
       .setThumbnail(giveaway.thumbnail)
       .setImage(giveaway.image);
     };
     /*========================================================
     # Tạo embed được hiển thị khi giveaway kết thúc và khi không có người tham gia hợp lệ
     ========================================================*/
-    generateNoValidParticipantsEndEmbed(giveaway) {
-      return giveaway.fillInEmbed(new EmbedBuilder()
-      .setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaway.prize)
-      .setColor(giveaway.embedColorEnd)
+    generateNoValidParticipantsEndEmbed(giveaways) {
+      return giveaways.fillInEmbed(new EmbedBuilder()
+      .setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize)
+      .setColor(giveaways.embedColorEnd)
       .setFooter({ text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
-      .setDescription(giveaway.messages.noWinner + (giveaway.hostedBy ? '\n' + giveaway.messages.hostedBy : ''))
-      .setTimestamp(giveaway.endAt)
+      .setDescription(giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''))
+      .setTimestamp(giveaways.endAt)
       .setThumbnail(giveaway.thumbnail)
       .setImage(giveaway.image));
     };

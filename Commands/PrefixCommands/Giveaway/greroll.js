@@ -14,7 +14,12 @@ module.exports = {
     const giveaway = client.giveawaysManager.giveaways.find((g) => g.messageId === args[0] && g.guildId === message.guild.id);
     if(!giveaway) return message.reply(`Không thể tìm thấy giveaway cho messageId: ${args[0]}`);
     if(!giveaway.ended) return message.reply("Giveaway chưa kết thúc.");
-    giveaway.reroll().then(() => {
+    giveaway.reroll({
+      messages: {
+        congrat: ':tada: Người chiến thắng mới: {winners}! Chúc mừng bạn đã chiến thắng **{this.prize}**!\n{this.messageURL}',
+        error: 'Không có sự tham gia hợp lệ, không thể chọn người chiến thắng mới!'
+      }
+    }).then(() => {
       return message.reply('Thành công! Giveaway đã được bắt đầu lại!').then((msg) => {
         setTimeout(() => msg.delete(), 5000);
       });

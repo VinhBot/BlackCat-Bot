@@ -2,6 +2,7 @@ const { StringSelectMenuBuilder, EmbedBuilder, PermissionsBitField, ActionRowBui
 const config  = require(`${process.cwd()}/config.json`);
 
 module.exports = (client) => { 
-  client.on("messageCreate", message => {
+  client.on("messageCreate", (message) => {
+    // 
   });
 };

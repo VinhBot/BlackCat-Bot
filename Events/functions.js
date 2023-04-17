@@ -1,7 +1,7 @@
 const { EmbedBuilder, StringSelectMenuBuilder, parseEmoji, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType, Collection, SelectMenuBuilder } = require("discord.js");
 const { Database } = require("st.db");
-const ems = require("enhanced-ms");
 const fetch = require("node-fetch");
+const ms = require("enhanced-ms");
 const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
@@ -11,7 +11,7 @@ const database = new Database("./Assets/Database/defaultDatabase.json", {
 ========================================================*/
 const setupDatabase = async(guild) => {
   const checkData = await database.has(guild.id);
-  if(!checkData) {          // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
+  if(!checkData) { // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
     console.log(`Đã tạo database cho: ${guild.name}`); // thông báo ra bảng điều khiển
     await database.set(guild.id, {             // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
       defaultGuildName: guild.name,            // tên guilds
@@ -155,22 +155,11 @@ const GiveawayClass = class {
         prize,
         winnerCount: winners,
         hostedBy: host,
-        // image: "url ảnh",
-        thumbnail: "https://imgur.io/4FGhUuk.gif",
         messages: {
-          giveaway: '🎉🎉 **GIVEAWAY** 🎉🎉',
-          giveawayEnded: '🎉🎉 **GIVEAWAY ENDED** 🎉🎉',
+          giveaway: '🎉🎉 **Bắt đầu Giveaways** 🎉🎉',
+          giveawayEnded: '🎉🎉 **Giveaways đã kết thúc** 🎉🎉',
           winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải',
-          title: 'Phần thưởng:\n{this.prize}',
-          drawing: 'Kết thúc sau: {timestamp}',
-          dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
-          inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
-          embedFooter: '{this.winnerCount} người chiến thắng',
-          noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
-          hostedBy: 'Tổ chức bởi: {this.hostedBy}',
-          winners: 'Người chiến thắng:',
-          endedAt: 'Đã kết thúc'
-        },
+        }
       };
       if(allowedRoles.length > 0) {
         options.exemptMembers = (member) => !member.roles.cache.find((role) => allowedRoles.includes(role.id));
@@ -183,7 +172,8 @@ const GiveawayClass = class {
     };
   };
   ///
-  async runModalSetup({ member, channel, guild }, targetCh) {
+  async runModalSetup(message, targetCh) {
+    const { member, channel, guild } = message;
     if(!targetCh) return channel.send("Thiết lập giveaway đã bị hủy. Bạn đã không đề cập đến một kênh");
     if(!targetCh.type === ChannelType.GuildText && !targetCh.permissionsFor(guild.members.me).has(["ViewChannel", "SendMessages", "EmbedLinks"])) return channel.send({
       content: `Thiết lập giveaway đã bị hủy.\ntôi cần quyền admin trong ${targetCh}`
@@ -207,7 +197,7 @@ const GiveawayClass = class {
       customId: "giveaway-modalSetup",
       title: "Thiết lập Giveaway",
       components: [
-        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("duration").setLabel("thời lượng là bao lâu?").setPlaceholder("1h / 1d / 1w").setStyle(TextInputStyle.Short).setRequired(true)),
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("duration").setLabel("thời lượng là bao lâu?").setPlaceholder("1m (phút)/1h (giờ)/1d (ngày)/1w (tuần)").setStyle(TextInputStyle.Short).setRequired(true)),
         new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("prize").setLabel("Giải thưởng là gì?").setStyle(TextInputStyle.Short).setRequired(true)),
         new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("winners").setLabel("Số người chiến thắng?").setStyle(TextInputStyle.Short).setRequired(true)),
         new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("roles").setLabel("RoleId có thể tham gia giveaway").setStyle(TextInputStyle.Short).setRequired(false)),
@@ -222,7 +212,8 @@ const GiveawayClass = class {
     if(!modal) return sentMsg.edit({ content: "Không nhận được phản hồi, đang hủy thiết lập", components: [] });
     sentMsg.delete().catch(() => {});
     await modal.reply("Thiết lập giveaway...");
-    const duration = ems(modal.fields.getTextInputValue("duration"));
+    // thời gian 
+    const duration = ms(modal.fields.getTextInputValue("duration"));
     if(isNaN(duration)) return modal.editReply("Thiết lập đã bị hủy bỏ. Bạn đã không chỉ định thời hạn hợp lệ");
     // phần thưởng
     const prize = modal.fields.getTextInputValue("prize");
@@ -232,6 +223,7 @@ const GiveawayClass = class {
     // roles
     const allowedRoles = modal.fields.getTextInputValue("roles")?.split(",")?.filter((roleId) => guild.roles.cache.get(roleId.trim())) || [];
     const hostId = modal.fields.getTextInputValue("host");
+    // 
     let host = null;
     if (hostId) {
       try {
@@ -274,7 +266,7 @@ const GiveawayClass = class {
     sentMsg.delete().catch(() => {});
     await modal.reply("Cập nhật giveaway...");
     // thời gian
-    const addDuration = ems(modal.fields.getTextInputValue("duration"));
+    const addDuration = ms(modal.fields.getTextInputValue("duration"));
     if(isNaN(addDuration)) return modal.editReply("Cập nhật đã bị hủy bỏ. Bạn đã không chỉ định thời lượng thêm hợp lệ");
     // phần thưởng
     const newPrize = modal.fields.getTextInputValue("prize");
@@ -325,18 +317,7 @@ const getExistingTicketChannel = (guild, userId) => {
   const tktChannels = getTicketChannels(guild);
   return tktChannels.filter((ch) => ch.topic.split("|")[1] === userId).first();
 };
-const postToBin = async(content, title) => {
-    try {
-      const response = await sourcebin.create([{ name: " ", content, languageId: "text" }], { title, description: " " });
-      return {
-        url: response.url,
-        short: response.short,
-        raw: `https://cdn.sourceb.in/bins/${response.key}/0`,
-      };
-    } catch (ex) {
-      console.log(`postToBin`, ex);
-    };
-};
+
 const closeTicket = async(channel, closedBy, reason) => {
       if(!channel.deletable || !channel.permissionsFor(channel.guild.members.me).has(closePerms)) return "missingPermissions";
       try {
@@ -349,7 +330,19 @@ const closeTicket = async(channel, closedBy, reason) => {
           if(m.attachments.size > 0) content += `${m.attachments.map((att) => att.proxyURL).join(", ")}\n`;
           content += "\n";
         });
-        const logsUrl = await postToBin(content, `Nhật ký ticket cho ${channel.name}`);
+        const postToBin = async(content, title = `Nhật ký ticket cho ${channel.name}`) => {
+          try {
+            const response = await sourcebin.create([{ name: " ", content, languageId: "text" }], { title, description: " " });
+            return {
+              url: response.url,
+              short: response.short,
+              raw: `https://cdn.sourceb.in/bins/${response.key}/0`,
+            };
+          } catch (ex) {
+            console.log(`postToBin`, ex);
+          };
+        };
+        const logsUrl = await postToBin(content);
         const parseTicketDetails = async(channel) => {
           if(!channel.topic) return;
           const split = channel.topic?.split("|");
@@ -396,6 +389,7 @@ const closeAllTickets = async(guild, author) => {
 };
 const ticketHandler = class {
   constructor() {
+   this.closePerms = ["ManageChannels", "ReadMessageHistory"];
    this.openPerms = ["Administrator"];
   };
   async handleTicketOpen(interaction) {
