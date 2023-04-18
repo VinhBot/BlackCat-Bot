@@ -102,7 +102,6 @@ module.exports = {
     },
   ],
   run: async(client, interaction) => {
-    moneyEvents(client, interaction);
     if(interaction.options.getSubcommand() === "cash") {
       const user = interaction.options.getUser("user") || interaction.user;
       const cash = await client.cs.balance({
@@ -188,6 +187,7 @@ module.exports = {
       });
       return interaction.reply({ embeds: [msg] }).catch(() => { });
     };
+    moneyEvents(client, interaction);
   },
 };
 

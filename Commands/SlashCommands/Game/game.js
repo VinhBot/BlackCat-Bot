@@ -1,12 +1,15 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
-const { RPSGame } = require(`${process.cwd()}/Events/Game`);
-
+const { RPSGame, Slots } = require(`${process.cwd()}/Events/Game`);
 module.exports = {
   name: "game",
   description: "play game",
   userPerms: [],
   options: [
     {
+      name: "slots",
+      description: "Chơi game slots",
+      type: ApplicationCommandOptionType.Subcommand,
+    },{
       name: "tictactoe",
       description: "Chơi game tictactoe cùng bạn bè",
       type: ApplicationCommandOptionType.Subcommand,
@@ -34,6 +37,17 @@ module.exports = {
         const TicTacToe = require("discord-tictactoe");
         const game = new TicTacToe({ language: 'vi', commandOptionName: 'user' });
         game.handleInteraction(interaction);
+      } else if(interaction.options.getSubcommand() === "slots") {
+        const Game = new Slots(client, {
+          message: interaction,
+          slashCommands: true,
+          embed: {
+           title: 'Slot Machine',
+           color: '#5865F2'
+          },
+          slots: ['🍇', '🍊', '🍋', '🍌']
+        });
+        Game.startGame();
       } else if(interaction.options.getSubcommand() === "rps") {
         const game = new RPSGame({
           message: interaction,

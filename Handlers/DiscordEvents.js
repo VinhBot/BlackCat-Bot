@@ -57,6 +57,7 @@ module.exports = async(client) => {
     const channelIdData = await database.get(oldState.guild.id);
     const guild = client.guilds.cache.get(oldState.guild.id);
     const ChannelId = guild.channels.cache.get(channelIdData.setDefaultMusicData.ChannelAutoCreateVoice);
+    try {
     if(newState?.channelId === ChannelId.id) {
       // Khi người dùng kết nối với kênh trung tâm voice, hãy tạo một kênh voice duy nhất có quyền
       guild.channels.create({
@@ -88,6 +89,7 @@ module.exports = async(client) => {
       // Cho phép người dùng tham gia lại voice
       ChannelId.permissionOverwrites.delete(newState?.member);
     };
+    } catch(ex) {}
   });
   /*========================================================
   # autoresponse

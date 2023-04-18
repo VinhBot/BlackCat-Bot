@@ -1,5 +1,6 @@
 const { RPSGame } = require(`${process.cwd()}/Events/Game`);
 const path = require("node:path");
+
 module.exports = {
   name: path.parse(__filename).name,
   usage: `${path.parse(__filename).name}`,

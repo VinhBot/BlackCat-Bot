@@ -2,10 +2,10 @@
     "788208207465938954": {
         "userName": "Nguyễn Vinh",
         "userID": "788208207465938954",
-        "wallet": 264989,
-        "bank": 30500787341,
+        "wallet": 559836,
+        "bank": 30497137341,
         "bankSpace": 0,
-        "networth": 30501052330,
+        "networth": 30497697177,
         "inventory": [],
         "streak": {
             "hourly": 1,
@@ -27,7 +27,7 @@
             "lastWeekly": 1681424539914,
             "lastMonthly": 1681424078438,
             "lastYearly": 1681424742279,
-            "lastBegged": 1681563500235,
+            "lastBegged": 1681745110638,
             "lastWork": 1681426296879
         }
     },

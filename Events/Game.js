@@ -1,5 +1,7 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js'); 
-
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
+/*========================================================
+# events disableButtons
+========================================================*/
 function disableButtons(components) {
   for (let x = 0; x < components.length; x++) {
     for (let y = 0; y < components[x].components.length; y++) {
@@ -9,7 +11,7 @@ function disableButtons(components) {
   return components;
 };
 /*========================================================
-# Rps Game
+# RPS
 ========================================================*/
 const RPSGame = class {
   constructor(options = {}) {
@@ -121,7 +123,6 @@ const RPSGame = class {
           });
         });
       };
-    
       if(await verify(this.options)) {
         this.RPSGame();
       };
@@ -213,7 +214,7 @@ const RPSGame = class {
   };
 };
 /*========================================================
-# Slot
+# slots game
 ========================================================*/
 const Slots = class {
   constructor(client, options = {}) {
@@ -226,6 +227,7 @@ const Slots = class {
     if(!Array.isArray(options.slots)) throw new TypeError('INVALID_SLOTS: tùy chọn vị trí phải là một mảng.');
     this.client = client;
     this.options = options;
+    this.money = options.moneyNumber;
     this.message = options.message;
     this.slot1 = this.slot2 = this.slot3 = 0;
     this.slots = options.slots;
@@ -242,14 +244,14 @@ const Slots = class {
       if(this.slot1 === this.slot2 && this.slot1 === this.slot3) {
         this.client.cs.addMoney({
           user: this.message.user || this.message.author, // mention
-          amount: 30000,
+          amount: this.money,
           wheretoPutMoney: "wallet"
         });
         board += `| : :   "Nổ hũ"   : : |`;
       } else {
         this.client.cs.removeMoney({
           user: this.message.user || this.message.author,
-          amount: 5000,
+          amount: this.money,
           wheretoPutMoney: "wallet",
         });
         board += `| : :   "Thua"   : : |`;
@@ -289,7 +291,7 @@ const Slots = class {
       await msg.edit({ embeds: [embed], content: "" });
       setTimeout(() => {
         return msg.edit({ 
-          content: `${(this.slot1 === this.slot2 && this.slot1 === this.slot3) ? "Bạn đã thắng được 30k tiền" : "Bạn đã thua 5k tiền"}`,
+          content: `${(this.slot1 === this.slot2 && this.slot1 === this.slot3) ? `Bạn đã thắng được ${this.money} tiền` : `Bạn đã thua ${this.money} tiền`}`,
           embeds: [new EmbedBuilder()
           .setColor(this.options.embed.color)
           .setTitle(this.options.embed.title)
@@ -305,6 +307,7 @@ const Slots = class {
   }
 };
 /*========================================================
+# xuất module
 ========================================================*/
 module.exports = {
   RPSGame, Slots

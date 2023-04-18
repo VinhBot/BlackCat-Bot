@@ -133,7 +133,7 @@
     },
     "1054933019934330930": {
         "defaultGuildName": "PokéMeow Việt Nam",
-        "setDefaultPrefix": "!",
+        "setDefaultPrefix": "&",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
             "DefaultAutoplay": false,
