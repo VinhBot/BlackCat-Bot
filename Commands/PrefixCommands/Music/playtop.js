@@ -16,6 +16,10 @@ module.exports = {
     if(!args[0]) return message.reply({
       content: "Vui lòng nhập tên bài hát hoặc url bài hát"
     });
+    const { MusicRole } = require(`${process.cwd()}/Events/functions`);
+    if(MusicRole(client, message.member, newQueue.songs[0])) return message.reply({
+      content: ` Bạn Không có MusicRole hoặc bạn không phải người yêu cầu bài hát\n(${MusicRole(client, message.member, newQueue.songs[0])})`
+    });
     const Text = args.join(" "); 
 		let newmsg = await message.reply({
 			content: `🔍 Đang tìm kiếm... \`\`\`${Text}\`\`\``,

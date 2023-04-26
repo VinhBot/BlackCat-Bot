@@ -1,10 +1,8 @@
 const { ChannelType } = require("discord.js");
-const { readdirSync } = require("node:fs");
 const DBD = require("discord-dashboard");
 const { Database } = require("st.db");
-const SoftUI = require("dbd-soft-ui");
+const theme = require("./theme.js");
 const config = require(`${process.cwd()}/config.json`);
-const language = require("./language.js");
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true,
 });
@@ -26,19 +24,6 @@ const BotFilters = {
   "earwax": "earwax"
 };
 module.exports = async(client) => {
-  /*========================================================
-  # Commands list
-  ========================================================*/
-  let Music = [];
-  client.commands.map((command) => {
-    Music.push({
-      commandName: `${config.prefix + command.name}`,
-      commandUsage: command.usage || "Không sử dụng",
-      commandDescription: command.description || "Không có mô tả",
-    });
-  });
-  /*========================================================
-  ========================================================*/
   await DBD.useLicense(config.dashboard.useLicense);
   DBD.Dashboard = DBD.UpdatedClass();
   const Dashboard = new DBD.Dashboard({
@@ -50,84 +35,11 @@ module.exports = async(client) => {
     useThemeMaintenance: true,
     useTheme404: true,
     bot: client,
-    theme: SoftUI({
-      websiteName: "BlackCat-Club", // Tên trang web
-      colorScheme: "pink", // theme
-      supporteMail: "vinhdocle2k3@gmail.com", // email hỗ trợ
-      locales: language, // thiết lập ngôn ngữ cho dashboard
-      customThemeOptions: {
-        index: async({ req, res, config }) => {
-            return {
-              values: [],
-              graph: {},
-              cards: [],
-            }
-        },
-      },
-      // Icons
-      icons: {
-        favicon: client.user?.displayAvatarURL({ size: 4096 }),
-        noGuildIcon: "https://pnggrid.com/wp-content/uploads/2021/05/Discord-Logo-Circle-1024x1024.png",
-        sidebar: {
-          darkUrl: client.user?.displayAvatarURL({ size: 4096 }),
-          lightUrl: client.user?.displayAvatarURL({ size: 4096 }),
-          hideName: true,
-          borderRadius: false,
-          alignCenter: true,
-        },
-      },
-      index: {
-        card: {
-          category: "Soft UI",
-          title: "Trợ lý - Trung tâm của mọi thứ",
-          description: `
-            <b>
-              <i>${client.user.username}</i>
-            </b>
-          `,
-          image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
-          link: {
-            enabled: true,
-            url: "https://www.facebook.com/BlackCat.2k3"
-          }
-        },
-        graph: {
-          enabled: true,
-          lineGraph: false,
-          title: 'Memory Usage',
-          tag: 'Memory (MB)',
-          max: 100
-        },
-      },
-      sweetalert: {
-        errors: {},
-        success: {
-          login: "Đã đăng nhập thành công.",
-        }
-      },
-      preloader: {
-        image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
-        spinner: false,
-        text: "Loading ...",
-      },
-      admin: {
-        pterodactyl: {
-          enabled: false,
-          apiKey: "apiKey",
-          panelLink: "https://panel.website.com",
-          serverUUIDs: []
-        }
-      },
-      commands: [
-        {
-					category: "Music",
-					subTitle: "Music Commands",
-					aliasesDisabled: false,
-					list: Music,
-				},
-      ],
-    }),
+    theme: theme(client, config),
     settings: [
+      /*========================================================
+      # Cài đặt 1
+      ========================================================*/
       {
         categoryId: 'setup',
         categoryName: "Setup",
@@ -220,7 +132,11 @@ module.exports = async(client) => {
             }
           },
         ]
-      },{
+      },
+      /*========================================================
+      # Cài đặt 2
+      ========================================================*/
+      {
         categoryId: 'welcomeGoodbye',
         categoryName: "welcomeGoodbye",
         categoryDescription: "Thiết lập welcomeGoodbye cho guilds!",
@@ -269,7 +185,10 @@ module.exports = async(client) => {
             }
           },
         ]
-      }
+      },
+      /*========================================================
+      # Cài đặt 3
+      ========================================================*/
     ]
   });
   Dashboard.init();

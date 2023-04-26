@@ -5,9 +5,9 @@ const locales = {
   enUS: {
     name: "English",
     index: {
-      feeds: ["Current Users", "CPU", "System Platform", "Server Count"],
+      feeds: ["Nguyễn Vinh"],
       card: {
-        image: "link to image",
+        image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
         category: "Soft UI",
         title: "Assistants - The center of everything",
         description: "Assistants Discord Bot management panel. Assistants Bot was created to give others the ability to do what they want. Just.<br>That's an example text. <br><br><b><i>Feel free to use HTML</i></b>",
@@ -100,16 +100,21 @@ const locales = {
   viVN: {
     name: "Tiếng Việt",            
     index: {
-      feeds: ["Current Users", "CPU", "System Platform", "Server Count"],
+      feeds: ["Nguyễn Vinh"],
       card: {
         image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
         category: "BlackCat-Club",
         title: "Trợ lý - Tâm điểm của mọi thứ",
-        description: "Assistants Discord Bot management panel. Assistants Bot was created to give others the ability to do what they want. Just.<br>That's an example text. <br><br><b><i>Feel free to use HTML</i></b>",
+        description: `
+          <br><br>
+          <b>
+            <i>BlackCat-Club</i>
+          </b>
+        `,
         footer: "Tìm hiểu thêm"
       },
-      feedsTitle: "Feeds",
-      graphTitle: "Graphs"
+      feedsTitle: "nguồn cấp dữ liệu",
+      graphTitle: "đồ thị"
     },
     manage: {
       settings: {

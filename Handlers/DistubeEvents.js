@@ -10,7 +10,7 @@ const maps = new Map();
 let songEditInterval = null;
 let lastEdited = false;
 // Json Data
-const { disspace } = require("../Events/functions");
+const { disspace, MusicRole } = require("../Events/functions");
 const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
@@ -212,6 +212,11 @@ module.exports = (client) => {
       };
     }, 4000);
     collector?.on('collect', async(i) => {
+      if(MusicRole(client, i.member, client.distube.getQueue(i.guild.id).songs[0])) {
+        return i.reply({
+          content: `Bạn không có MusicRole hoặc không phải người yêu cầu bài hát\n${MusicRole(client, i.member, client.distube.getQueue(i.guild.id).songs[0])}`, ephemeral: true 
+        });         
+      };
       lastEdited = true;
       setTimeout(() => lastEdited = false, 7000);
       let { member, guild } = i;

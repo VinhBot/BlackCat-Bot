@@ -4,7 +4,7 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": false,
+            "DefaultAutoplay": true,
             "DefaultVolume": 50,
             "DefaultFilters": [
                 "3d",

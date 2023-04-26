@@ -60,8 +60,35 @@ function onCoolDown(cooldowns, message, commands) {
     return false;
   };
 };
+// MusicRole
+function MusicRole(client, member, song) {
+    if(!client) return false; // nếu không có tin nhắn được thêm trở lại
+    var roleid = database.get(member.guild.id); // lấy quyền quản trị
+    if(String(roleid) == "") return false; // nếu không có musicrole trả về false, để nó tiếp tục
+    var isdj = false; // định nghĩa các biến
+    for (let i = 0; i < roleid.length; i++) { // lặp qua các roles
+        if(!member.guild.roles.cache.get(roleid[i])) continue; // nếu roles không tồn tại, hãy bỏ qua vòng lặp hiện tại này
+        if (member.roles.cache.has(roleid[i])) isdj = true; // nếu anh ấy có vai trò được đặt var thành true
+        // thêm roles vào chuỗi
+    }
+    // nếu không có dj và không phải là quản trị viên, hãy trả về chuỗi
+    if (!isdj && !member.permissions.has("Administrator") && song.user.id != member.id) {
+        return roleid.map((i) => `<@&${i}>`).join(", ");
+    // nếu anh ta là dj hoặc quản trị viên, thì hãy trả về false, điều này sẽ tiếp tục cmd
+    } else {
+        return false;
+    };
+};
 // music handlet
 const disspace = function(newQueue, newTrack, queue) {
+    const dataMusic = database.get(newQueue.id);
+    var djs = dataMusic.setDefaultMusicData.Djroles;
+    if(!djs || !Array.isArray(djs)) {
+      djs = [];
+    } else djs = djs.map(r => `<@&${r}>`);
+    if(djs.length == 0 ) {
+      djs = `\`Không thiết lập\``;
+    } else djs.slice(0, 15).join(`, `);
     let skip = new ButtonBuilder().setStyle('Primary').setCustomId('skip').setEmoji(`⏭`).setLabel(`Bỏ qua`);
     let stop = new ButtonBuilder().setStyle('Danger').setCustomId('stop').setEmoji(`😢`).setLabel(`Dừng phát`);
     let pause = new ButtonBuilder().setStyle('Success').setCustomId('pause').setEmoji('⏸').setLabel(`Tạm dừng`);
@@ -113,6 +140,7 @@ const disspace = function(newQueue, newTrack, queue) {
           { name: `vòng lặp:`, value: `>>> ${newQueue.repeatMode ? newQueue.repeatMode === 2 ? `✔️ hàng chờ` : `✔️ Bài hát` : `❌`}` },
           { name: `Tự động phát:`, value: `>>> ${newQueue.autoplay ? `✔️` : `❌`}` },
           { name: `Filters:`, value: `\`${newQueue.filters.names.join(", ") || "Tắt"}\`` },
+          { name: `MusicRole:`, value: `${djs}` },
           { name: `Tải nhạc về:`, value: `>>> [Click vào đây](${newTrack.streamURL})` },
           { name: `Lượt xem:`, value: `${Intl.NumberFormat().format(newQueue.songs[0].views)}` },
           { name: `Likes`, value: `👍 ${Intl.NumberFormat().format(newQueue.songs[0].likes)}` },
@@ -162,7 +190,6 @@ const getExistingTicketChannel = (guild, userId) => {
   const tktChannels = getTicketChannels(guild);
   return tktChannels.filter((ch) => ch.topic.split("|")[1] === userId).first();
 };
-
 const closeTicket = async(channel, closedBy, reason) => {
       if(!channel.deletable || !channel.permissionsFor(channel.guild.members.me).has(closePerms)) return "missingPermissions";
       try {
@@ -1093,6 +1120,6 @@ const EconomyHandler = class {
 };
 
 module.exports = {
-  onCoolDown, disspace, setupDatabase, baseURL,
+  onCoolDown, disspace, setupDatabase, baseURL, MusicRole,
   ticketHandler, EconomyHandler
 };

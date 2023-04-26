@@ -19,6 +19,10 @@ module.exports = {
     if(!args[0]) return message.reply({
       content: "**Vui lòng thêm Thời lượng chuyển tiếp!**"
     });
+    const { MusicRole } = require(`${process.cwd()}/Events/functions`);
+    if(MusicRole(client, message.member, newQueue.songs[0])) return message.reply({
+      content: ` Bạn Không có MusicRole hoặc bạn không phải người yêu cầu bài hát\n(${MusicRole(client, message.member, newQueue.songs[0])})`
+    });
     let seekNumber = Number(args[0])
 		let seektime = newQueue.currentTime + seekNumber;
 		if(seektime >= newQueue.songs[0].duration) seektime = newQueue.songs[0].duration - 1;

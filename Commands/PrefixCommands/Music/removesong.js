@@ -16,6 +16,10 @@ module.exports = {
 		if(!newQueue || !newQueue.songs || newQueue.songs.length == 0) return message.reply({
 			embeds: [new EmbedBuilder().setColor("Random").setTitle("Danh sách nhạc trống")],
 	  });
+    const { MusicRole } = require(`${process.cwd()}/Events/functions`);
+    if(MusicRole(client, message.member, newQueue.songs[0])) return message.reply({
+      content: ` Bạn Không có MusicRole hoặc bạn không phải người yêu cầu bài hát\n(${MusicRole(client, message.member, newQueue.songs[0])})`
+    });
     if(!args[0]) return message.reply({
       content: "Vui lòng thêm vị trí bài hát"
     });
