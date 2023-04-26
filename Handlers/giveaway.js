@@ -1,38 +1,10 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
 const { GiveawaysManager } = require("discord-giveaways");
 const { Database } = require("st.db");
-const giveawayDB = new Database("./Assets/Database/giveawayDatabase.json", { 
+const ms = require("enhanced-ms");
+const giveawayDB = new Database("./Assets/Database/giveaways.json", { 
   databaseInObject: true 
 });
-
-const giveaway = {
-  thumbnail: "https://imgur.io/4FGhUuk.gif",
-  // image: "",
-  messages: {
-    title: 'Phần thưởng:\n{this.prize}',
-    drawing: 'Kết thúc sau: {timestamp}',
-    dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
-    inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
-    embedFooter: '{this.winnerCount} người chiến thắng',
-    noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
-    hostedBy: 'Tổ chức bởi: {this.hostedBy}',
-    winners: 'Người chiến thắng:',
-    endedAt: 'Đã kết thúc'
-  },
-  lastChance: { // Hệ thống cơ hội cuối cùng 
-    enabled: true, // nếu hệ thống cơ hội cuối cùng được bật.
-    content: '⚠️ **CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA!** ⚠️', // Văn bản embed
-    threshold: 10000, // số mili giây trước khi giveaways kết thúc.
-    embedColor: 'Random' // màu của embed.
-  },
-  pauseOptions: {
-    isPaused: false, // nếu embed bị tạm dừng.
-    content: '⚠️ **GIVEAWAY NÀY ĐÃ TẠM DỪNG!** ⚠️', // văn bản embed
-    unpauseAfter: null, // số mili giây hoặc dấu thời gian tính bằng mili giây, sau đó giveaway sẽ tự động bỏ tạm dừng.
-    embedColor: 'Random', // màu embed
-    infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
-  }
-};
 
 const GiveawaysHandlers = class extends GiveawaysManager {
   constructor(client) {
@@ -61,6 +33,37 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         reaction: '<a:hehehe:1091770710915022858>'
       },
     });
+    /**
+    * tùy chọn tin nhắn mặc định khi chạy giveaway
+    */
+    this.optionalDefault =  {
+      thumbnail: "https://imgur.io/4FGhUuk.gif",
+      // image: "",
+      messages: {
+        title: 'Phần thưởng:\n{this.prize}',
+        drawing: 'Kết thúc sau: {timestamp}',
+        dropMessage: 'Hãy là người đầu tiên phản ứng với 🎁!',
+        inviteToParticipate: 'Phản ứng với 🎁 để tham gia!',
+        embedFooter: '{this.winnerCount} người chiến thắng',
+        noWinner: 'Giveaway bị hủy, không có người tham gia hợp lệ.',
+        hostedBy: 'Tổ chức bởi: {this.hostedBy}',
+        winners: 'Người chiến thắng:',
+        endedAt: 'Đã kết thúc'
+      },
+      lastChance: { // Hệ thống cơ hội cuối cùng 
+        enabled: true, // nếu hệ thống cơ hội cuối cùng được bật.
+        content: '⚠️ **CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA!** ⚠️', // Văn bản embed
+        threshold: 10000, // số mili giây trước khi giveaways kết thúc.
+        embedColor: 'Random' // màu của embed.
+      },
+      pauseOptions: {
+        isPaused: false, // nếu embed bị tạm dừng.
+        content: '⚠️ **GIVEAWAY NÀY ĐÃ TẠM DỪNG!** ⚠️', // văn bản embed
+        unpauseAfter: null, // số mili giây hoặc dấu thời gian tính bằng mili giây, sau đó giveaway sẽ tự động bỏ tạm dừng.
+        embedColor: 'Random', // màu embed
+        infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
+      }
+    };
   };
   /*========================================================
   # một số events 💾
@@ -74,21 +77,18 @@ const GiveawaysHandlers = class extends GiveawaysManager {
   async saveGiveaway(messageId, giveawayData) {
     // Thêm giveaway mới vào cơ sở dữ liệu
     giveawayDB.set(messageId, giveawayData);
-    // Đừng quên trả lại một cái gì đó!
     return true;
   };
   // Hàm này được gọi khi cần chỉnh sửa giveaway trong cơ sở dữ liệu.
   async editGiveaway(messageId, giveawayData) {
     // Thay thế giveaway chưa chỉnh sửa bằng giveaway đã chỉnh sửa
     giveawayDB.set(messageId, giveawayData);
-    // Đừng quên trả lại một cái gì đó!
     return true;
   };
   // Hàm này được gọi khi cần xóa giveaway khỏi cơ sở dữ liệu.
   async deleteGiveaway(messageId) {
     // Xóa giveaway khỏi cơ sở dữ liệu
     giveawayDB.delete(messageId);
-    // Đừng quên trả lại một cái gì đó!
     return true;
   };
   /*========================================================
@@ -96,6 +96,7 @@ const GiveawaysHandlers = class extends GiveawaysManager {
   # @param {boolean} [lastChanceEnabled=false] Có hay không bao gồm văn bản cơ hội cuối cùng
   ========================================================*/
   generateMainEmbed(giveaways, lastChanceEnabled = false) {
+    const giveaway = this.optionalDefault;
     const embed = new EmbedBuilder()
     embed.setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize);
     embed.setColor(giveaways.isDrop ? giveaways.embedColor : giveaway.pauseOptions.isPaused && giveaway.pauseOptions.embedColor ? giveaway.pauseOptions.embedColor : lastChanceEnabled ? giveaway.lastChance.embedColor : giveaways.embedColor);
@@ -114,6 +115,7 @@ const GiveawaysHandlers = class extends GiveawaysManager {
   ========================================================*/
   generateEndEmbed(giveaways, winners) {
     let formattedWinners = winners.map((w) => `${w}`).join(', ');
+    const giveaway = this.optionalDefault;
     const strings = {
       winners: giveaways.fillInString(giveaway.messages.winners),
       hostedBy: giveaways.fillInString(giveaway.messages.hostedBy),
@@ -126,28 +128,155 @@ const GiveawaysHandlers = class extends GiveawaysManager {
     };
     return new EmbedBuilder()
       .setTitle(strings.title)
-      .setColor(giveaways.embedColorEnd)
+      .setColor(giveaways.embedColorEnd) 
       .setFooter({ text: strings.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
       .setDescription(descriptionString(formattedWinners))
       .setTimestamp(giveaways.endAt)
       .setThumbnail(giveaway.thumbnail)
       .setImage(giveaway.image);
+  };
+  /*========================================================
+  # Tạo embed được hiển thị khi giveaway kết thúc và khi không có người tham gia hợp lệ
+  ========================================================*/
+  generateNoValidParticipantsEndEmbed(giveaways) {
+    const giveaway = this.optionalDefault;
+    return giveaways.fillInEmbed(new EmbedBuilder()
+    .setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize)
+    .setColor(giveaways.embedColorEnd)
+    .setFooter({ text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
+    .setDescription(giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''))
+    .setTimestamp(giveaways.endAt)
+    .setThumbnail(giveaway.thumbnail)
+    .setImage(giveaway.image));
+  };
+  /*========================================================
+  # runModalSetup /
+  ========================================================*/
+  async runModalSetup(message, targetCh) {
+    const { member, channel, guild } = message;
+    if(!targetCh) return channel.send("Thiết lập giveaway đã bị hủy. Bạn đã không đề cập đến một kênh");
+    if(!targetCh.type === ChannelType.GuildText && !targetCh.permissionsFor(guild.members.me).has(["ViewChannel", "SendMessages", "EmbedLinks"])) return channel.send({
+      content: `Thiết lập giveaway đã bị hủy.\ntôi cần quyền admin trong ${targetCh}`
+    });
+    const sentMsg = await channel.send({
+       content: "Vui lòng nhấp vào nút bên dưới để thiết lập giveaway mới",
+       components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("giveaway_btnSetup").setLabel("thiết lập Giveaway").setStyle(ButtonStyle.Primary))],
+    });
+    if(!sentMsg) return;
+    const btnInteraction = await channel.awaitMessageComponent({
+      componentType: ComponentType.Button,
+      filter: (i) => i.customId === "giveaway_btnSetup" && i.member.id === member.id && i.message.id === sentMsg.id,
+      time: 20000,
+    }).catch((ex) => console.log(ex));
+    if(!btnInteraction) return sentMsg.edit({ 
+      content: "Không nhận được phản hồi, đang hủy thiết lập",
+      components: [] 
+    });
+    // các tùy chọn modal
+    await btnInteraction.showModal(new ModalBuilder({
+      customId: "giveaway-modalSetup",
+      title: "Thiết lập Giveaway",
+      components: [
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("duration").setLabel("thời lượng là bao lâu?").setPlaceholder("1m/1h/1d/1w").setStyle(TextInputStyle.Short).setRequired(true)),
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("prize").setLabel("Giải thưởng là gì?").setStyle(TextInputStyle.Short).setRequired(true)),
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("winners").setLabel("Số người chiến thắng?").setStyle(TextInputStyle.Short).setRequired(true)),
+      ],
+    }));
+    // 
+    const modal = await btnInteraction.awaitModalSubmit({
+      time: 1 * 60 * 1000,
+      filter: (m) => m.customId === "giveaway-modalSetup" && m.member.id === member.id && m.message.id === sentMsg.id,
+    }).catch((ex) => console.log(ex));
+    // nếu như không nhận được phản hồi hợp lệ, hủy thiết lập :))
+    if(!modal) return sentMsg.edit({ content: "Không nhận được phản hồi, đang hủy thiết lập", components: [] });
+    // xoá sentMsg trước đó nếu đã được thiết lập
+    sentMsg.delete().catch(() => {});
+    // thoing báo thiết lập
+    await modal.reply("Thiết lập giveaway...");
+    // thời gian 
+    const duration = ms(modal.fields.getTextInputValue("duration"));
+    if(isNaN(duration)) return modal.editReply("Thiết lập đã bị hủy bỏ. Bạn đã không chỉ định thời hạn hợp lệ");
+    // phần thưởng
+    const prize = modal.fields.getTextInputValue("prize");
+    // số người chiến thắng
+    const winners = parseInt(modal.fields.getTextInputValue("winners"));
+    if(isNaN(winners)) return modal.editReply("Thiết lập đã bị hủy. Bạn không chỉ định số lượng người chiến thắng hợp lệ");
+    //
+    try {
+      const options = {
+        duration: duration,
+        prize,
+        winnerCount: winners,
+        hostedBy: `<@${message.author ? message.author.id : message.user.id}>`,
+        messages: {
+          giveaway: '🎉🎉 **Bắt đầu Giveaways** 🎉🎉',
+          giveawayEnded: '🎉🎉 **Giveaways đã kết thúc** 🎉🎉',
+          winMessage: 'Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải',
+        }
+      };
+      await this.start(targetCh, options);
+    } catch(error) {
+      console.log(error);
+      return message.reply({ content: `Đã xảy ra lỗi khi bắt đầu giveaway: ${error}` });
     };
-    /*========================================================
-    # Tạo embed được hiển thị khi giveaway kết thúc và khi không có người tham gia hợp lệ
-    ========================================================*/
-    generateNoValidParticipantsEndEmbed(giveaways) {
-      return giveaways.fillInEmbed(new EmbedBuilder()
-      .setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize)
-      .setColor(giveaways.embedColorEnd)
-      .setFooter({ text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
-      .setDescription(giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''))
-      .setTimestamp(giveaways.endAt)
-      .setThumbnail(giveaway.thumbnail)
-      .setImage(giveaway.image));
+    await modal.editReply(`Giveaways đã được bắt đầu trong ${targetCh}`);
+  };
+  // chỉnh sửa giveaway
+  async runModalEdit(message, messageId) {
+    const { member, channel } = message;
+    if(!messageId) return message.reply({ content: "Bạn phải cung cấp id tin nhắn hợp lệ." });
+    const giveaway = this.giveaways.find((g) => g.messageId === messageId && g.guildId === member.guild.id);
+    if(!giveaway) return message.reply({ content: `Không thể tìm thấy giveaway cho messageId: ${messageId}` });
+    const sentMsg = await channel.send({
+      content: "Vui lòng nhấp vào nút bên dưới để chỉnh sửa giveaway",
+      components: [new ActionRowBuilder().addComponents(new ButtonBuilder().setCustomId("giveaway_btnEdit").setLabel("Chỉnh sửa Giveaway").setStyle(ButtonStyle.Primary))],
+    });
+    const btnInteraction = await channel.awaitMessageComponent({
+      componentType: ComponentType.Button,
+      filter: (i) => i.customId === "giveaway_btnEdit" && i.member.id === member.id && i.message.id === sentMsg.id,
+      time: 20000,
+    }).catch((ex) => {});
+    if(!btnInteraction) return sentMsg.edit({ content: "Không nhận được phản hồi, hủy cập nhật", components: [] });
+    // phương thức hiển thị
+    await btnInteraction.showModal(new ModalBuilder({
+      customId: "giveaway-modalEdit",
+      title: "Cập nhật Giveaway",
+      components: [
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("duration").setLabel("Thời gian để thêm").setPlaceholder("1h / 1d / 1w").setStyle(TextInputStyle.Short).setRequired(false)),
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("prize").setLabel("giải thưởng mới là gì?").setStyle(TextInputStyle.Short).setRequired(false)),
+        new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId("winners").setLabel("Number of winners?").setStyle(TextInputStyle.Short).setRequired(false)),
+      ],
+    }));
+    // nhận đầu vào phương thức
+    const modal = await btnInteraction.awaitModalSubmit({
+      time: 1 * 60 * 1000,
+      filter: (m) => m.customId === "giveaway-modalEdit" && m.member.id === member.id && m.message.id === sentMsg.id,
+    }).catch((ex) => {});
+    if(!modal) return sentMsg.edit({ content: "Không nhận được phản hồi, hủy cập nhật", components: [] });
+    sentMsg.delete().catch(() => {});
+    await modal.reply("Cập nhật giveaway...");
+    // thời gian
+    const addDuration = ms(modal.fields.getTextInputValue("duration"));
+    if(isNaN(addDuration)) return modal.editReply("Cập nhật đã bị hủy bỏ. Bạn đã không chỉ định thời lượng thêm hợp lệ");
+    // phần thưởng
+    const newPrize = modal.fields.getTextInputValue("prize");
+    // số người chiến thắng
+    const newWinnerCount = parseInt(modal.fields.getTextInputValue("winners"));
+    if(isNaN(newWinnerCount)) return modal.editReply("Cập nhật đã bị hủy bỏ. Bạn đã không chỉ định số lượng người chiến thắng hợp lệ");
+    // edit
+    try {
+      await this.edit(messageId, {
+        addTime: addDuration || 0,
+        newPrize: newPrize || giveaway.prize,
+        newWinnerCount: newWinnerCount || giveaway.winnerCount,
+      });
+    } catch(error) {
+      return message.reply({ content: `Đã xảy ra lỗi khi cập nhật giveaway: ${error.message}` });
     };
+    await modal.editReply("Đã cập nhật thành công giveaway!");
+  };
 };
-  
+
 module.exports = (client) => {
   const giveawayHandler = new GiveawaysHandlers(client);
   // gởi tin nhắn đến cho người chiến thắng 
@@ -200,6 +329,6 @@ module.exports = (client) => {
   giveawayHandler.on('giveawayDeleted', (giveaway) => {
     console.log(`Giveaway với id ${giveaway.messageId} đã bị xoá`)
   });
-  // evnets giveaways
+  // client giveaways
   client.giveawaysManager = giveawayHandler;
 };

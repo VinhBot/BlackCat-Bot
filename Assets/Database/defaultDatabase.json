@@ -7,18 +7,23 @@
             "DefaultAutoplay": false,
             "DefaultVolume": 50,
             "DefaultFilters": [
-                "bassboost",
-                "3d"
+                "3d",
+                "bassboost"
             ],
             "MessageId": "1092828039475367946",
             "ChannelId": "1092827995003166882",
             "ChannelAutoCreateVoice": "1096800005123227760",
-            "Djroles": []
+            "Djroles": [
+                "1089413553615814750"
+            ]
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "1089615977559375954",
             "GoodbyeChannel": "1089615977559375954",
-            "AutoAddRoleWel": []
+            "AutoAddRoleWel": [
+                "1089413553615814750",
+                "1089413589267382282"
+            ]
         }
     },
     "717168653300269116": {
@@ -79,7 +84,7 @@
             "MessageId": "",
             "ChannelId": "",
             "ChannelAutoCreateVoice": "",
-            "Djroles": []
+            "Djroles": ""
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "",
@@ -158,7 +163,7 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": false,
+            "DefaultAutoplay": true,
             "DefaultVolume": 50,
             "DefaultFilters": [
                 "bassboost",
@@ -166,7 +171,7 @@
             ],
             "MessageId": "",
             "ChannelId": "",
-            "ChannelAutoCreateVoice": "1096800915408818177",
+            "ChannelAutoCreateVoice": "",
             "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {

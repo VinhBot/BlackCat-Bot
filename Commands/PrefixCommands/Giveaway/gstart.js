@@ -1,4 +1,4 @@
-const { GiveawayClass } = require(`${process.cwd()}/Events/functions`);
+const { ChannelType } = require("discord.js");
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,9 +10,9 @@ module.exports = {
   category:"Giveaway", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const giveaway = new GiveawayClass(client);
     let channel = message.mentions.channels.first();
+    if(!channel.type === ChannelType.GuildText) return message.reply({ content: "Bạn chỉ có thể bắt đầu giveaway trong các kênh văn bản." });
     if(!channel) return message.reply({ content: "Bạn quên chưa ping kênh channel" });
-    return await giveaway.runModalSetup(message, channel);
+    return await client.giveawaysManager.runModalSetup(message, channel);
   },
 };

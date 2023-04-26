@@ -48,6 +48,7 @@ module.exports = {
       };
       const roles = member.roles.cache.sort((a, b) => b.position - a.position).map(role => role.toString()).slice(0, -1);
       const userFlags = member.user.flags ? member.user.flags.toArray() : [];
+
       return message.reply({ embeds: [new EmbedBuilder()
         .setTitle("Xem thông tin người dùng")
         .setThumbnail(member.user.displayAvatarURL({ dynamic: true, size: 1024 }))

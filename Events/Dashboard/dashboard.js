@@ -1,34 +1,13 @@
-const { PermissionsBitField, ChannelType } = require("discord.js");
-const Strategy = require("passport-discord").Strategy;
-const session = require("express-session");
-const bodyParser = require("body-parser");
-const passport = require("passport");
-const express = require("express");
-const http = require("node:http");  
-const path = require("node:path");
-const url = require("node:url");
-const fs = require("node:fs");
-const ejs = require("ejs");
-const MemoryStore = require("memorystore")(session);
+const { ChannelType } = require("discord.js");
+const { readdirSync } = require("node:fs");
+const DBD = require("discord-dashboard");
 const { Database } = require("st.db");
-const httpApp = express();
-const app = express();
-const categories = fs.readdirSync(`./Commands/PrefixCommands/`);
+const SoftUI = require("dbd-soft-ui");
+const config = require(`${process.cwd()}/config.json`);
+const language = require("./language.js");
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true
+  databaseInObject: true,
 });
-const settings = {
-    "website" : {
-      "support": "https://discord.gg/tSTY36dPWa",
-      "domain": "https://BlackCat-Bot.vinhbot.repl.co"
-    },
-    "config": {
-        "httpPort": 80,
-        "callback": "https://BlackCat-Bot.vinhbot.repl.co/callback",
-        "clientID": "881709146695667773",
-        "secret": "1_4Nz4IBGxdlnW4xOCJDjlXAHy4YGoLr"
-    }
-};
 const BotFilters = {
   "3d": "3d",
   "bassboost": "bassboost",
@@ -46,254 +25,252 @@ const BotFilters = {
   "tremolo": "tremolo",
   "earwax": "earwax"
 };
-
-module.exports = (client) => {
-    // - THÊM TIẾT KIỆM PHIÊN
-    app.use(session({
-      store: new MemoryStore({ checkPeriod: 86400000 }),
-      secret: `#@%#&^$^$%@$^$&%#$%@#$%$^%&$%^#$%@#$%#E%#%@$FEErfgr3g#%GT%536c53cc6%5%tv%4y4hrgrggrgrgf4n`,
-      resave: false,
-      saveUninitialized: false,
-    }));
-    app.use(passport.initialize());
-    app.use(passport.session());
-    app.set('view engine', 'ejs');
-    /*========================================================
-    ========================================================*/
-    app.set('views', path.join(__dirname, './views'));
-    app.use(express.static(path.join(__dirname, './public')));
-    // Những cái cho app.use(s) là đầu vào của phương thức post (cập nhật cài đặt)
-    app.use(bodyParser.json());
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(express.json());
-    app.use(express.urlencoded({ extended: true }));
-    //Tải .well-known (nếu có)
-    app.use(express.static(path.join(__dirname, '/'), {
-      dotfiles: 'allow'
-    }));
-    // - Khởi tạo thiết lập đăng nhập Discord!
-    passport.serializeUser((user, done) => done(null, user));
-    passport.deserializeUser((obj, done) => done(null, obj));
-    passport.use(new Strategy({
-      clientID: settings.config.clientID,
-      clientSecret: settings.config.secret,
-      callbackURL: settings.config.callback,      
-      scope: [`identify`, `guilds`, `guilds.join`]
-    }, (accessToken, refreshToken, profile, done) => { 
-      process.nextTick(() => done(null, profile));
-    }));
-    // Chúng tôi khai báo một phần mềm trung gian chức năng checkAuth để kiểm tra xem người dùng đã đăng nhập hay chưa và nếu không thì chuyển hướng anh ta.
-    const checkAuth = (req, res, next) => {
-      if(req.isAuthenticated()) return next();
-      req.session.backURL = req.url;
-      res.redirect("/login");
-    };
-    //Login endpoint
-    app.get(`/login`, (req, res, next) => {
-        if (req.session.backURL) {
-          req.session.backURL = req.session.backURL; 
-        } else if(req.headers.referer) {
-          const parsed = url.parse(req.headers.referer);
-          if (parsed.hostname === app.locals.domain) {
-            req.session.backURL = parsed.path;
-          };
-        } else {
-          req.session.backURL = `/`;
-        };
-        next();
-    }, passport.authenticate(`discord`, { prompt: `none` }));
-    // Điểm cuối gọi lại cho dữ liệu đăng nhập
-    app.get(`/callback`, passport.authenticate(`discord`, { failureRedirect: "/" }), async(req, res) => {
-        let banned = false; // req.user.id
-        if(banned) {
-          req.session.destroy(() => {
-            res.json({ login: false, message: `Bạn đã bị chặn khỏi Trang tổng quan.`, logout: true })
-            req.logout();
-          });
-        } else {
-            res.redirect(`/dashboard`)
-        };
+module.exports = async(client) => {
+  /*========================================================
+  # Commands list
+  ========================================================*/
+  let Music = [];
+  client.commands.map((command) => {
+    Music.push({
+      commandName: `${config.prefix + command.name}`,
+      commandUsage: command.usage || "Không sử dụng",
+      commandDescription: command.description || "Không có mô tả",
     });
-    // Khi trang web được tải trên trang chính, hãy hiển thị trang chính + với các biến đó
-    app.get("/", (req, res) => {
-        res.render("index", {
-          req: req,
-          user: req.isAuthenticated() ? req.user : null,
-          botClient: client,
-          Permissions: PermissionsBitField,
-          bot: settings.website,
-          callback: settings.config.callback,
-          categories: categories, 
-          commands: client.commands, 
-          BotFilters: BotFilters
-        });
-    });
-    // Khi trang lệnh được tải, hiển thị nó với các cài đặt đó
-    app.get("/commands", (req, res) => {
-      res.render("commands", {
-        req: req,
-        user: req.isAuthenticated() ? req.user : null,
-        botClient: client,
-        Permissions: PermissionsBitField,
-        bot: settings.website,
-        callback: settings.config.callback,
-        categories: categories, 
-        commands: client.commands, 
-        BotFilters: BotFilters,
-      });
-    });
-    // Đăng xuất người dùng và chuyển anh ta trở lại trang chính
-    app.get(`/logout`, function (req, res) {
-      req.session.destroy(() => {
-        req.logout();
-        res.redirect(`/`);
-      });
-    });
-    // Dashboard endpoint.
-    app.get("/dashboard", checkAuth, async (req,res) => {
-      if(!req.isAuthenticated() || !req.user) 
-      return res.redirect("/?error=" + encodeURIComponent("Hãy đăng nhập đầu tiên!"));
-      if(!req.user.guilds)
-      return res.redirect("/?error=" + encodeURIComponent("Không thể có được guilds của bạn!"));
-        res.render("dashboard", {
-          req: req,
-          user: req.isAuthenticated() ? req.user : null,
-          botClient: client,
-          Permissions: PermissionsBitField,
-          bot: settings.website,
-          callback: settings.config.callback,
-          categories: categories, 
-          commands: client.commands, 
-          BotFilters: BotFilters,
-        });
-    });
-    // Settings endpoint.
-    app.get("/dashboard/:guildID", checkAuth, async (req, res) => {
-      // Chúng tôi xác thực yêu cầu, kiểm tra xem guilds có tồn tại không, thành viên có ở trong guilds không và nếu thành viên có quyền tối thiểu, nếu không, chúng tôi sẽ chuyển hướng lại.
-      const guild = client.guilds.cache.get(req.params.guildID);
-      if (!guild) return res.redirect("/dashboard?error=" + encodeURIComponent("Không thể lấy dữ liệu thông tin guilds"));
-      let member = guild.members.cache.get(req.user.id);
-      if (!member) {
-        try {
-          member = await guild.members.fetch(req.user.id);
-        } catch(err) {
-          console.error(`Không thể tìm nạp ${req.user.id} trong ${guild.name}: ${err}`);
-        };
-      };
-      if (!member) return res.redirect("/dashboard?error=" + encodeURIComponent("Không thể tìm nạp bạn, xin lỗi!"));
-      if (!member.permissions.has("ManageGuild")) {
-        return res.redirect("/dashboard?error=" + encodeURIComponent("Bạn không được phép làm điều đó!"));
-      };
-      let guildData = await database.get(guild.id);
-      res.render("settings", {
-          req: req,
-          user: req.isAuthenticated() ? req.user : null,
-          guild: client.guilds.cache.get(req.params.guildID),
-          botClient: client,
-          guildData: guildData.setDefaultMusicData,
-          guildData2: guildData,
-          ChannelType: ChannelType,
-          Permissions: PermissionsBitField,
-          bot: settings.website,
-          callback: settings.config.callback,
-          categories: categories, 
-          commands: client.commands, 
-          BotFilters: BotFilters,
-      });
-      await database.set(guild.id, guildData);
-    });
-    // Settings endpoint.
-    app.post("/dashboard/:guildID", checkAuth, async(req, res) => {
-      // Chúng tôi xác thực yêu cầu, kiểm tra xem guilds có tồn tại không, thành viên có ở trong guilds không và nếu thành viên có quyền tối thiểu, nếu không, chúng tôi chuyển hướng lại.
-      const guild = client.guilds.cache.get(req.params.guildID);
-      if (!guild) return res.redirect("/dashboard?error=" + encodeURIComponent("Không thể lấy dữ liệu thông tin Guilds!"));
-      let member = guild.members.cache.get(req.user.id);
-      if (!member) {
-        try {
-          member = await guild.members.fetch(req.user.id);
-        } catch (err) {
-          console.error(`Không thể tìm nạp ${req.user.id} trong ${guild.name}: ${err}`);
-        };
-      };
-      if (!member) return res.redirect("/dashboard?error=" + encodeURIComponent("Không thể Tìm Thông tin Dữ liệu về bạn!"));
-      if (!member.permissions.has("ManageGuild")) {
-        return res.redirect("/dashboard?error=" + encodeURIComponent("Bạn không được phép làm điều đó!"));
-      };
-      let guildData = await database.get(guild.id);
-      if(req.body.prefix) {
-        guildData.setDefaultPrefix = String(req.body.prefix).split(" ")[0];
-      };
-      if(req.body.defaultvolume) {
-        guildData.setDefaultMusicData.DefaultVolume = Number(req.body.defaultvolume);
-      };
-      if(req.body.defaultautoplay) {
-        guildData.setDefaultMusicData.DefaultAutoplay = true;
-      } else {
-        guildData.setDefaultMusicData.DefaultAutoplay = false;
-      };
-      if(req.body.defaultfilters) {
-        guildData.setDefaultMusicData.DefaultFilters = req.body.defaultfilters;
-      };
-      if(req.body.djroles) {
-        guildData.setDefaultMusicData.Djroles = req.body.djroles;
-      };
-      if(req.body.botchannel) {
-        guildData.setDefaultMusicData.ChannelId = req.body.botchannel;
-      };
-      await database.set(guild.id, guildData);
-      res.render("settings", {
-          req: req,
-          user: req.isAuthenticated() ? req.user : null,
-          guild: client.guilds.cache.get(req.params.guildID),
-          botClient: client,
-          guildData: guildData.setDefaultMusicData,
-          guildData2: guildData,
-          ChannelType: ChannelType,
-          Permissions: PermissionsBitField,
-          bot: settings.website,
-          callback: settings.config.callback,
-          categories: categories, 
-          commands: client.commands, 
-          BotFilters: BotFilters,
-        });
-        await database.set(guild.id, guildData);
-    });
-    // Queue Dash
-    app.get("/queue/:guildID", async (req,res) => {
-      res.render("queue", {
-        req: req,
-        user: req.isAuthenticated() ? req.user : null,
-        guild: client.guilds.cache.get(req.params.guildID),
-        botClient: client,
-        Permissions: PermissionsBitField,
-        bot: settings.website,
-        callback: settings.config.callback,
-        categories: categories, 
-        commands: client.commands, 
-        BotFilters: BotFilters
-      });
-    })
-    //Queue Dashes
-    app.get("/queuedashboard", checkAuth, async (req,res) => {
-      if(!req.isAuthenticated() || !req.user) 
-      return res.redirect("/?error=" + encodeURIComponent("Vui lòng đăng nhập!"));
-      if(!req.user.guilds)
-      return res.redirect("/?error=" + encodeURIComponent("Không thể có được guilds của bạn!"));
-      res.render("queuedashboard", {
-        req: req,
-        user: req.isAuthenticated() ? req.user : null,
-        botClient: client,
-        Permissions: PermissionsBitField,
-        bot: settings.website,
-        callback: settings.config.callback,
-        categories: categories, 
-        commands: client.commands, 
-        BotFilters: BotFilters
-      });
-    });
-    
-    const http = require(`http`).createServer(app);
-    http.listen(settings.config.httpPort, () => {
-        console.log(`HTTP-Website đang chạy trên cổng ${settings.config.httpPort}.`.red);
-    });
+  });
+  /*========================================================
+  ========================================================*/
+  await DBD.useLicense(config.dashboard.useLicense);
+  DBD.Dashboard = DBD.UpdatedClass();
+  const Dashboard = new DBD.Dashboard({
+    port: config.dashboard.port,
+    client: config.dashboard.client,
+    redirectUri: config.dashboard.redirectUri,
+    domain: config.dashboard.domain,
+    ownerIDs: config.dashboard.ownerIDs,
+    useThemeMaintenance: true,
+    useTheme404: true,
+    bot: client,
+    theme: SoftUI({
+      websiteName: "BlackCat-Club", // Tên trang web
+      colorScheme: "pink", // theme
+      supporteMail: "vinhdocle2k3@gmail.com", // email hỗ trợ
+      locales: language, // thiết lập ngôn ngữ cho dashboard
+      customThemeOptions: {
+        index: async({ req, res, config }) => {
+            return {
+              values: [],
+              graph: {},
+              cards: [],
+            }
+        },
+      },
+      // Icons
+      icons: {
+        favicon: client.user?.displayAvatarURL({ size: 4096 }),
+        noGuildIcon: "https://pnggrid.com/wp-content/uploads/2021/05/Discord-Logo-Circle-1024x1024.png",
+        sidebar: {
+          darkUrl: client.user?.displayAvatarURL({ size: 4096 }),
+          lightUrl: client.user?.displayAvatarURL({ size: 4096 }),
+          hideName: true,
+          borderRadius: false,
+          alignCenter: true,
+        },
+      },
+      index: {
+        card: {
+          category: "Soft UI",
+          title: "Trợ lý - Trung tâm của mọi thứ",
+          description: `
+            <b>
+              <i>${client.user.username}</i>
+            </b>
+          `,
+          image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
+          link: {
+            enabled: true,
+            url: "https://www.facebook.com/BlackCat.2k3"
+          }
+        },
+        graph: {
+          enabled: true,
+          lineGraph: false,
+          title: 'Memory Usage',
+          tag: 'Memory (MB)',
+          max: 100
+        },
+      },
+      sweetalert: {
+        errors: {},
+        success: {
+          login: "Đã đăng nhập thành công.",
+        }
+      },
+      preloader: {
+        image: "https://media.discordapp.net/attachments/1092828708798214284/1092828811818709113/music.gif",
+        spinner: false,
+        text: "Loading ...",
+      },
+      admin: {
+        pterodactyl: {
+          enabled: false,
+          apiKey: "apiKey",
+          panelLink: "https://panel.website.com",
+          serverUUIDs: []
+        }
+      },
+      commands: [
+        {
+					category: "Music",
+					subTitle: "Music Commands",
+					aliasesDisabled: false,
+					list: Music,
+				},
+      ],
+    }),
+    settings: [
+      {
+        categoryId: 'setup',
+        categoryName: "Setup",
+        categoryDescription: "Thiết lập bot của bạn với cài đặt mặc định!",
+        categoryOptionsList: [
+          {
+            optionId: 'prefix',
+            optionName: "CustomPrefix",
+            optionDescription: "Thay đổi prefix cho guilds",
+            optionType: DBD.formTypes.input("Prefix của bạn.", 1, 5),
+            getActualSet: async ({ guild }) => {
+              const getPrefix = database.get(guild.id);
+              return (getPrefix.setDefaultPrefix);
+            },
+            setNew: async({ guild, newData }) => {
+              const getPrefix = database.get(guild.id);
+              getPrefix.setDefaultPrefix = newData;
+              await database.set(guild.id, getPrefix);
+              console.log(`Đã đổi prefix mới cho ${guild.name}, prefix mới: ${newData}`);
+            }
+          },{
+            optionId: 'volume',
+            optionName: "DefaultVolume",
+            optionDescription: "Thiết lập mặc định mức âm lượng",
+            optionType: DBD.formTypes.input("Volume", 1, 150),
+            getActualSet: async ({ guild }) => {
+              const getVolume = database.get(guild.id);
+              return (getVolume.setDefaultMusicData.DefaultVolume) || 50;
+            },
+            setNew: async ({ guild, newData }) => {
+              const getVolume = database.get(guild.id);
+              getVolume.setDefaultMusicData.DefaultVolume = Number(newData);
+              await database.set(guild.id, getVolume);
+            }
+          },{
+            optionId: 'autoplay',
+            optionName: "DefaultAutoplay",
+            optionDescription: "Thiết lập chế độ mặc định tự động phát",
+            optionType: DBD.formTypes.switch(),
+            getActualSet: async({ guild }) => {
+              const defaultAutopl = database.get(guild.id);
+              return (defaultAutopl.setDefaultMusicData.DefaultAutoplay);
+            },
+            setNew: async({ guild, newData }) => {
+              const defaultAutopl = database.get(guild.id);
+              defaultAutopl.setDefaultMusicData.DefaultAutoplay = Boolean(newData);
+              await database.set(guild.id, defaultAutopl);
+            }
+          },{
+            optionId: 'autoresume',
+            optionName: "DefaultResume",
+            optionDescription: "Thiết lập chế độ mặc định tự động phát lại nhạc khi bot lỗi",
+            optionType: DBD.formTypes.switch(),
+            getActualSet: async({ guild }) => {
+              const defaultAutore = database.get(guild.id);
+              return (defaultAutore.setDefaultMusicData.DefaultAutoresume);
+            },
+            setNew: async({ guild, newData }) => {
+              const defaultAutore = database.get(guild.id);
+              defaultAutore.setDefaultMusicData.DefaultAutoresume = Boolean(newData);
+              await database.set(guild.id, defaultAutore);
+            }
+          },{
+            optionId: 'djrole',
+            optionName: "Djrole 🎶",
+            optionDescription: "Thiết lập role dành riêng để phát nhạc (Hiện chưa thể dùng)",
+            optionType: DBD.formTypes.rolesMultiSelect(false, true, false, true),
+            getActualSet: async ({ guild }) => {
+              const defaultAutopl = database.get(guild.id);
+              return (defaultAutopl.setDefaultMusicData.Djroles);
+            },
+            setNew: async ({ guild, newData }) => {
+              const defaultAutopl = database.get(guild.id);
+              defaultAutopl.setDefaultMusicData.Djroles = newData;
+              await database.set(guild.id, defaultAutopl);
+            }
+          },{
+            optionId: "filters",
+            optionName: "DefaultFilters",
+            optionDescription: "Thiết lập Filters mặc định khi phát nhạc",
+            optionType: DBD.formTypes.multiSelect(BotFilters),
+            getActualSet: async ({ guild }) => {
+              const defaultFilters = database.get(guild.id);
+              return (defaultFilters.setDefaultMusicData.DefaultFilters);
+            },
+            setNew: async ({ guild, newData }) => {
+              const defaultFilters = database.get(guild.id);
+              defaultFilters.setDefaultMusicData.DefaultFilters = newData;
+              await database.set(guild.id, defaultFilters);
+            }
+          },
+        ]
+      },{
+        categoryId: 'welcomeGoodbye',
+        categoryName: "welcomeGoodbye",
+        categoryDescription: "Thiết lập welcomeGoodbye cho guilds!",
+        categoryOptionsList: [
+          {
+            optionId: 'welcome',
+            optionName: "WelcomeChannel",
+            optionDescription: "Thiết lập welcome channel",
+            optionType: DBD.formTypes.channelsSelect(false, channelTypes = [ChannelType.GuildText]),
+            getActualSet: async ({ guild }) => {
+              const getChannel = database.get(guild.id);
+              return (getChannel.setDefaultWelcomeGoodbyeData.WelcomeChannel);
+            },
+            setNew: async({ guild, newData }) => {
+              const getChannel = database.get(guild.id);
+              getChannel.setDefaultWelcomeGoodbyeData.WelcomeChannel = newData;
+              await database.set(guild.id, getChannel);
+            }
+          },{
+            optionId: 'googbye',
+            optionName: "GoodbyeChannel",
+            optionDescription: "Thiết lập goodbye channel",
+            optionType: DBD.formTypes.channelsSelect(false, channelTypes = [ChannelType.GuildText]),
+            getActualSet: async ({ guild }) => {
+              const getChannel = database.get(guild.id);
+              return (getChannel.setDefaultWelcomeGoodbyeData.GoodbyeChannel);
+            },
+            setNew: async({ guild, newData }) => {
+              const getChannel = database.get(guild.id);
+              getChannel.setDefaultWelcomeGoodbyeData.GoodbyeChannel = newData;
+              await database.set(guild.id, getChannel);
+            }
+          },{
+            optionId: 'autoRole',
+            optionName: "AutoAddRole",
+            optionDescription: "Thiết lập tự động add role khi thành viên mới tham gia guilds",
+            optionType: DBD.formTypes.rolesMultiSelect(false, true, false, true),
+            getActualSet: async ({ guild }) => {
+              const getRoles = database.get(guild.id);
+              return (getRoles.setDefaultWelcomeGoodbyeData.AutoAddRoleWel);
+            },
+            setNew: async({ guild, newData }) => {
+              const getRoles = database.get(guild.id);
+              getRoles.setDefaultWelcomeGoodbyeData.AutoAddRoleWel = newData;
+              await database.set(guild.id, getRoles);
+            }
+          },
+        ]
+      }
+    ]
+  });
+  Dashboard.init();
 };

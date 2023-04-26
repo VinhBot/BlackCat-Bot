@@ -108,6 +108,7 @@ module.exports = {
           a: new ButtonBuilder().setLabel("-").setStyle(ButtonStyle.Secondary).setCustomId("a15"),
         },
       ];
+    
       function shuffle(array) {
         let currentIndex = array.length, randomIndex;
         while (currentIndex != 0) {
@@ -154,17 +155,21 @@ module.exports = {
           clicks -= 1;
         };
         used.a = used.r;
-        row1 = new ActionRowBuilder().addComponents(positions[0].a, positions[1].a, positions[2].a)
-        row2 = new ActionRowBuilder().addComponents(positions[3].a, positions[4].a, positions[5].a)
-        row3 = new ActionRowBuilder().addComponents(positions[6].a, positions[7].a, positions[8].a)
-        row4 = new ActionRowBuilder().addComponents(positions[9].a, positions[10].a, positions[11].a)
-        row5 = new ActionRowBuilder().addComponents(positions[12].a, positions[13].a, positions[14].a)
         embed = new EmbedBuilder()
           .setColor('Random')
           .setTitle(`${message.author.username } kiếp đỏ đen`)
           .setTimestamp()
           .setDescription(`Tiền thắng: **${moneyEarned.toLocaleString()}₫ ** \nBạn có: **${clicks}** lần cào nữa.`)
-        msg.edit({ embeds: [embed], components: [row1, row2, row3, row4, row5] });
+        msg.edit({ 
+          embeds: [embed], 
+          components: [
+            new ActionRowBuilder().addComponents(positions[0].a, positions[1].a, positions[2].a),
+            new ActionRowBuilder().addComponents(positions[3].a, positions[4].a, positions[5].a),
+            new ActionRowBuilder().addComponents(positions[6].a, positions[7].a, positions[8].a),
+            new ActionRowBuilder().addComponents(positions[9].a, positions[10].a, positions[11].a),
+            new ActionRowBuilder().addComponents(positions[12].a, positions[13].a, positions[14].a),
+          ]
+        });
       });
       collector.on('end', async() => {
         positions.forEach((g) => {
@@ -185,7 +190,16 @@ module.exports = {
           .setColor("Random")
           .setTitle(`${message.author.username } kiếp đỏ đen`)
           .setTimestamp()
-        msg.edit({ embeds: [embed], components: [row1, row2, row3, row4, row5] });
+        msg.edit({
+          embeds: [embed],
+          components: [
+            row1,
+            row2,
+            row3,
+            row4,
+            row5
+          ]
+        });
       });
     },
 };

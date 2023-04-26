@@ -1,5 +1,4 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const { GiveawayClass } = require(`${process.cwd()}/Events/functions`)
 const ms = require("enhanced-ms");
 
 module.exports = {
@@ -94,10 +93,9 @@ module.exports = {
   ],
   run: async(client, interaction) => {
     const subCommands = interaction.options.getSubcommand();
-    const giveaway = new GiveawayClass(client);
     if(subCommands === "start") {
       const channel = interaction.options.getChannel("channel");
-      return await giveaway.runModalSetup(interaction, channel);
+      return await client.giveawaysManager.runModalSetup(interaction, channel);
     } else if(subCommands === "pause") {
       const messageId = interaction.options.getString("message_id");
       const giveaway = client.giveawaysManager.giveaways.find((g) => g.messageId === messageId && g.guildId === interaction.guild.id);

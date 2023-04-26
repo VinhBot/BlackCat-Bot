@@ -75,7 +75,8 @@ module.exports = {
           { name: "🔀 Xáo trộn hàng đợi", value: "shuffle"},
           { name: "🔼 Thêm một bài hát liên quan", value: "relatedSong"},
           { name: "🔁 Chuyển đổi chế độ lặp lại", value: "repeatMode"},
-          { name: "⏮ Phát bài hát trước", value: "previous"}
+          { name: "⏮ Phát bài hát trước", value: "previous"},
+          { name: "⏳ Xem vài hát hiện tại đang phát", value: "nowplaying"},
         ],
       }],
     },{
@@ -213,6 +214,48 @@ module.exports = {
         return interaction.reply({ content: "⏮ Phát bản nhạc trước.", ephemeral: true});                                           
       } else if(option === "queue") {
         return interaction.reply({ embeds: [new EmbedBuilder().setColor("Purple").setDescription(`${queue.songs.map((song, id) => `\n**${id + 1}**. ${song.name} - \`${song.formattedDuration}\``)}`)], ephemeral: true});                   
+      } else if(option === "nowplaying") {
+        let newQueue = client.distube.getQueue(guildId);
+        function numberWithCommas(number) { // 1000 to 1,000
+          return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        };
+        if(!newQueue || !newQueue.songs || newQueue.songs.length == 0) return interaction.reply({
+		    	embeds: [new EmbedBuilder().setColor("Random").setTitle("Danh sách nhạc trống")],
+	      });
+        const memberVoice = interaction.guild.members.me.voice.channel || null;
+        const voiceChannelMembers = memberVoice.members.filter((member) => !member.user.bot);
+        const nowEmbed = new EmbedBuilder()
+        .setColor("Random")
+        .setDescription(`Đang phát **[${newQueue.songs[0].name} (${newQueue.songs[0].formattedDuration})](${newQueue.songs[0].url})** có ${voiceChannelMembers.size} người đang nghe trong <#${VoiceChannel.id}>`)
+        .setThumbnail(newQueue.songs[0]?.thumbnail)
+        .setFooter({
+          text: `Bài hát được yêu cầu bởi ${newQueue.songs[0].user.tag}`,
+          iconURL: newQueue.songs[0].user.displayAvatarURL({ size: 1024 })
+        })
+        .addFields([
+          { name: "**Volume**", value: `\`${newQueue.volume}%\`` },
+          { name: "**Filters**", value: `\`${newQueue.filters.names.join(', ') || 'Tắt'}\`` },
+          { name: "**Vòng lặp**", value: `\`${newQueue.repeatMode ? newQueue.repeatMode === 2 ? 'Tất Cả Hàng đợi' : 'Bài hát này' : 'Tắt'}\`` },
+          { name: "**Tự động phát**", value: `\`${newQueue.autoplay ? 'Bật' : 'Tắt'}\`` },
+        ]);
+        if(newQueue.songs[0].views) nowEmbed.addFields({
+          name: '👀 Views:',
+          value: `${numberWithCommas(newQueue.songs[0].views)}`,
+          inline: true
+        });
+        if(newQueue.songs[0].likes) nowEmbed.addFields({
+          name: '👍🏻 Likes:',
+          value: `${numberWithCommas(newQueue.songs[0].likes)}`,
+          inline: true
+        });
+        if(newQueue.songs[0].dislikes) nowEmbed.addFields({
+          name: '👎🏻 Dislikes:',
+          value: `${numberWithCommas(newQueue.songs[0].dislikes)}`,
+          inline: true
+        });
+        return interaction.reply({
+          embeds: [nowEmbed]
+        });
       };
     } else if(options.getSubcommand() === "filters") {
       const queue = await client.distube.getQueue(VoiceChannel);

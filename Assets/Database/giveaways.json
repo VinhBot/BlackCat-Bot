@@ -1,94 +1,10 @@
 {
-    "1097234637094408212": {
-        "messageId": "1097234637094408212",
+    "1100045797199970447": {
+        "messageId": "1100045797199970447",
         "channelId": "1055150050357022843",
         "guildId": "1055150050357022840",
-        "startAt": 1681671522993,
-        "endAt": 1681675122993,
-        "ended": true,
-        "winnerCount": 1,
-        "prize": "_?''?\"??\"?\"?'?",
-        "messages": {
-            "giveaway": "🎉🎉 **GIVEAWAY** 🎉🎉",
-            "giveawayEnded": "🎉🎉 **GIVEAWAY ENDED** 🎉🎉",
-            "title": "{this.prize}",
-            "inviteToParticipate": "React with 🎉 to participate!",
-            "winMessage": "Congratulations, {winners}! You won **{this.prize}**!\n{this.messageURL}",
-            "drawing": "Drawing: {timestamp}",
-            "dropMessage": "Be the first to react with 🎉 !",
-            "embedFooter": "{this.winnerCount} winner(s)",
-            "noWinner": "Giveaway cancelled, no valid participations.",
-            "winners": "Winner(s):",
-            "endedAt": "Ended at",
-            "hostedBy": "Hosted by: {this.hostedBy}"
-        },
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ]
-    },
-    "1097236382101016726": {
-        "messageId": "1097236382101016726",
-        "channelId": "1055150050357022843",
-        "guildId": "1055150050357022840",
-        "startAt": 1681671939022,
-        "endAt": 1681675539022,
-        "ended": true,
-        "winnerCount": 1,
-        "prize": "test",
-        "messages": {
-            "giveaway": "🎉🎉 **GIVEAWAY** 🎉🎉",
-            "giveawayEnded": "🎉🎉 **GIVEAWAY ENDED** 🎉🎉",
-            "title": "{this.prize}",
-            "inviteToParticipate": "React with 🎉 to participate!",
-            "winMessage": "Congratulations, {winners}! You won **{this.prize}**!\n{this.messageURL}",
-            "drawing": "Drawing: {timestamp}",
-            "dropMessage": "Be the first to react with 🎉 !",
-            "embedFooter": "{this.winnerCount} winner(s)",
-            "noWinner": "Giveaway cancelled, no valid participations.",
-            "winners": "Winner(s):",
-            "endedAt": "Ended at",
-            "hostedBy": "Hosted by: {this.hostedBy}"
-        },
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ]
-    },
-    "1097237185339600988": {
-        "messageId": "1097237185339600988",
-        "channelId": "1055150050357022843",
-        "guildId": "1055150050357022840",
-        "startAt": 1681672130632,
-        "endAt": 1681675730632,
-        "ended": true,
-        "winnerCount": 1,
-        "prize": "kdjxjxmxm",
-        "messages": {
-            "giveaway": "🎉🎉 **GIVEAWAY** 🎉🎉",
-            "giveawayEnded": "🎉🎉 **GIVEAWAY ENDED** 🎉🎉",
-            "title": "{this.prize}",
-            "inviteToParticipate": "React with 🎉 to participate!",
-            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
-            "drawing": "Drawing: {timestamp}",
-            "dropMessage": "Be the first to react with 🎉 !",
-            "embedFooter": "{this.winnerCount} winner(s)",
-            "noWinner": "Giveaway cancelled, no valid participations.",
-            "winners": "Winner(s):",
-            "endedAt": "Ended at",
-            "hostedBy": "Hosted by: {this.hostedBy}"
-        },
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ]
-    },
-    "1097237830230614117": {
-        "messageId": "1097237830230614117",
-        "channelId": "1055150050357022843",
-        "guildId": "1055150050357022840",
-        "startAt": 1681672284274,
-        "endAt": 1681685425029,
+        "startAt": 1682341755838,
+        "endAt": 1682341815838,
         "ended": true,
         "winnerCount": 1,
         "prize": "test",
@@ -106,21 +22,64 @@
             "endedAt": "Ended at",
             "hostedBy": "Hosted by: {this.hostedBy}"
         },
-        "hostedBy": "<@788208207465938954>",
-        "winnerIds": [
-            "788208207465938954"
-        ],
-        "pauseOptions": {
-            "durationAfterPause": 3584141,
-            "isPaused": false
-        }
+        "hostedBy": "<@788208207465938954>"
     },
-    "1097301131283140648": {
-        "messageId": "1097301131283140648",
+    "1100047327894442024": {
+        "messageId": "1100047327894442024",
         "channelId": "1055150050357022843",
         "guildId": "1055150050357022840",
-        "startAt": 1681687376427,
-        "endAt": 1681707034963,
+        "startAt": 1682342120751,
+        "endAt": 1682342180751,
+        "ended": true,
+        "winnerCount": 1,
+        "prize": "test",
+        "messages": {
+            "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
+            "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
+            "title": "{this.prize}",
+            "inviteToParticipate": "React with 🎉 to participate!",
+            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
+            "drawing": "Drawing: {timestamp}",
+            "dropMessage": "Be the first to react with 🎉 !",
+            "embedFooter": "{this.winnerCount} winner(s)",
+            "noWinner": "Giveaway cancelled, no valid participations.",
+            "winners": "Winner(s):",
+            "endedAt": "Ended at",
+            "hostedBy": "Hosted by: {this.hostedBy}"
+        },
+        "hostedBy": "<@788208207465938954>"
+    },
+    "1100048584566644791": {
+        "messageId": "1100048584566644791",
+        "channelId": "1055150050357022843",
+        "guildId": "1055150050357022840",
+        "startAt": 1682342420453,
+        "endAt": 1682342480453,
+        "ended": true,
+        "winnerCount": 1,
+        "prize": "test",
+        "messages": {
+            "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
+            "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
+            "title": "{this.prize}",
+            "inviteToParticipate": "React with 🎉 to participate!",
+            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
+            "drawing": "Drawing: {timestamp}",
+            "dropMessage": "Be the first to react with 🎉 !",
+            "embedFooter": "{this.winnerCount} winner(s)",
+            "noWinner": "Giveaway cancelled, no valid participations.",
+            "winners": "Winner(s):",
+            "endedAt": "Ended at",
+            "hostedBy": "Hosted by: {this.hostedBy}"
+        },
+        "hostedBy": "<@788208207465938954>"
+    },
+    "1100053673079480392": {
+        "messageId": "1100053673079480392",
+        "channelId": "1055150050357022843",
+        "guildId": "1055150050357022840",
+        "startAt": 1682343633295,
+        "endAt": 1682343693295,
         "ended": true,
         "winnerCount": 1,
         "prize": "test",
@@ -143,15 +102,98 @@
             "788208207465938954"
         ]
     },
-    "1097384299768053771": {
-        "messageId": "1097384299768053771",
+    "1100060387879165952": {
+        "messageId": "1100060387879165952",
         "channelId": "1055150050357022843",
         "guildId": "1055150050357022840",
-        "startAt": 1681707205222,
-        "endAt": 1681707805222,
+        "startAt": 1682345234512,
+        "endAt": 1682345294512,
         "ended": true,
         "winnerCount": 1,
-        "prize": "test-abcxyz",
+        "prize": "test",
+        "messages": {
+            "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
+            "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
+            "title": "{this.prize}",
+            "inviteToParticipate": "React with 🎉 to participate!",
+            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
+            "drawing": "Drawing: {timestamp}",
+            "dropMessage": "Be the first to react with 🎉 !",
+            "embedFooter": "{this.winnerCount} winner(s)",
+            "noWinner": "Giveaway cancelled, no valid participations.",
+            "winners": "Winner(s):",
+            "endedAt": "Ended at",
+            "hostedBy": "Hosted by: {this.hostedBy}"
+        },
+        "winnerIds": [
+            "788208207465938954"
+        ]
+    },
+    "1100060928092930068": {
+        "messageId": "1100060928092930068",
+        "channelId": "1055150050357022843",
+        "guildId": "1055150050357022840",
+        "startAt": 1682345363312,
+        "endAt": 1682345423312,
+        "ended": true,
+        "winnerCount": 1,
+        "prize": "test",
+        "messages": {
+            "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
+            "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
+            "title": "{this.prize}",
+            "inviteToParticipate": "React with 🎉 to participate!",
+            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
+            "drawing": "Drawing: {timestamp}",
+            "dropMessage": "Be the first to react with 🎉 !",
+            "embedFooter": "{this.winnerCount} winner(s)",
+            "noWinner": "Giveaway cancelled, no valid participations.",
+            "winners": "Winner(s):",
+            "endedAt": "Ended at",
+            "hostedBy": "Hosted by: {this.hostedBy}"
+        },
+        "hostedBy": "<@788208207465938954>",
+        "winnerIds": [
+            "788208207465938954"
+        ]
+    },
+    "1100064626839932968": {
+        "messageId": "1100064626839932968",
+        "channelId": "1055150050357022843",
+        "guildId": "1055150050357022840",
+        "startAt": 1682346245055,
+        "endAt": 1682346305055,
+        "ended": true,
+        "winnerCount": 1,
+        "prize": "e!gstart <#1055150050357022843>",
+        "messages": {
+            "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
+            "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
+            "title": "{this.prize}",
+            "inviteToParticipate": "React with 🎉 to participate!",
+            "winMessage": "Chúc mừng, {winners}! Bạn đã thắng **{this.prize}**!\nVui lòng liên hệ với chủ sever để nhận giải",
+            "drawing": "Drawing: {timestamp}",
+            "dropMessage": "Be the first to react with 🎉 !",
+            "embedFooter": "{this.winnerCount} winner(s)",
+            "noWinner": "Giveaway cancelled, no valid participations.",
+            "winners": "Winner(s):",
+            "endedAt": "Ended at",
+            "hostedBy": "Hosted by: {this.hostedBy}"
+        },
+        "hostedBy": "<@788208207465938954>",
+        "winnerIds": [
+            "788208207465938954"
+        ]
+    },
+    "1100065003735888053": {
+        "messageId": "1100065003735888053",
+        "channelId": "1055150050357022843",
+        "guildId": "1055150050357022840",
+        "startAt": 1682346334535,
+        "endAt": 1682346394535,
+        "ended": true,
+        "winnerCount": 1,
+        "prize": "!gstart <#1055150050357022843>",
         "messages": {
             "giveaway": "🎉🎉 **Bắt đầu Giveaways** 🎉🎉",
             "giveawayEnded": "🎉🎉 **Giveaways đã kết thúc** 🎉🎉",
