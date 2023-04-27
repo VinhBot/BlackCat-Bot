@@ -4,25 +4,22 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": true,
-            "DefaultVolume": 50,
+            "DefaultAutoplay": false,
+            "DefaultVolume": 57,
             "DefaultFilters": [
                 "3d",
                 "bassboost"
             ],
-            "MessageId": "1092828039475367946",
+            "MessageId": "1101203129694953512",
             "ChannelId": "1092827995003166882",
             "ChannelAutoCreateVoice": "1096800005123227760",
-            "Djroles": [
-                "1089413553615814750"
-            ]
+            "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "1089615977559375954",
             "GoodbyeChannel": "1089615977559375954",
             "AutoAddRoleWel": [
-                "1089413553615814750",
-                "1089413589267382282"
+                "1089413553615814750"
             ]
         }
     },

@@ -75,9 +75,13 @@ const theme = (client, config) => {
         },
       },
       sweetalert: {
-        errors: {},
+        errors: {
+          settingsSave: "Không thể lưu cài đặt"
+        },
         success: {
           login: "Đã đăng nhập thành công.",
+          logout: "Đã đăng xuất thành công.",
+          settingsSave: "Đã lưu cài đặt thành công"
         }
       },
       preloader: {
