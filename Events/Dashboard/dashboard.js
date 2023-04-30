@@ -3,10 +3,12 @@ const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
 const { Database } = require("st.db");
 const theme = require("./theme.js");
+const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true,
 });
+
 /*========================================================
 # Main 
 ========================================================*/
@@ -100,7 +102,7 @@ const welconmeGoodbyeCh = (client) => {
               },
             },
         ]),
-      }, // kết thúc lựa chọn 1
+      }
     ]
   };
 };
@@ -125,48 +127,6 @@ const setupMusic = (client) => {
     "tremolo": "tremolo",
     "earwax": "earwax"
   };
-  const embeds = (guilds) => {
-    const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
-    const guild = client.guilds.cache.get(guilds.id);
-    var Emojis = [`0️⃣`, `1️⃣`, `2️⃣`, `3️⃣`, `4️⃣`, `5️⃣`, `6️⃣`, `7️⃣`, `8️⃣`, `9️⃣`, `🔟`, `🟥`,`🟧`, `🟨`, `🟩`, `🟦`, `🟪`, `🟫`];
-    return {
-      embeds: [new EmbedBuilder()
-        .setColor("Random")
-        .setTitle(`📃 hàng đợi của __${guild.name}__`)
-        .setDescription(`**Hiện tại có __0 Bài hát__ trong Hàng đợi**`)
-        .setThumbnail(guild.iconURL({ dynamic: true })),
-        new EmbedBuilder()
-        .setColor("Random")
-        .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-        .setImage(guild.banner ? guild.bannerURL({ size: 4096 }) : "https://i.pinimg.com/originals/72/97/52/729752d06f814ebfbcc9a35215e2b897.jpg")
-        .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh thoại và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
-        .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
-      ], components: [new ActionRowBuilder().addComponents([
-        new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Pop`, `Strange-Fruits`, `Gaming`, `Chill`, `Rock`, `Jazz`, `Blues`, `Metal`, `Magic-Release`, `NCS | No Copyright Music`, `Default`].map((t, index) => {
-            return {
-              label: t.substr(0, 25),
-              value: t.substr(0, 25),
-              description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),
-              emoji: Emojis[index]
-            };
-          }))
-        ]),
-        new ActionRowBuilder().addComponents([
-          new ButtonBuilder().setStyle('Primary').setCustomId('Skip').setEmoji(`⏭`).setLabel(`Skip`).setDisabled(),
-          new ButtonBuilder().setStyle('Danger').setCustomId("1").setEmoji(`🏠`).setLabel(`Stop`).setDisabled(),
-          new ButtonBuilder().setStyle('Secondary').setCustomId('Pause').setEmoji('⏸').setLabel(`Pause`).setDisabled(),
-          new ButtonBuilder().setStyle('Success').setCustomId('Autoplay').setEmoji('🔁').setLabel(`Autoplay`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Shuffle').setEmoji('🔀').setLabel(`Shuffle`).setDisabled(),
-        ]),
-        new ActionRowBuilder().addComponents([
-          new ButtonBuilder().setStyle('Success').setCustomId('Song').setEmoji(`🔁`).setLabel(`Song`).setDisabled(),
-          new ButtonBuilder().setStyle('Success').setCustomId('Queue').setEmoji(`🔂`).setLabel(`Queue`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Forward').setEmoji('⏩').setLabel(`+10 Sec`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Rewind').setEmoji('⏪').setLabel(`-10 Sec`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
-        ]),
-    ]};
-  };
   return {
     categoryId: 'MusicCommands-setup',
     categoryName: "Music Commands 🎶",
@@ -189,7 +149,7 @@ const setupMusic = (client) => {
             },
             setNew: async({ guild, newData }) => {
               client.channels.fetch(newData).then((channel) => {
-                channel.send(embeds(guild)).then(async(msg) => {
+                channel.send(musicEmbedDefault(client, guild)).then(async(msg) => {
                   const guildData = await database.get(guild.id);
                   // Cập nhật thuộc tính setDefaultMusicData với giá trị mới
                   guildData.setDefaultMusicData.ChannelId = channel.id;
@@ -203,7 +163,7 @@ const setupMusic = (client) => {
             optionId: 'volume',
             optionName: "Default Volume",
             optionDescription: "Thiết lập mặc định mức âm lượng (1 - 150)",
-            optionType: DBD.formTypes.input("Volume", 1, 150),
+            optionType: SoftUI.formTypes.numberPicker(1, 150, false),
             getActualSet: async ({ guild }) => {
               const getVolume = database.get(guild.id);
               return (getVolume.setDefaultMusicData.DefaultVolume) || 50;
@@ -299,3 +259,8 @@ module.exports = async(client) => {
   });
   Dashboard.init();
 };
+db.list("prefix").then(matches => {})
+db.list("prefix").then(matches => {})
+db.list().then(keys => {})
+db.list().then(keys => {})
+db.list().then(keys => {})

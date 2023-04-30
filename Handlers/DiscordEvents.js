@@ -11,7 +11,7 @@ module.exports = async(client) => {
   # EconomyHandler
   ========================================================*/
   client.cs = new EconomyHandler({
-    EcoPath: "./Assets/Database/economyDatabase.json",
+    EcoPath: "./Assets/Database/economy.json",
     setFormat: ["vi-VN", "VND"], // xác định loại tiền của các nước
     // Đặt số tiền ngân hàng mặc định khi người dùng mới được tạo!
     setDefaultWalletAmount: 10000, // trong ví tiền

@@ -5,7 +5,7 @@
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
             "DefaultAutoplay": false,
-            "DefaultVolume": 57,
+            "DefaultVolume": 55,
             "DefaultFilters": [
                 "3d",
                 "bassboost"

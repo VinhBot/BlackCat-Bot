@@ -60,6 +60,48 @@ function onCoolDown(cooldowns, message, commands) {
     return false;
   };
 };
+// Music embed
+const musicEmbedDefault = (client, guilds) => {
+    const guild = client.guilds.cache.get(guilds.id);
+    var Emojis = [`0️⃣`, `1️⃣`];
+    return {
+      embeds: [new EmbedBuilder()
+        .setColor("Random")
+        .setTitle(`📃 hàng đợi của __${guild.name}__`)
+        .setDescription(`**Hiện tại có __0 Bài hát__ trong Hàng đợi**`)
+        .setThumbnail(guild.iconURL({ dynamic: true })),
+        new EmbedBuilder()
+        .setColor("Random")
+        .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
+        .setImage(guild.banner ? guild.bannerURL({ size: 4096 }) : "https://i.pinimg.com/originals/72/97/52/729752d06f814ebfbcc9a35215e2b897.jpg")
+        .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh thoại và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
+        .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
+      ], components: [new ActionRowBuilder().addComponents([
+        new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Gaming`, `NCS | No Copyright Music`].map((t, index) => {
+            return {
+              label: t.substr(0, 25),
+              value: t.substr(0, 25),
+              description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),
+              emoji: Emojis[index]
+            };
+          }))
+        ]),
+        new ActionRowBuilder().addComponents([
+          new ButtonBuilder().setStyle('Primary').setCustomId('Skip').setEmoji(`⏭`).setLabel(`Skip`).setDisabled(),
+          new ButtonBuilder().setStyle('Danger').setCustomId("1").setEmoji(`🏠`).setLabel(`Stop`).setDisabled(),
+          new ButtonBuilder().setStyle('Secondary').setCustomId('Pause').setEmoji('⏸').setLabel(`Pause`).setDisabled(),
+          new ButtonBuilder().setStyle('Success').setCustomId('Autoplay').setEmoji('🔁').setLabel(`Autoplay`).setDisabled(),
+          new ButtonBuilder().setStyle('Primary').setCustomId('Shuffle').setEmoji('🔀').setLabel(`Shuffle`).setDisabled(),
+        ]),
+        new ActionRowBuilder().addComponents([
+          new ButtonBuilder().setStyle('Success').setCustomId('Song').setEmoji(`🔁`).setLabel(`Song`).setDisabled(),
+          new ButtonBuilder().setStyle('Success').setCustomId('Queue').setEmoji(`🔂`).setLabel(`Queue`).setDisabled(),
+          new ButtonBuilder().setStyle('Primary').setCustomId('Forward').setEmoji('⏩').setLabel(`+10 Sec`).setDisabled(),
+          new ButtonBuilder().setStyle('Primary').setCustomId('Rewind').setEmoji('⏪').setLabel(`-10 Sec`).setDisabled(),
+          new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
+        ]),
+    ]};
+};
 // MusicRole
 function MusicRole(client, member, song) {
     if(!client) return false; // nếu không có tin nhắn được thêm trở lại
@@ -79,7 +121,7 @@ function MusicRole(client, member, song) {
         return false;
     };
 };
-// music handlet
+// music handler
 const disspace = function(newQueue, newTrack, queue) {
     const dataMusic = database.get(newQueue.id);
     var djs = dataMusic.setDefaultMusicData.Djroles;
@@ -411,7 +453,7 @@ const ticketHandler = class {
       return "Không thể thêm người dùng/Roles. Bạn đã cung cấp ID hợp lệ chưa?";
     };
   };
-  /***/
+  /** */
   async removeFromTicket({ channel }, inputId) {
     if (!isTicketChannel(channel)) return "Lệnh này chỉ có thể được sử dụng trong kênh ticket";
     if (!inputId || isNaN(inputId)) return "Bạn cần nhập một giá trị hợp lệ userId/roleId";
@@ -1120,6 +1162,6 @@ const EconomyHandler = class {
 };
 
 module.exports = {
-  onCoolDown, disspace, setupDatabase, baseURL, MusicRole,
+  onCoolDown, disspace, setupDatabase, baseURL, MusicRole, musicEmbedDefault,
   ticketHandler, EconomyHandler
 };
