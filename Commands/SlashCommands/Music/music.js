@@ -1,4 +1,5 @@
-const { ApplicationCommandOptionType, EmbedBuilder, ChannelType, SelectMenuBuilder, ActionRowBuilder } = require("discord.js");
+const { ApplicationCommandOptionType, EmbedBuilder, ChannelType, SelectMenuBuilder, ActionRowBuilder, AttachmentBuilder } = require("discord.js");
+const Canvas = require('canvas');
 module.exports = {
   name: "music", // Tên lệnh 
   description: "phát một bài hát", // Mô tả lệnh
@@ -216,45 +217,81 @@ module.exports = {
         return interaction.reply({ embeds: [new EmbedBuilder().setColor("Purple").setDescription(`${queue.songs.map((song, id) => `\n**${id + 1}**. ${song.name} - \`${song.formattedDuration}\``)}`)], ephemeral: true});                   
       } else if(option === "nowplaying") {
         let newQueue = client.distube.getQueue(guildId);
-        function numberWithCommas(number) { // 1000 to 1,000
-          return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-        };
         if(!newQueue || !newQueue.songs || newQueue.songs.length == 0) return interaction.reply({
 		    	embeds: [new EmbedBuilder().setColor("Random").setTitle("Danh sách nhạc trống")],
 	      });
-        const memberVoice = interaction.guild.members.me.voice.channel || null;
-        const voiceChannelMembers = memberVoice.members.filter((member) => !member.user.bot);
-        const nowEmbed = new EmbedBuilder()
-        .setColor("Random")
-        .setDescription(`Đang phát **[${newQueue.songs[0].name} (${newQueue.songs[0].formattedDuration})](${newQueue.songs[0].url})** có ${voiceChannelMembers.size} người đang nghe trong <#${VoiceChannel.id}>`)
-        .setThumbnail(newQueue.songs[0]?.thumbnail)
-        .setFooter({
-          text: `Bài hát được yêu cầu bởi ${newQueue.songs[0].user.tag}`,
-          iconURL: newQueue.songs[0].user.displayAvatarURL({ size: 1024 })
-        })
-        .addFields([
-          { name: "**Volume**", value: `\`${newQueue.volume}%\`` },
-          { name: "**Filters**", value: `\`${newQueue.filters.names.join(', ') || 'Tắt'}\`` },
-          { name: "**Vòng lặp**", value: `\`${newQueue.repeatMode ? newQueue.repeatMode === 2 ? 'Tất Cả Hàng đợi' : 'Bài hát này' : 'Tắt'}\`` },
-          { name: "**Tự động phát**", value: `\`${newQueue.autoplay ? 'Bật' : 'Tắt'}\`` },
-        ]);
-        if(newQueue.songs[0].views) nowEmbed.addFields({
-          name: '👀 Views:',
-          value: `${numberWithCommas(newQueue.songs[0].views)}`,
-          inline: true
+        let queuesong = newQueue.formattedCurrentTime;
+        let cursong = newQueue.songs[0];
+        let cursongtimes = 0;
+        let cursongtimem = 0;
+        let cursongtimeh = 0;
+        let queuetimes = 0;
+        let queuetimem = 0;
+        let queuetimeh = 0;
+        if(cursong.formattedDuration.split(":").length === 3) {
+          cursongtimes = cursong.formattedDuration.split(":")[2]
+          cursongtimem = cursong.formattedDuration.split(":")[1]
+          cursongtimeh = cursong.formattedDuration.split(":")[0]
+        };
+        if(queuesong.split(":").length === 3) {
+          queuetimes = queuesong.split(":")[2]
+          queuetimem = queuesong.split(":")[1]
+          queuetimeh = queuesong.split(":")[0]
+        };
+        cursongtimes = cursong.formattedDuration.split(":")[1]
+        cursongtimem = cursong.formattedDuration.split(":")[0]
+        queuetimes = queuesong.split(":")[1]
+        queuetimem = queuesong.split(":")[0]
+        let maxduration = Number(cursongtimes) + Number(cursongtimem) * 60 + Number(cursongtimeh) * 60 * 60;
+        let minduration = Number(queuetimes) + Number(queuetimem) * 60 + Number(queuetimeh) * 60 * 60;
+        let percentduration = Math.floor((minduration / maxduration) * 100);
+        let songtitle = cursong.name;
+        let oftime = `${newQueue.formattedCurrentTime}/${cursong.formattedDuration}`
+        const canvas = Canvas.createCanvas(800, 200);
+        const ctx = canvas.getContext('2d');
+        const background = await Canvas.loadImage("https://cdn.discordapp.com/attachments/1092880002695036950/1103677516016787517/bg.png");
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+        const url = `https://img.youtube.com/vi/${cursong.id}/mqdefault.jpg`
+        const avatar = await Canvas.loadImage(url);
+        ctx.drawImage(avatar, 10, 10, 192, 108);
+        var textString = songtitle.substr(0, 35);
+        ctx.font = 'bold 40px Genta';
+        ctx.fillStyle = '#d625ed';
+        ctx.fillText(textString, 10 + 192 + 10, 10 + 25);
+        let textStringt
+        if (songtitle.length > 40) textStringt = songtitle.substr(35, 32) + "...";
+        else textStringt = "";
+        ctx.font = 'bold 40px Genta';
+        ctx.fillStyle = '#d625ed';
+        ctx.fillText(textStringt, 10 + 192 + 10, 10 + 25 + 40);
+        ctx.font = 'bold 30px Genta';
+        ctx.fillStyle = '#d625ed';
+        ctx.fillText(oftime, 10 + 192 + 10, 10 + 25 + 30 + 50);
+        let percent = percentduration;
+        let index = Math.floor(percent) || 10;
+        let left = Number(".".repeat(index).length) * 7.9;
+        if(left < 50) left = 50;
+        let x = 14;
+        let y = 200 - 65;
+        let width = left;
+        let height = 50;
+        let radius = 25;
+        if(width < 2 * radius) radius = width / 2;
+        if(height < 2 * radius) radius = height / 2;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.arcTo(x + width, y, x + width, y + height, radius);
+        ctx.arcTo(x + width, y + height, x, y + height, radius);
+        ctx.arcTo(x, y + height, x, y, radius);
+        ctx.arcTo(x, y, x + width, y, radius);
+        ctx.closePath();
+        ctx.fillStyle = '#d625ed';
+        ctx.fill();
+        const attachment = new AttachmentBuilder(canvas.toBuffer(), {
+          name: 'nowplaying.png' 
         });
-        if(newQueue.songs[0].likes) nowEmbed.addFields({
-          name: '👍🏻 Likes:',
-          value: `${numberWithCommas(newQueue.songs[0].likes)}`,
-          inline: true
-        });
-        if(newQueue.songs[0].dislikes) nowEmbed.addFields({
-          name: '👎🏻 Dislikes:',
-          value: `${numberWithCommas(newQueue.songs[0].dislikes)}`,
-          inline: true
-        });
-        return interaction.reply({
-          embeds: [nowEmbed]
+        return await interaction.reply({ 
+          files: [attachment]
         });
       };
     } else if(options.getSubcommand() === "filters") {
