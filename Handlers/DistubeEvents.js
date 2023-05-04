@@ -765,9 +765,9 @@ module.exports = (client) => {
   client.on("messageCreate", async(message) => {
     if(!message.guild || !message.guild.available) return;
     const defaultData = await database.get(message.guild.id);
-    const data = defaultData.setDefaultMusicData;
-    if(!data.ChannelId || data.ChannelId.length < 5) return;
-    let textChannel = message.guild.channels.cache.get(data.ChannelId) || await message.guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
+    const data = defaultData?.setDefaultMusicData;
+    if(!data?.ChannelId || data?.ChannelId.length < 5) return;
+    let textChannel = message.guild.channels.cache.get(data?.ChannelId) || await message.guild.channels.fetch(data?.ChannelId).catch(() => {}) || false;
     if(!textChannel) return console.log("Không có channel nào được thiết lập");
     if(textChannel.id != message.channel.id) return;
     // xoá tin nhắn 

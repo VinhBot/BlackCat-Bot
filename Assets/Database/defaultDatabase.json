@@ -160,7 +160,7 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": true,
+            "DefaultAutoplay": false,
             "DefaultVolume": 50,
             "DefaultFilters": [
                 "bassboost",

@@ -6,7 +6,10 @@ const database = new Database("./Assets/Database/defaultDatabase.json", {
   databaseInObject: true 
 });
 
-module.exports = async(client, member) => {
+module.exports = {
+	eventName: "guildMemberRemove", // tên events
+	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
+	executeEvents: async(client, member) => {
     const { setDefaultWelcomeGoodbyeData: data } = await database.get(member.guild.id);
     const channel = member.guild.channels.cache.find(c => c.id === data.GoodbyeChannel);
     if(!channel) return;
@@ -46,4 +49,5 @@ module.exports = async(client, member) => {
     ctx.drawImage(avatar, 65, canvas.height / 2 - 250, 500, 500);      
     const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'goodbye-image.png' }); 
     channel.send({ files: [attachment] }); 
+  },
 };

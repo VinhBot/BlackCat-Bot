@@ -258,9 +258,4 @@ module.exports = async(client) => {
     ]
   });
   Dashboard.init();
-};
-db.list("prefix").then(matches => {})
-db.list("prefix").then(matches => {})
-db.list().then(keys => {})
-db.list().then(keys => {})
-db.list().then(keys => {})
+}; 

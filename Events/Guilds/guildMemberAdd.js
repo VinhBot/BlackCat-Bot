@@ -7,9 +7,12 @@ const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
-module.exports = async(client, member) => {
-  // gởi tin nhắn lhi có member gia nhập guilds
-  const profile = {
+
+module.exports = {
+	eventName: "guildMemberAdd", // tên events
+	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
+	executeEvents: async(client, member) => {
+      const profile = {
          "dot":"https://cdn.discordapp.com/attachments/869133321010032731/889068805060435979/dot.png",
          "status": {
            "online": "https://cdn.discordapp.com/attachments/869133321010032731/889033864297713664/online.png",
@@ -99,11 +102,14 @@ module.exports = async(client, member) => {
          .setThumbnail(member.guild.iconURL({ dynamic: true, extension: "jpg" }) || "https://cdn.discordapp.com/emojis/687231938955837454.gif")
       ], files: [attachment]  }).catch((e) => console.log(e));
       let roles = data.AutoAddRoleWel;
-      for(let i = 0; i < roles.length; i++ ) {
-        member.roles.add(roles[i]).then(() => {
-          console.log(`Đã add role cho ${member.user.username}`);
-        }).catch(() => {
-          console.log("Tôi không có quyền để làm điều đó")
-        });
+      if(roles) {
+        for (let i = 0; i < roles.length; i++ ) {
+          member.roles.add(roles[i]).then(() => {
+            console.log(`Đã add role cho ${member.user.username}`);
+          }).catch(() => {
+            console.log("Tôi không có quyền để làm điều đó")
+          });
+        };
       };
+  },
 };

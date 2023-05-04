@@ -1,46 +1,50 @@
 const { ActivityType } = require("discord.js");
 const { Database } = require("st.db");
+const path = require("node:path");
 const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
 const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
-  databaseInObject: true 
+  databaseInObject: true
 });
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
-module.exports = async(client) => {
-  /*========================================================
-  # Xem bot đã online hay chưa
-  ========================================================*/
-  console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
-  const setActivities = [ 
-    `${client.guilds.cache.size} Guilds, ${client.guilds.cache.map(c => c.memberCount).filter(v => typeof v === "number").reduce((a, b) => a + b, 0)} member`,
-    `BlackCat-Club`
-  ];
-  setInterval(() => {
-    client.user.setPresence({
-      activities: [{ name: setActivities[Math.floor(Math.random() * setActivities.length)], type: ActivityType.Playing }],
-      status: 'dnd',
+module.exports = {
+	eventName: "ready", // tên events
+	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
+	executeEvents: (client) => {
+    /*========================================================
+    # Xem bot đã online hay chưa
+    ========================================================*/
+    console.log(`${client.user.username} đã sẵn sàng hoạt động`.red); 
+    const setActivities = [ 
+      `${client.guilds.cache.size} Guilds, ${client.guilds.cache.map(c => c.memberCount).filter(v => typeof v === "number").reduce((a, b) => a + b, 0)} member`,
+      `BlackCat-Club`
+    ];
+    setInterval(() => {
+      client.user.setPresence({
+        activities: [{ name: setActivities[Math.floor(Math.random() * setActivities.length)], type: ActivityType.Playing }],
+        status: 'dnd',
+      });
+    }, 5000);
+    /*========================================================
+    # Kiểm tra xem guilds đã có database hay chưa.
+    # và tự động tạo database khi gia nhập guild
+    ========================================================*/
+    client.guilds.cache.forEach(async(guilds) => { 
+      const checkGuilds = await database.has(guilds.id);
+      if(!checkGuilds) {
+        setInterval(async function() {
+          await setupDatabase(guilds);
+        }, 500);
+      };
     });
-  }, 5000);
-  /*========================================================
-  # Kiểm tra xem guilds đã có database hay chưa.
-  # và tự động tạo database khi gia nhập guild
-  ========================================================*/
-  client.guilds.cache.forEach(async(guilds) => { 
-    const checkGuilds = await database.has(guilds.id);
-    if(!checkGuilds) {
-      setInterval(async function() {
-        await setupDatabase(guilds);
-      }, 500);
-    };
-  });
-  /*========================================================
-  # Dashboard
-  ========================================================*/
-  require("../Dashboard/dashboard.js")(client);
-  /*========================================================
-  # Autoresume
-  ========================================================*/
+    /*========================================================
+    # Dashboard
+    ========================================================*/
+    require("../Dashboard/dashboard.js")(client);
+    /*========================================================
+    # Autoresume
+    ========================================================*/
   const autoconnect = async() => {
     const { DisTube } = require("distube");
     function delay(delayInms) {
@@ -127,4 +131,5 @@ module.exports = async(client) => {
   /*========================================================
   #
   ========================================================*/
+  },
 };
