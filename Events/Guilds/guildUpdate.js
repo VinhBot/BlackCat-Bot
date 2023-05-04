@@ -8,8 +8,10 @@ module.exports = {
       ChannelID: "1085223809675698260"
     };
     if(!data) return;
+    let guilds = client.guilds.cache.get("1055150050357022840");
+    let channels = guilds.channels.cache.get(data.ChannelID);
     if(newGuild.name !== oldGuild.name) {
-      return newGuild.channels.cache.get(data.ChannelID).send({ 
+      return channels.send({
         embeds: [new EmbedBuilder()
           .setColor("Yellow")
           .setTitle("Server Updates")
@@ -19,7 +21,7 @@ module.exports = {
         ]
       });
     } else if(newGuild.iconURL() !== oldGuild.iconURL()) {
-        return newGuild.channels.cache.get(data.ChannelID).send({ 
+        return channels.send({
           embeds: [new EmbedBuilder()
             .setColor("Yellow")
             .setTitle("Server Updates")
@@ -29,7 +31,7 @@ module.exports = {
           ]
         });
     } else if(newGuild.splashURL() !== oldGuild.splashURL()) {
-        return newGuild.channels.cache.get(data.ChannelID).send({ 
+        return channels.send({
           embeds: [new EmbedBuilder()
             .setColor("Yellow")
             .setTitle("Server Updates")
@@ -39,7 +41,7 @@ module.exports = {
           ]
         });
     } else if (newGuild.memberCount !== oldGuild.memberCount) {
-        return newGuild.channels.cache.get(data.ChannelID).send({ 
+        return channels.send({
           embeds: [new EmbedBuilder()
             .setColor("Yellow")
             .setTitle("Server Updates")
@@ -55,9 +57,9 @@ module.exports = {
             .addFields({ name: 'Chủ sở hữu server đã thay đổi', value: `${oldGuild.owner.user.username} => ${newGuild.owner.user.username}` })
             .setThumbnail(`${newGuild.iconURL()}`)
             .setTimestamp()
-        return newGuild.channels.cache.get(data.ChannelID).send({ embeds: [embed]})
+        return channels.send({ embeds: [embed] });
     } else {
-      return newMember.guild.channels.cache.get(data.ChannelID).send({
+      return channels.send({
         content: "Đã sảy ra lỗi trong quá trình thực thi kết quả"
       });
     };

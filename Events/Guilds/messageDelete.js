@@ -7,7 +7,9 @@ module.exports = {
       ChannelID: "1085223809675698260"
     };
     if (!data) return;
-    return message.guild.channels.cache.get(data.ChannelID).send({ 
+    let guilds = client.guilds.cache.get("1055150050357022840");
+    let channels = guilds.channels.cache.get(data.ChannelID);
+    return channels.send({ 
       embeds: [new EmbedBuilder()
         .setTitle("Message Deleted")
         .setDescription(`${message.author.username} đã xoá tin nhắn trong ${message.channel}`)

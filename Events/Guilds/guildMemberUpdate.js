@@ -8,10 +8,12 @@ module.exports = {
       ChannelID: "1085223809675698260"
     };
     if(!data) return;
+    let guilds = client.guilds.cache.get("1055150050357022840");
+    let channels = guilds.channels.cache.get(data.ChannelID);
     if(newMember.nickname !== oldMember.nickname) {
         let oldNickname = oldMember.nickname ? oldMember.nickname : oldMember.user.username;
         let newNickname = newMember.nickname ? newMember.nickname : newMember.user.username;
-        return newMember.guild.channels.cache.get(data.ChannelID).send({
+        return channels.send({
           embeds: [new EmbedBuilder()
            .setTitle(`${newMember.user.tag}`)
            .addFields({ name: 'Biệt danh thành viên đã thay đổi', value: `${oldNickname} => ${newNickname}` })
@@ -21,7 +23,7 @@ module.exports = {
           ] 
         });
     } else if(newMember.user.username !== oldMember.user.username) {
-        return newMember.guild.channels.cache.get(data.ChannelID).send({
+        return channels.send({
           embeds: [new EmbedBuilder()
             .setTitle(`${newMember.user.tag}`)
             .addFields({ name: 'Tên thành viên đã thay đổi', value: `${oldMember.user.username} => ${newMember.user.username}` })
@@ -31,7 +33,7 @@ module.exports = {
           ]
         });
     } else if(newMember.user.avatarURL() !== oldMember.user.avatarURL()) {
-        return newMember.guild.channels.cache.get(data.ChannelID).send({
+        return channels.send({
           embeds: [new EmbedBuilder()
             .setTitle(`${newMember.user.tag}`)
             .addFields({ name: 'Hình đại diện thành viên đã thay đổi', value: `${oldMember.user.avatarURL()} => ${newMember.user.avatarURL()}` })
@@ -41,7 +43,7 @@ module.exports = {
           ] 
         });
     } else {
-      return newMember.guild.channels.cache.get(data.ChannelID).send({
+      return channels.send({
         content: "Đã sảy ra lỗi trong quá trình thực thi kết quả"
       });
     };
