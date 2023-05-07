@@ -1,5 +1,6 @@
 {
     "1055150050357022840": {
+        "defaultGuildId": "1055150050357022840",
         "defaultGuildName": "BlackCat-Club",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -21,9 +22,14 @@
             "AutoAddRoleWel": [
                 "1089413553615814750"
             ]
+        },
+        "setDiaryChannel": {
+            "channelCreate": "1085223809675698260",
+            "channelDelete": ""
         }
     },
     "717168653300269116": {
+        "defaultGuildId": "717168653300269116",
         "defaultGuildName": "- 𝑺𝒖 𝑺𝒖 -  𝐒𝐞𝐫𝐯𝐞𝐫 [OLD]",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -43,9 +49,14 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "847531356476276816": {
+        "defaultGuildId": "847531356476276816",
         "defaultGuildName": "bombom",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -65,9 +76,14 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "884047380176048159": {
+        "defaultGuildId": "884047380176048159",
         "defaultGuildName": "Cỏ lúa bằng nhau",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -81,15 +97,20 @@
             "MessageId": "",
             "ChannelId": "",
             "ChannelAutoCreateVoice": "",
-            "Djroles": ""
+            "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "888330272385409034": {
+        "defaultGuildId": "888330272385409034",
         "defaultGuildName": "Thiền Am Bên Bờ Vũ Trụ",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -109,9 +130,14 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "894577205194133546": {
+        "defaultGuildId": "894577205194133546",
         "defaultGuildName": "KLOG HOME | #KOH",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -131,11 +157,16 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "1054933019934330930": {
+        "defaultGuildId": "1054933019934330930",
         "defaultGuildName": "PokéMeow Việt Nam",
-        "setDefaultPrefix": "&",
+        "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
             "DefaultAutoplay": false,
@@ -153,9 +184,14 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     },
     "1091655091938930769": {
+        "defaultGuildId": "1091655091938930769",
         "defaultGuildName": "Database",
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
@@ -166,8 +202,8 @@
                 "bassboost",
                 "3d"
             ],
-            "MessageId": "1103674632478916668",
-            "ChannelId": "1103674532985843806",
+            "MessageId": "",
+            "ChannelId": "",
             "ChannelAutoCreateVoice": "",
             "Djroles": []
         },
@@ -175,6 +211,10 @@
             "WelcomeChannel": "",
             "GoodbyeChannel": "",
             "AutoAddRoleWel": []
+        },
+        "setDiaryChannel": {
+            "channelCreate": "",
+            "channelDelete": ""
         }
     }
 }

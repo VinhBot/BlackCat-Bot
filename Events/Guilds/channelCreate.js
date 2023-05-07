@@ -1,24 +1,30 @@
 const { EmbedBuilder } = require("discord.js");
-    
+const { Database } = require("st.db");
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
+  databaseInObject: true 
+});
 module.exports = {
 	eventName: "channelCreate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
-	executeEvents: (client, channel) => {
-    let guilds = client.guilds.cache.get("1055150050357022840");
-    let channels = guilds.channels.cache.get("1085223809675698260");
+	executeEvents: async(client, channel) => {
+    const getData = await database.get(channel.guild.id);
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.channelCreate);
     let types = {
         0: 'Text channel',
         2: 'Voice channel'
     };
-    const embed = new EmbedBuilder()
-    .setTitle("Channel Created")
-    .addFields([
-      { name: "Tên kênh", value: `${channel.name}`},
-      { name: "ID kênh", value: `${channel.id}` },
-      { name: "Loại kênh", value: `${types[channel.type]}` },
-    ])
-    .setColor("Random")
-    .setTimestamp()
-    channels.send({ embeds: [embed] });
+    return channels?.send({ 
+      embeds: [new EmbedBuilder()
+        .setTitle("Channel Created")
+        .addFields([
+          { name: "Tên kênh", value: `${channel.name}`},
+          { name: "ID kênh", value: `${channel.id}` },
+          { name: "Loại kênh", value: `${types[channel.type]}` },
+        ])
+        .setColor("Random")
+        .setTimestamp()
+      ] 
+    });
   },
 };

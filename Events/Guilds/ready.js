@@ -1,17 +1,19 @@
+const { theme, diaryChannel, setupMusic, welconmeGoodbyeCh, mainSettings } = require(`${process.cwd()}/Events/Dashboard/dashboard.js`);
+const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
 const { ActivityType } = require("discord.js");
 const { Database } = require("st.db");
-const path = require("node:path");
-const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
+const DBD = require("discord-dashboard");
 const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
   databaseInObject: true
 });
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
+const config = require(`${process.cwd()}/config.json`);
 module.exports = {
 	eventName: "ready", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
-	executeEvents: (client) => {
+	executeEvents: async(client) => {
     /*========================================================
     # Xem bot đã online hay chưa
     ========================================================*/
@@ -41,7 +43,26 @@ module.exports = {
     /*========================================================
     # Dashboard
     ========================================================*/
-    require("../Dashboard/dashboard.js")(client);
+    await DBD.useLicense(config.dashboard.useLicense);
+    DBD.Dashboard = DBD.UpdatedClass();
+    const Dashboard = new DBD.Dashboard({
+      port: config.dashboard.port,
+      client: config.dashboard.client,
+      redirectUri: config.dashboard.redirectUri,
+      domain: config.dashboard.domain,
+      ownerIDs: config.dashboard.ownerIDs,
+      useThemeMaintenance: true,
+      useTheme404: true,
+      bot: client,
+      theme: theme(client, config),
+      settings: [
+        mainSettings(client),
+        welconmeGoodbyeCh(client), 
+        setupMusic(client), 
+        diaryChannel(client),
+      ]
+    });
+    Dashboard.init();
     /*========================================================
     # Autoresume
     ========================================================*/

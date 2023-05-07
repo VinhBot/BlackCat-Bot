@@ -1,8 +1,10 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
 const { baseURL } = require(`${process.cwd()}/Events/functions`);
-const fetch = require("node-fetch");
+const { fetchRandom } = require('nekos-best.js');
 const animals = ["cat", "dog", "panda", "fox", "red_panda", "koala", "bird", "raccoon", "kangaroo"];
 let categories = ["waifu", "neko", "shinobu", "megumin", "bully", "cuddle", "cry", "hug", "awoo", "kiss", "lick", "pat", "smug", "bonk", "yeet", "blush", "smile", "wave", "highfive", "handhold", "nom", "bite", "glomp", "slap", "kill", "kick", "happy", "wink", "poke", "dance" ];
+let animeGif = ["baka", "bite", "blush", "bored", "cry", "cuddle", "dance", "facepalm", "feed", "happy", "highfive", "hug", "kiss", "laugh", "pat", "poke", "pout", "shrug", "slap", "sleep", "smile", "smug", "stare", "think", "tickle"];
+let animeGif2 = ["wave", "wink"];
 
 module.exports = {
   name: "images", // Tên lệnh 
@@ -23,18 +25,28 @@ module.exports = {
         choices: animals.map((animal) => ({ name: animal, value: animal })),
       }],
     },{ 
+      name: "animegif", 
+      description: "xem hình ảnh/gif anime", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [
+        {
+          name: "name", 
+          description: "bạn muốn xem thể loại nào ?", 
+          type: ApplicationCommandOptionType.String,
+          required: false, 
+          choices: animeGif.map((item) => ({ name: item, value: item })),
+        },{
+          name: "name2", 
+          description: "bạn muốn xem thể loại nào ?", 
+          type: ApplicationCommandOptionType.String,
+          required: false, 
+          choices: animeGif2.map((item) => ({ name: item, value: item })),
+        }
+      ],
+    },{ 
       name: "animegirl", 
       description: "Xem hình ảnh anime của các cô gái", 
-      type: ApplicationCommandOptionType.Subcommand, 
-      options: [{
-        name: "type", 
-        description: "bạn muốn xem loại nào", 
-        type: ApplicationCommandOptionType.String,
-        required: false, 
-        choices: [
-          { name: "nsfw", value: "nsfw" }
-        ],
-      }],
+      type: ApplicationCommandOptionType.Subcommand
     },
   ],
   run: async(client, interaction) => {
@@ -49,16 +61,19 @@ module.exports = {
         .setFooter({ text: `Yêu cầu bởi ${interaction.user.tag}` })
         ]
       });
-    } if(interaction.options.getSubcommand() === "animegirl") {
-      const type = interaction.options.getString("type");
-      if(type === "nsfw" && !interaction.channel.nsfw) return interaction.reply({
-				content: "Bạn chỉ có thể sử dụng tùy chọn NSFW trong các kênh nsfw",
-			}).catch((err) => console.log(err));
-      if(type === "nsfw") {
-        categories = ["waifu", "neko", "trap", "blowjob"]
+    } else if(interaction.options.getSubcommand() === "animegif") {
+      const choice = interaction.options.getString("name");
+      const choice2 = interaction.options.getString("name2");
+      const category = animeGif[Math.floor(Math.random() * animeGif.length)];
+      async function fetchImage() {
+        const response = await fetchRandom(choice ? choice : choice2 || category);
+        return response.results[0].url;
       };
+      const img = await fetchImage();
+      return interaction.reply({ content: img });
+    } else if(interaction.options.getSubcommand() === "animegirl") {
       const category = categories[Math.floor(Math.random() * categories.length)];
-      const response = await baseURL(`https://api.waifu.pics/${type === "nfsw" ? "nfsw":"sfw"}/${category}`);
+      const response = await baseURL(`https://api.waifu.pics/sfw/${category}`);
       if(!response.success) {
         return interaction.reply({ 
           content: "Có lỗi sảy ra vui lòng thử lại sau"

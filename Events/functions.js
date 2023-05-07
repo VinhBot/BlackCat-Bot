@@ -13,7 +13,8 @@ const setupDatabase = async(guild) => {
   const checkData = await database.has(guild.id);
   if(!checkData) { // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
     console.log(`Đã tạo database cho: ${guild.name}`); // thông báo ra bảng điều khiển
-    await database.set(guild.id, {             // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
+    await database.set(guild.id, {       // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
+      defaultGuildId: guild.id,
       defaultGuildName: guild.name,            // tên guilds
       setDefaultPrefix: config.prefix,         // đặt prefix mặc định cho guild
       setDefaultMusicData: {                   // thiết lập mặc định dành cho hệ thống âm nhạc
@@ -30,6 +31,10 @@ const setupDatabase = async(guild) => {
         WelcomeChannel: "",
         GoodbyeChannel: "",
         AutoAddRoleWel: [], 
+      },
+      setDiaryChannel: {
+        channelCreate: "",
+        channelDelete: ""
       },
     });
   };
