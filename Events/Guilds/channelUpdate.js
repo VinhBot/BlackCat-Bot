@@ -1,29 +1,33 @@
-const { EmbedBuilder } = require('discord.js')
-
 module.exports = {
 	eventName: "channelUpdate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, oldChannel, newChannel) => {
-    const data = {
-      ChannelID: "1085223809675698260"
-    };
-    if(!data) return;
-    let guilds = client.guilds.cache.get("1055150050357022840");
-    let channels = guilds.channels.cache.get(data.ChannelID);
+    const { EmbedBuilder } = require('discord.js')
+    const { Database } = require("st.db");
+    const database = new Database("./Assets/Database/defaultDatabase.json", { 
+      databaseInObject: true 
+    });
+    const getData = await database.get(oldChannel.guild.id);
+    if(!getData) return;
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.channelUpdate);
+    if(!channels) return;
     if(oldChannel.name !== newChannel.name) {
         const nameEmbed = new EmbedBuilder()
         .setTitle('Channel Updates')
         .addFields({ name: 'Tên kênh đã thay đổi', value: `${oldChannel.name} -> ${newChannel.name}` })
         .setColor("Green")
         .setTimestamp()
-        channels.send({ embeds: [nameEmbed] });
+        return channels.send({ 
+          embeds: [nameEmbed] 
+        });
     } else if(oldChannel.topic !== newChannel.topic) {
         const topicEmbed = new EmbedBuilder()
         .setTitle('Channel Updates')
         .addFields({ name: 'Chủ đề kênh đã thay đổi', value: `${oldChannel.topic} -> ${newChannel.topic}` })
         .setColor("Green")
         .setTimestamp()
-        channels.send({ embeds: [topicEmbed] });
+        return channels.send({ embeds: [topicEmbed] });
     } else if(oldChannel.position !== newChannel.position) {
         const positionEmbed = new EmbedBuilder()
         .setTitle('Channel Updates')

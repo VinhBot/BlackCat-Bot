@@ -1,15 +1,18 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder } = require('discord.js')
+const { Database } = require("st.db");
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
+  databaseInObject: true 
+});
 
 module.exports = {
 	eventName: "guildUpdate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
-	executeEvents: (client, channel) => {
-    const data = {
-      ChannelID: "1085223809675698260"
-    };
-    if(!data) return;
-    let guilds = client.guilds.cache.get("1055150050357022840");
-    let channels = guilds.channels.cache.get(data.ChannelID);
+	executeEvents: async(client, channel) => {
+    const getData = await database.get(channel.guild.id);
+    if(!getData) return;
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.guildUpdate);
+    if(!channels) return;
     if(newGuild.name !== oldGuild.name) {
       return channels.send({
         embeds: [new EmbedBuilder()

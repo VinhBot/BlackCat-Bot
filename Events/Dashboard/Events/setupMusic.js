@@ -1,17 +1,12 @@
 const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
-const { Database } = require("st.db");
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true,
-});
 
 /*========================================================
 # Thiết lập music Channel
 ========================================================*/
-const setupMusic = (client) => {
+const setupMusic = (client, database, config) => {
   const BotFilters = {
     "3d": "3d",
     "bassboost": "bassboost",

@@ -24,7 +24,8 @@ module.exports = {
         "raw_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889033867724468224/raw_profile.png"
       };
       const { setDefaultWelcomeGoodbyeData: data } = await database.get(member.guild.id);
-      const channel = member.guild.channels.cache.find(c => c.id === data.WelcomeChannel);
+      if(!data) return;
+      const channel = member.guild.channels.cache.find((channel) => channel.id === data.WelcomeChannel);
       if(!channel) return;
       Canvas.registerFont(join(__dirname, '..', '..', 'Assets', 'Fonts', 'HelveticaNeue.otf'), { family: 'HelveticaNeue', weight: "regular", style: "normal" });
       Canvas.registerFont(join(__dirname, '..', '..', 'Assets', 'Fonts', 'HelveticaNeue-Bold.otf'), { family: 'HelveticaNeueBold', weight: "regular", style: "normal" });

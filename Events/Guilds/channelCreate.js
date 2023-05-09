@@ -8,13 +8,15 @@ module.exports = {
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, channel) => {
     const getData = await database.get(channel.guild.id);
+    if(!getData) return;
     let guilds = client.guilds.cache.get(getData.defaultGuildId);
     let channels = guilds.channels.cache.get(getData.setDiaryChannel.channelCreate);
+    if(!channels) return;
     let types = {
         0: 'Text channel',
         2: 'Voice channel'
     };
-    return channels?.send({ 
+    return channels.send({ 
       embeds: [new EmbedBuilder()
         .setTitle("Channel Created")
         .addFields([

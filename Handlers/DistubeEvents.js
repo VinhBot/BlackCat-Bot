@@ -65,6 +65,11 @@ module.exports = (client) => {
         return `**[${bar[0]}]**`;
       };
     };
+    const genshinGif = [
+      "https://upload-os-bbs.hoyolab.com/upload/2021/08/12/64359086/ad5f51c6a4f16adb0137cbe1e86e165d_8637324071058858884.gif?x-oss-process=image/resize,s_1000/quality,q_80/auto-orient,0/interlace,1/format,gif",
+      "https://upload-os-bbs.hoyolab.com/upload/2021/08/12/64359086/2fc26b1deefa6d2ff633dda1718d6e5b_6343886487912626448.gif?x-oss-process=image/resize,s_1000/quality,q_80/auto-orient,0/interlace,1/format,gif",
+    ];
+    const randomGenshin = genshinGif[Math.floor(Math.random() * genshinGif.length)];
     let guild = client.guilds.cache.get(guildId);
     if(!guild) return;
     let newQueue = client.distube.getQueue(guild.id);
@@ -82,7 +87,7 @@ module.exports = (client) => {
       new EmbedBuilder()
       .setColor("Random")
       .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-      .setImage("https://cdn.discordapp.com/attachments/1092828708798214284/1092828811818709113/music.gif")
+      .setImage(randomGenshin)
     ];
     if(!leave && newQueue && newQueue.songs[0]) {
       embeds[1].setImage(`https://img.youtube.com/vi/${newQueue.songs[0].id}/mqdefault.jpg`)
@@ -508,6 +513,7 @@ module.exports = (client) => {
   }).on("initQueue", async(queue) => {
     var newQueue = client.distube.getQueue(queue.id);
     const defaultData = await database.get(queue.id);
+    if(!defaultData) return;
     const data = defaultData.setDefaultMusicData;
     let channelId = data.ChannelId;
     let messageId = data.MessageId;
@@ -630,6 +636,7 @@ module.exports = (client) => {
     if(!interaction.isButton() && !interaction.isStringSelectMenu()) return;
     var { guild, message, channel, member, user, customId } = interaction;
     const defaultData = await database.get(interaction.guild.id);
+    if(!defaultData) return;
     const data = defaultData.setDefaultMusicData;
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
     if(!guild) return;
@@ -765,9 +772,10 @@ module.exports = (client) => {
   client.on("messageCreate", async(message) => {
     if(!message.guild || !message.guild.available) return;
     const defaultData = await database.get(message.guild.id);
-    const data = defaultData?.setDefaultMusicData;
-    if(!data?.ChannelId || data?.ChannelId.length < 5) return;
-    let textChannel = message.guild.channels.cache.get(data?.ChannelId) || await message.guild.channels.fetch(data?.ChannelId).catch(() => {}) || false;
+    if(!defaultData) return;
+    const data = defaultData.setDefaultMusicData;
+    if(!data.ChannelId || data.ChannelId.length < 5) return;
+    let textChannel = message.guild.channels.cache.get(data.ChannelId) || await message.guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
     if(!textChannel) return console.log("Không có channel nào được thiết lập");
     if(textChannel.id != message.channel.id) return;
     // xoá tin nhắn 

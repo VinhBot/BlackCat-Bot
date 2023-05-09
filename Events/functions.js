@@ -33,8 +33,17 @@ const setupDatabase = async(guild) => {
         AutoAddRoleWel: [], 
       },
       setDiaryChannel: {
+        // voice
+        voiceStateUpdate: "",
+        // channel
         channelCreate: "",
-        channelDelete: ""
+        channelDelete: "",
+        channelUpdate: "",
+        // Guild
+        guildMemberUpdate: "",
+        guildCreate: "",
+        guildDelete: "",
+        guildUpdate: ""
       },
     });
   };
@@ -68,6 +77,10 @@ function onCoolDown(cooldowns, message, commands) {
 // Music embed
 const musicEmbedDefault = (client, guilds) => {
     const guild = client.guilds.cache.get(guilds.id);
+    const genshinGif = [
+      "https://upload-os-bbs.hoyolab.com/upload/2021/08/12/64359086/ad5f51c6a4f16adb0137cbe1e86e165d_8637324071058858884.gif?x-oss-process=image/resize,s_1000/quality,q_80/auto-orient,0/interlace,1/format,gif",
+    ];
+    const randomGenshin = genshinGif[Math.floor(Math.random() * genshinGif.length)];
     var Emojis = [`0️⃣`, `1️⃣`];
     return {
       embeds: [new EmbedBuilder()
@@ -78,7 +91,7 @@ const musicEmbedDefault = (client, guilds) => {
         new EmbedBuilder()
         .setColor("Random")
         .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-        .setImage(guild.banner ? guild.bannerURL({ size: 4096 }) : "https://i.pinimg.com/originals/72/97/52/729752d06f814ebfbcc9a35215e2b897.jpg")
+        .setImage(randomGenshin)
         .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh thoại và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
         .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
       ], components: [new ActionRowBuilder().addComponents([
@@ -120,6 +133,7 @@ function MusicRole(client, member, song) {
     }
     // nếu không có dj và không phải là quản trị viên, hãy trả về chuỗi
     if (!isdj && !member.permissions.has("Administrator") && song.user.id != member.id) {
+        if(!roleid) return;
         return roleid.map((i) => `<@&${i}>`).join(", ");
     // nếu anh ta là dj hoặc quản trị viên, thì hãy trả về false, điều này sẽ tiếp tục cmd
     } else {

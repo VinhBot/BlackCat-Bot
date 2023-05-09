@@ -1,15 +1,18 @@
 const { EmbedBuilder } = require('discord.js')
-
+const { Database } = require("st.db");
+const database = new Database("./Assets/Database/defaultDatabase.json", { 
+  databaseInObject: true 
+});
+    
 module.exports = {
 	eventName: "guildMemberUpdate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, oldMember, newMember) => {
-    const data = {
-      ChannelID: "1085223809675698260"
-    };
-    if(!data) return;
-    let guilds = client.guilds.cache.get("1055150050357022840");
-    let channels = guilds.channels.cache.get(data.ChannelID);
+    const getData = await database.get(oldMember.guild.id);
+    if(!getData) return;
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.guildMemberUpdate);
+    if(!channels) return;
     if(newMember.nickname !== oldMember.nickname) {
         let oldNickname = oldMember.nickname ? oldMember.nickname : oldMember.user.username;
         let newNickname = newMember.nickname ? newMember.nickname : newMember.user.username;
@@ -44,7 +47,7 @@ module.exports = {
         });
     } else {
       return channels.send({
-        content: "Đã sảy ra lỗi trong quá trình thực thi kết quả"
+        content: "[guildMemberUpdate] Đã sảy ra lỗi trong quá trình thực thi kết quả"
       });
     };
   },

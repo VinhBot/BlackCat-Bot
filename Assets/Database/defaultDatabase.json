@@ -5,27 +5,33 @@
         "setDefaultPrefix": "!",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
-            "DefaultAutoplay": false,
-            "DefaultVolume": 55,
+            "DefaultAutoplay": true,
+            "DefaultVolume": 66,
             "DefaultFilters": [
-                "3d",
-                "bassboost"
+                "bassboost",
+                "3d"
             ],
-            "MessageId": "1101203129694953512",
+            "MessageId": "1105114579744325673",
             "ChannelId": "1092827995003166882",
-            "ChannelAutoCreateVoice": "1096800005123227760",
+            "ChannelAutoCreateVoice": "",
             "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
             "WelcomeChannel": "1089615977559375954",
             "GoodbyeChannel": "1089615977559375954",
             "AutoAddRoleWel": [
-                "1089413553615814750"
+                "1100924393175142453"
             ]
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "1085223809675698260",
             "channelCreate": "1085223809675698260",
-            "channelDelete": ""
+            "channelDelete": "1085223809675698260",
+            "channelUpdate": "1085223809675698260",
+            "guildMemberUpdate": "1085223809675698260",
+            "guildCreate": "1085223809675698260",
+            "guildDelete": "1085223809675698260",
+            "guildUpdate": "1085223809675698260"
         }
     },
     "717168653300269116": {
@@ -51,8 +57,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "847531356476276816": {
@@ -78,8 +90,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "884047380176048159": {
@@ -105,8 +123,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "888330272385409034": {
@@ -132,8 +156,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "894577205194133546": {
@@ -159,14 +189,20 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "1054933019934330930": {
         "defaultGuildId": "1054933019934330930",
         "defaultGuildName": "PokéMeow Việt Nam",
-        "setDefaultPrefix": "!",
+        "setDefaultPrefix": "&",
         "setDefaultMusicData": {
             "DefaultAutoresume": true,
             "DefaultAutoplay": false,
@@ -186,8 +222,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     },
     "1091655091938930769": {
@@ -213,8 +255,14 @@
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {
+            "voiceStateUpdate": "",
             "channelCreate": "",
-            "channelDelete": ""
+            "channelDelete": "",
+            "channelUpdate": "",
+            "guildMemberUpdate": "",
+            "guildCreate": "",
+            "guildDelete": "",
+            "guildUpdate": ""
         }
     }
 }

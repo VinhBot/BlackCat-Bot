@@ -1,13 +1,8 @@
 const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
-const { Database } = require("st.db");
-const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true,
-});
 
-const diaryChannel = (client) => {
+const diaryChannel = (client, database, config) => {
   return {
     categoryId: 'diaryChannel-setup',
     categoryName: "Kênh nhật ký 📝",
@@ -20,6 +15,23 @@ const diaryChannel = (client) => {
         optionDescription: "Thiết lập kênh nhật ký theo yêu cầu",
         optionType: SoftUI.formTypes.multiRow([
             {
+              optionId: "Channel-voiceStateUpdate",
+              optionName: "voiceStateUpdate",
+              optionDescription: "Gởi tin nhắn nhật ký voice",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.voiceStateUpdate);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.voiceStateUpdate = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
               optionId: "Channel-Create",
               optionName: "channelCreate",
               optionDescription: "Gởi khi kênh được tạo",
@@ -32,7 +44,7 @@ const diaryChannel = (client) => {
                 const getChannel = await database.get(guild.id);
                 getChannel.setDiaryChannel.channelCreate = newData;
                 client.channels.fetch(newData).then((channel) => {
-                  channel.send('Kênh welcome đã được thiết lập!');
+                  channel.send('Kênh đã được thiết lập!');
                 });
                 return await database.set(guild.id, getChannel);
               },
@@ -47,9 +59,94 @@ const diaryChannel = (client) => {
               },
               setNew: async({ guild, newData }) => {
                 const getChannel = await database.get(guild.id);
-                getChannel.setDiaryChannel.chgetChannel.channelDelete = newData;
+                getChannel.setDiaryChannel.channelDelete = newData;
                 client.channels.fetch(newData).then((channel) => {
-                  channel.send('Kênh Goodbye đã được thiết lập!');
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
+              optionId: "Channel-Update",
+              optionName: "channelUpdate",
+              optionDescription: "Gởi tin nhắn khi kênh được cập nhật",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.channelUpdate);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.channelUpdate = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
+              optionId: "Channel-guildMemberUpdate",
+              optionName: "guildMemberUpdate",
+              optionDescription: "Gởi tin nhắn khi thành viên trong guilds thay đổi",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.guildMemberUpdate);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.guildMemberUpdate = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
+              optionId: "Channel-guildCreate",
+              optionName: "guildCreate",
+              optionDescription: "Gởi tin nhắn khi bot tham gia guilds mới",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.guildCreate);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.guildCreate = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
+              optionId: "Channel-guildDelete",
+              optionName: "guildDelete",
+              optionDescription: "Gởi tin nhắn bot bị kick ra khỏi guilds",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.guildDelete);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.guildDelete = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
+                });
+                return await database.set(guild.id, getChannel);
+              },
+            },{
+              optionId: "Channel-guildUpdate",
+              optionName: "guildUpdate",
+              optionDescription: "Gởi tin nhắn khi guilds được chỉnh sửa",
+              optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
+              getActualSet: async({ guild }) => {
+                const getChannel = await database.get(guild.id);
+                return (getChannel.setDiaryChannel.guildUpdate);
+              },
+              setNew: async({ guild, newData }) => {
+                const getChannel = await database.get(guild.id);
+                getChannel.setDiaryChannel.guildUpdate = newData;
+                client.channels.fetch(newData).then((channel) => {
+                  channel.send('Kênh đã được thiết lập!');
                 });
                 return await database.set(guild.id, getChannel);
               },

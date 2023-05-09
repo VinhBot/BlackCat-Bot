@@ -10,9 +10,14 @@ module.exports = {
 	eventName: "guildCreate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, guild) => {
-    let Sguild = client.guilds.cache.get("1055150050357022840");
-    let channel = Sguild.channels.cache.get("1085223809675698260");
-    let invite = await guild.channels.cache.filter(x => x.type === ChannelType.GuildText).random(1)[0].createInvite({
+    const getData = await database.get(guild.id);
+    if(!getData) return;
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.guildCreate);
+    if(!channels) return;
+    let invite = await guild.channels.cache.filter((x) => {
+      return x.type === ChannelType.GuildText;
+    }).random(1)[0].createInvite({
       maxAge: 0, 
       maxUses: 5
     });
@@ -33,7 +38,7 @@ module.exports = {
       ], components: [new ActionRowBuilder().addComponents([ inviteBot, Discord ])]
     }).catch((e) => console.log(`guildCreate: ${e}`));
     // Gửi tin nhắn vào chanel
-    return channel.send({
+    return channels.send({
       embeds: [new EmbedBuilder()
         .setAuthor({ name: guild.name, iconURL: owner.user.displayAvatarURL({ dynamic: true }) })
         .setDescription(`Tôi đã thêm vào \`${guild.name}\` và tổng số guild của tôi là: \`${client.guilds.cache.size}\``)

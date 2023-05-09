@@ -11,6 +11,7 @@ module.exports = {
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, member) => {
     const { setDefaultWelcomeGoodbyeData: data } = await database.get(member.guild.id);
+    if(!data) return;
     const channel = member.guild.channels.cache.find(c => c.id === data.GoodbyeChannel);
     if(!channel) return;
     const canvas = Canvas.createCanvas(1772, 633);     

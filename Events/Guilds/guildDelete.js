@@ -8,13 +8,17 @@ module.exports = {
 	eventName: "guildDelete", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, guild) => {
-    let Sguild = client.guilds.cache.get("1055150050357022840");
-    let channel = Sguild.channels.cache.get("1085223809675698260");
+    const getData = await database.get(guild.id);
+    if(!getData) return;
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds.channels.cache.get(getData.setDiaryChannel.guildDelete);
+    if(!channels) return;
+    // lấy owner value
     let owner = await guild.fetchOwner();
     // xoá database khi bot rời khỏi guilds
     await database.delete(guild.id);
     // gửi tin nhắn vào channel
-    return channel.send({ 
+    return channels.send({ 
       embeds: [new EmbedBuilder()
         .setAuthor({ name: guild.name, iconURL: owner.user.displayAvatarURL({ dynamic: true }) })
         .setDescription(`Tôi đã bị kick khỏi \`${guild.name}\` và tổng số guilds còn lại: \`${client.guilds.cache.size}\``)

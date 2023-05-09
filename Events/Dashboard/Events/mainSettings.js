@@ -1,10 +1,6 @@
 const DBD = require("discord-dashboard");
-const { Database } = require("st.db");
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true,
-});
 
-const mainSettings = (client) => {
+const mainSettings = (client, database, config) => {
   return {
     categoryId: 'mainSettings-option',
     categoryName: "Main Settings 🛠️",

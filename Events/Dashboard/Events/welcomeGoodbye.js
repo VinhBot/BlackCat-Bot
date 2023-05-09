@@ -1,16 +1,10 @@
 const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
-const { Database } = require("st.db");
-const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true,
-});
-
 /*========================================================
 # Thiết lập welcome & goodbye 
 ========================================================*/
-const welconmeGoodbyeCh = (client) => {
+const welconmeGoodbyeCh = (client, database, config) => {
   return {
     categoryId: 'WelcomeGoodbye-setup',
     categoryName: "Welcome & Goodbye 👋",

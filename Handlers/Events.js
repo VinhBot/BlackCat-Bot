@@ -33,24 +33,27 @@ module.exports = (client) => {
   const executeEvents = async(options) => {
     let Events = new ascii("Events - Create");
     Events.setHeading("File", "Events");
-    const eventFiles = fs.readdirSync(options.eventsPath).filter(file => file.endsWith('.js'));
-    for (const file of eventFiles) {
-    	const event = require(`${options.eventsPath}/${file}`);
-	    if(event.eventName) {
-        if(event.eventOnce) {
-	      	client.once(event.eventName, (...args) => {
-            event.executeEvents(client, ...args);
-          });
-	      } else {
-		      client.on(event.eventName, (...args) => {
-            event.executeEvents(client, ...args);
-          });
-	      };
-        Events.addRow(file, '✔');
-      } else {
-        Events.addRow(file, '❌');
+    const loadDir = (dir) => {
+      const eventFiles = fs.readdirSync(`${options.eventsPath}/${dir}`).filter((file) => file.endsWith('.js'));
+      for (const file of eventFiles) {
+    	  const event = require(`${options.eventsPath}/${dir}/${file}`);
+	      if(event.eventName) {
+          if(event.eventOnce) {
+	      	  client.once(event.eventName, (...args) => {
+              event.executeEvents(client, ...args);
+            });
+	        } else {
+		        client.on(event.eventName, (...args) => {
+              event.executeEvents(client, ...args);
+            });
+	        };
+          Events.addRow(file, '✔');
+        } else {
+          Events.addRow(file, '❌');
+        };
       };
     };
+    await options.Events.forEach(e => loadDir(e));
     console.log(Events.toString().yellow);
   };
   /*========================================================
@@ -58,6 +61,7 @@ module.exports = (client) => {
   ========================================================*/
   // commandHandler(`${process.cwd()}/Commands/PrefixCommands`);
   executeEvents({
-     eventsPath: `${process.cwd()}/Events/Guilds`
+     eventsPath: `${process.cwd()}/Events/`,
+     Events: ["Guilds", "Custom"]
   });
 };
