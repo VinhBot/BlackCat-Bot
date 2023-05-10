@@ -15,13 +15,12 @@ module.exports = {
     const { member, guild } = oldState;
     const getData = await database.get(guild.id);
     if(!getData) return;
-    if(getData) {
-        let guilds = client.guilds.cache.get(getData.defaultGuildId);
-        let channel = guilds.channels.cache.get(getData.setDefaultMusicData.ChannelAutoCreateVoice);
-        const newChannel = newState.channel;
-        const oldChannel = oldState.channel;
-        if(!channel) return;
-        if(oldChannel !== newChannel && newChannel && newChannel.id === channel.id) {
+    let guilds = client.guilds.cache.get(getData.defaultGuildId);
+    let channel = guilds.channels.cache.get(getData.setDefaultMusicData.ChannelAutoCreateVoice);
+    const newChannel = newState.channel;
+    const oldChannel = oldState.channel;
+    if(!channel) return;
+    if(oldChannel !== newChannel && newChannel && newChannel.id === channel.id) {
             const voiceChannel = await guild.channels.create({
                 name: `${member.user.tag}`,
                 type: ChannelType.GuildVoice,
@@ -48,11 +47,11 @@ module.exports = {
             return setTimeout(() => {
                 member.voice.setChannel(voiceChannel);
             }, 500);
-        }
-        const jointocreate = voiceManager.get(member.id);
-        const members = oldChannel?.members.filter((m) => !m.user.bot).map((m) => m.id);
-        if(jointocreate && oldChannel.id === jointocreate && (!newChannel || newChannel.id !== jointocreate)) {
-            if(members.length > 0) {
+    };
+    const jointocreate = voiceManager.get(member.id);
+    const members = oldChannel?.members.filter((m) => !m.user.bot).map((m) => m.id);
+    if(jointocreate && oldChannel.id === jointocreate && (!newChannel || newChannel.id !== jointocreate)) {
+      if(members.length > 0) {
                 let randomID = members[Math.floor(Math.random() * members.length)];
                 let randomMember = guild.members.cache.get(randomID);
                 randomMember.voice.setChannel(oldChannel).then((v) => {
@@ -64,17 +63,16 @@ module.exports = {
                 });
                 voiceManager.set(member.id, null);
                 voiceManager.set(randomMember.id, oldChannel.id);
-            } else {
-                voiceManager.set(member.id, null);
-                oldChannel.delete().catch((e) => null);
-            };
-        }
+      } else {
+        voiceManager.set(member.id, null);
+        oldChannel.delete().catch((e) => null);
+      };
     };
     /*========================================================
     # nhật ký
     ========================================================*/
-    let guilds = client.guilds.cache.get(getData.defaultGuildId);
-    let channels = guilds.channels.cache.get(getData.setDiaryChannel.voiceStateUpdate);
+    let guilds2 = client.guilds.cache.get(getData.defaultGuildId);
+    let channels = guilds2.channels.cache.get(getData.setDiaryChannel.voiceStateUpdate);
     if(!channels) return;
     let oldUser = oldState.member;
     let newUser = newState.member;

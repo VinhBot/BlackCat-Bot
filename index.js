@@ -8,12 +8,6 @@ const client = new Client({
   setToken: process.env.token || config.token, // token của bot
   setDeveloper: config.developer,
 });
-/*
-client.eventHandler({
-  EventPath: `${process.cwd()}/Events`, // path of events
-  Events: ["Guilds"] // folder name
-});
-*/
 
 // khởi chạy các lệnh slash (/)
 client.slashHandler({

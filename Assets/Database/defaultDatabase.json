@@ -13,7 +13,7 @@
             ],
             "MessageId": "1105114579744325673",
             "ChannelId": "1092827995003166882",
-            "ChannelAutoCreateVoice": "",
+            "ChannelAutoCreateVoice": "1096800005123227760",
             "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
@@ -250,8 +250,8 @@
             "Djroles": []
         },
         "setDefaultWelcomeGoodbyeData": {
-            "WelcomeChannel": "",
-            "GoodbyeChannel": "",
+            "WelcomeChannel": "1091655093138509917",
+            "GoodbyeChannel": "1091655093138509917",
             "AutoAddRoleWel": []
         },
         "setDiaryChannel": {

@@ -22,10 +22,10 @@
     "useLicense": "ccae16a1-d263-4baa-93df-16c62db0af49",
     "port": 80,
     "client": {
-      "id": "881709146695667773",
-      "secret": "1_4Nz4IBGxdlnW4xOCJDjlXAHy4YGoLr"
+      "id": "bot Id",
+      "secret": "bot Secret"
     },
-    "redirectUri": "https://BlackCat-Bot.vinhbot.repl.co/discord/callback",
-    "domain": "https://BlackCat-Bot.vinhbot.repl.co"
+    "redirectUri": "https://  Tên miền  .com/discord/callback",
+    "domain": "https:// Tên miền .com"
   }
 }

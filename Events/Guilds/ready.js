@@ -3,9 +3,6 @@ const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
 const { ActivityType } = require("discord.js");
 const { Database } = require("st.db");
 const DBD = require("discord-dashboard");
-const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
-  databaseInObject: true
-});
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
@@ -35,7 +32,7 @@ module.exports = {
     client.guilds.cache.forEach(async(guilds) => { 
       const checkGuilds = await database.has(guilds.id);
       if(!checkGuilds) {
-        setInterval(async function() {
+        setInterval(async() => {
           await setupDatabase(guilds);
         }, 500);
       };
@@ -43,30 +40,43 @@ module.exports = {
     /*========================================================
     # Dashboard
     ========================================================*/
-    await DBD.useLicense(config.dashboard.useLicense);
-    DBD.Dashboard = DBD.UpdatedClass();
-    const Dashboard = new DBD.Dashboard({
-      port: config.dashboard.port,
-      client: config.dashboard.client,
-      redirectUri: config.dashboard.redirectUri,
-      domain: config.dashboard.domain,
-      ownerIDs: config.dashboard.ownerIDs,
-      useThemeMaintenance: true,
-      useTheme404: true,
-      bot: client,
-      theme: theme(client, config),
-      settings: [
-        mainSettings(client, database, config),
-        welconmeGoodbyeCh(client, database, config), 
-        setupMusic(client, database, config), 
-        diaryChannel(client, database, config),
-      ]
-    });
-    Dashboard.init();
+    const dashboard = async(options) => {
+      if(options) {
+        const botClient = {
+          id: process.env.botID,
+          secret: process.env.botSecret
+        };
+        const redirectUri = process.env.redirectUri;
+        await DBD.useLicense(config.dashboard.useLicense);
+        DBD.Dashboard = DBD.UpdatedClass();
+        const Dashboard = new DBD.Dashboard({
+          port: config.dashboard.port,
+          client: botClient || config.dashboard.client,
+          redirectUri: redirectUri || config.dashboard.redirectUri,
+          domain: config.dashboard.domain,
+          ownerIDs: config.dashboard.ownerIDs,
+          useThemeMaintenance: true,
+          useTheme404: true,
+          bot: client,
+          theme: theme(client, config),
+          settings: [
+            mainSettings(client, database, config),
+            welconmeGoodbyeCh(client, database, config), 
+            setupMusic(client, database, config), 
+            diaryChannel(client, database, config),
+          ]
+        });
+        return Dashboard.init();
+      };
+    };
+    dashboard(true);
     /*========================================================
     # Autoresume
     ========================================================*/
     const autoconnect = async() => {
+      const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
+        databaseInObject: true
+      });
       const { DisTube } = require("distube");
       function delay(delayInms) {
         return new Promise((resolve) => setTimeout(() => resolve(2), delayInms));

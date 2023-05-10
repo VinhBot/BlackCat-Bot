@@ -484,6 +484,7 @@ module.exports = (client) => {
           ])
       ]}).then((msg) => setTimeout(() => msg.delete(), 30000));
   }).on("deleteQueue", async(queue) => {
+    var newQueue = client.distube.getQueue(queue.id);
     if(!PlayerMap.has(`deleted-${queue.id}`)) {
           PlayerMap.set(`deleted-${queue.id}`, true);
           if(maps.has(`beforeshuffle-${queue.id}`)){

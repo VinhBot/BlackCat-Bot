@@ -1,22 +1,4 @@
 {
-    "1055150050357022840": [
-        {
-            "name": "vinh",
-            "responses": "đẹp trai thế"
-        },
-        {
-            "name": "thảo",
-            "responses": "xinh gái v"
-        },
-        {
-            "name": "vinh đẹp trai",
-            "responses": "công nhân đẹp trai vl"
-        },
-        {
-            "name": "khiem",
-            "responses": "test test test"
-        }
-    ],
     "1054933019934330930": [
         {
             "name": "",
@@ -24,14 +6,7 @@
             "responses": ""
         }
     ],
-    "1091655091938930769": [
-        {
-            "name": "",
-            "wildcard": "",
-            "responses": ""
-        }
-    ],
-    "884047380176048159": [
+    "1055150050357022840": [
         {
             "name": "",
             "wildcard": "",
