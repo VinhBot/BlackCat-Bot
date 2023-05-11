@@ -1,11 +1,4 @@
 const { ApplicationCommandOptionType } = require("discord.js");
-const ticket = require(`${process.cwd()}/Events/functions`);
-const { 
-  ticketModalSetup,
-  removeFromTicket,
-  addToTicket, 
-  close 
-} = new ticket.ticketHandler();
 
 module.exports = {
   name: "ticket", // Tên lệnh 
@@ -53,15 +46,15 @@ module.exports = {
   run: async(client, interaction) => {
     if(interaction.options.getSubcommand() === "create") {
       const ChannelId = interaction.options.getChannel("channel");
-      return ticketModalSetup(interaction, ChannelId);
+      return client.ticketHandler.ticketModalSetup(interaction, ChannelId);
     } else if(interaction.options.getSubcommand() === "close") {
-      return await interaction.reply(await close(interaction, interaction.user));
+      return await interaction.reply(await client.ticketHandler.close(interaction, interaction.user));
     } else if(interaction.options.getSubcommand() === "add") {
       const userId = interaction.options.getString("user_id");
-      return await interaction.reply(await addToTicket(interaction, userId));
+      return await interaction.reply(await client.ticketHandler.addToTicket(interaction, userId));
     } else if(interaction.options.getSubcommand() === "remove") {
       const user = interaction.options.getUser("user");
-      return await interaction.reply(await removeFromTicket(interaction, user.id));
+      return await interaction.reply(await client.ticketHandler.removeFromTicket(interaction, user.id));
     };
   },
 };

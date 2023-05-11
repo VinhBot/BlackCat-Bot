@@ -3,40 +3,15 @@ const fs = require("node:fs");
 
 module.exports = (client) => { 
   /*========================================================
-  # Commands 
-  ========================================================*/
-  const commandHandler = async(options) => {
-    let tableCmds = new ascii('BlackCat - commands');
-    tableCmds.setHeading("Tên File", "Trạng thái");
-    const commandsPath = options;
-    fs.readdirSync(commandsPath).forEach((dir) => {
-      const commands = fs.readdirSync(`${commandsPath}/${dir}/`).filter((file) => file.endsWith(".js"));
-      for (let file of commands) {
-        let pull = require(`${commandsPath}/${dir}/${file}`);
-        if(pull.commandName) {
-          client.commands.set(pull.commandName, pull);
-          tableCmds.addRow(file, '✔');
-        } else {
-          tableCmds.addRow(file, "❌");
-          continue;
-        };
-        if(pull.commandAliases && Array.isArray(pull.commandAliases)) {
-           pull.commandAliases.forEach((alias) => client.aliases.set(alias, pull.commandName));
-        };
-      };
-    });
-    console.log(tableCmds.toString().magenta);
-  };
-  /*========================================================
   # Events
   ========================================================*/
-  const executeEvents = async(options) => {
-    let Events = new ascii("Events - Create");
-    Events.setHeading("File", "Events");
+  const executeEvents = async({ eventsPath, Events }) => {
+    let _Events = new ascii("Events - Create");
+    _Events.setHeading("File", "Events");
     const loadDir = (dir) => {
-      const eventFiles = fs.readdirSync(`${options.eventsPath}/${dir}`).filter((file) => file.endsWith('.js'));
+      const eventFiles = fs.readdirSync(`${eventsPath}/${dir}`).filter((file) => file.endsWith('.js'));
       for (const file of eventFiles) {
-    	  const event = require(`${options.eventsPath}/${dir}/${file}`);
+    	  const event = require(`${eventsPath}/${dir}/${file}`);
 	      if(event.eventName) {
           if(event.eventOnce) {
 	      	  client.once(event.eventName, (...args) => {
@@ -47,19 +22,18 @@ module.exports = (client) => {
               event.executeEvents(client, ...args);
             });
 	        };
-          Events.addRow(file, '✔');
+          _Events.addRow(file, '✔');
         } else {
-          Events.addRow(file, '❌');
+          _Events.addRow(file, '❌');
         };
       };
     };
-    await options.Events.forEach(e => loadDir(e));
-    console.log(Events.toString().yellow);
+    await Events.forEach(e => loadDir(e));
+    console.log(_Events.toString().yellow);
   };
   /*========================================================
   // Chạy các function
   ========================================================*/
-  // commandHandler(`${process.cwd()}/Commands/PrefixCommands`);
   executeEvents({
      eventsPath: `${process.cwd()}/Events/`,
      Events: ["Guilds", "Custom"]

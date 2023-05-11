@@ -18,18 +18,6 @@ module.exports = {
           setTimeout(() => interaction.deleteReply(), 5000);
         }).catch(() => {});
       };
-      /*========================================================
-      # ticket handlers 🎫 🎟️
-      ========================================================*/
-      const { handleTicketOpen, handleTicketClose } = new ticketHandler();
-      if(customId === "TicketCreate") {
-        return handleTicketOpen(interaction);
-      } else if(customId === "TicketClose") {
-        return handleTicketClose(interaction);
-      };
-      /*========================================================
-      # 
-      ========================================================*/
     } else if(interaction.isStringSelectMenu()) {
       //// 
     };

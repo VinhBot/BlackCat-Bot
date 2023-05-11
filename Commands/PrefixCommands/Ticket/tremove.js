@@ -1,4 +1,3 @@
-const ticket = require(`${process.cwd()}/Events/functions`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,7 +9,6 @@ module.exports = {
   category:"Ticket", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const { removeFromTicket } = new ticket.ticketHandler();
     if(!args[0]) return message.reply("Vui lòng cung cấp thành viên hoặc role để xóa");
     let inputId;
     if(message.mentions.users.size > 0) {
@@ -18,7 +16,7 @@ module.exports = {
     } else if(message.mentions.roles.size > 0) {
       inputId = message.mentions.roles.first().id;
     } else inputId = args[1];
-    const response = await removeFromTicket(message, inputId);
+    const response = await client.removeFromTicket(message, inputId);
     message.reply(response);
   },
 };

@@ -6,6 +6,9 @@ const DBD = require("discord-dashboard");
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
+const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
+  databaseInObject: true
+});
 const config = require(`${process.cwd()}/config.json`);
 module.exports = {
 	eventName: "ready", // tên events
@@ -74,9 +77,6 @@ module.exports = {
     # Autoresume
     ========================================================*/
     const autoconnect = async() => {
-      const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
-        databaseInObject: true
-      });
       const { DisTube } = require("distube");
       function delay(delayInms) {
         return new Promise((resolve) => setTimeout(() => resolve(2), delayInms));
@@ -129,7 +129,7 @@ module.exports = {
           await client.distube.play(voiceChannel, tracks[0].url, {
             member: guild.members.cache.get(tracks[0].memberId) || guild.me,
             textChannel: textChannel
-          });
+          }).catch((ex) => { });
           let newQueue = client.distube.getQueue(guild.id);
           for(const track of tracks.slice(1)){
             newQueue.songs.push(await makeTrack(track));

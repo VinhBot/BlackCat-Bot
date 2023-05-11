@@ -1,4 +1,3 @@
-const ticket = require(`${process.cwd()}/Events/functions`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,9 +9,8 @@ module.exports = {
   category:"Ticket", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const { closeAll } = new ticket.ticketHandler();
     let sent = await message.reply("Đóng tickets ...");
-    const response = await closeAll(message, message.author);
+    const response = await client.ticketCloseAll(message, message.author);
     return sent.editable ? sent.edit(response) : message.channel.send(response);
   },
 };

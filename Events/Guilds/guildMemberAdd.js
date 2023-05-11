@@ -3,7 +3,6 @@ const { join } = require('node:path');
 const Canvas = require('canvas');
 const axios = require('axios');
 const { Database } = require("st.db");
-const config = require(`${process.cwd()}/config.json`);
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 
 });
@@ -101,7 +100,7 @@ module.exports = {
          .setImage("attachment://image.png")
          .setColor("Random")
          .setThumbnail(member.guild.iconURL({ dynamic: true, extension: "jpg" }) || "https://cdn.discordapp.com/emojis/687231938955837454.gif")
-      ], files: [attachment]  }).catch((e) => console.log(e));
+      ], files: [attachment] }).catch((e) => console.log(e));
       let roles = data.AutoAddRoleWel;
       if(roles) {
         for (let i = 0; i < roles.length; i++ ) {

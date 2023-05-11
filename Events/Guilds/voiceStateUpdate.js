@@ -1,4 +1,4 @@
-const { ChannelType, Collection } = require("discord.js");
+const { ChannelType, Collection, EmbedBuilder } = require("discord.js");
 const { Database } = require("st.db");
 const database = new Database("./Assets/Database/defaultDatabase.json", { 
   databaseInObject: true 

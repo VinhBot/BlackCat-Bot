@@ -39,7 +39,7 @@ module.exports = {
     },
   ],
   run: async(client, interaction) => {
-   
+    
   },
 };
 // modules
@@ -59,20 +59,5 @@ module.exports = {
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client) => {
     // code
-  },
-};
-// test conmands 
-const path = require("node:path");
-module.exports = {
-  commandName: path.parse(__filename).name,
-  commandUsage: path.parse(__filename).name,
-  commandAliases: [""], // lệnh phụ
-  commandDescription: "", // mô tả lệnh
-  commandUserPerms: [], // Administrator, ....
-  commandOwner: false, //: tắt // true : bật
-  commandCategory:"", // tên folder chứa lệnh
-  commandCooldown: 5, // thời gian có thể tái sử dụng lệnh
-  commandExecution: async(client, message, args, prefix) => {
-    
   },
 };

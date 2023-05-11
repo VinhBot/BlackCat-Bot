@@ -1,8 +1,4 @@
-const ticket = require(`${process.cwd()}/Events/functions`);
 const path = require("node:path");
-const { 
-  ticketModalSetup
-} = new ticket.ticketHandler();
 module.exports = {
   name: path.parse(__filename).name,
   usage: path.parse(__filename).name,
@@ -15,6 +11,6 @@ module.exports = {
   run: async(client, message, args, prefix) => {
     let ChannelId = message.mentions.channels.first();
     if(!ChannelId) return message.reply({ content: `**Bạn quên ping một Text-Channel!**` });
-    return ticketModalSetup(message, ChannelId);
+    return client.ticketModalSetup(message, ChannelId);
   },
 };

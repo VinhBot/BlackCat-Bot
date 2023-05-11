@@ -1,4 +1,3 @@
-const ticket = require(`${process.cwd()}/Events/functions`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,9 +9,8 @@ module.exports = {
   category:"Ticket", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const { addToTicket } = new ticket.ticketHandler();
     if(!args[0]) return message.reply("Vui lòng cung cấp id thành viên hoặc id role để thêm vào yêu cầu");
-    const response = await addToTicket(message, args[0]);
+    const response = await client.addToTicket(message, args[0]);
     message.reply(response);
   },
 };
