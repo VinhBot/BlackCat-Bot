@@ -13,8 +13,15 @@ module.exports = {
     let channels = guilds.channels.cache.get(getData.setDiaryChannel.channelDelete);
     if(!channels) return;
     let types = {
-        0: 'Text channel',
-        2: 'Voice channel'
+      0: "Text Channel",
+      2: "Voice Channel",
+      4: "Category",
+      5: "News Channel",
+      10: "News Thread",
+      11: "Public Thread",
+      12: "Private Thread",
+      13: "Stage Channel",
+      14: "Category",
     };
     return channels.send({
       embeds: [new EmbedBuilder()
@@ -22,6 +29,7 @@ module.exports = {
         .addFields([
           { name: "Tên kênh", value: `${channel.name}`},
           { name: "ID kênh", value: `${channel.id}` },
+          { name: "Danh mục", value: `- ${channel.parent}` },
           { name: "Loại kênh", value: `${types[channel.type]}` },
         ])
         .setColor("Random")

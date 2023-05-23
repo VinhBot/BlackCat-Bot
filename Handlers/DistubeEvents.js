@@ -538,7 +538,7 @@ module.exports = (client) => {
         if (!channel) return console.log(`Music System - Relevant Checker`.brightCyan + ` - Không tìm thấy kênh!`);
         let messages = await channel.messages.fetch();
         if(messages.filter(m => m.id != messageId).size > 0) {
-          channel.bulkDelete(messages.filter(m => m.id != messageId)).catch(() => {}).then(messages => console.log(`Music System - Relevant Checker`.brightCyan + ` - Đã xóa hàng loạt ${messages.size} tin nhắn`))
+          channel.bulkDelete(messages.filter(m => m.id != messageId)).catch(() => {}).then(messages => console.log(`Music System - Relevant Checker`.brightCyan + ` - Đã xóa hàng loạt ${messages.size ? messages.size : "0"} tin nhắn`));
         } else {
           console.log(`Music System - Relevant Checker`.brightCyan + ` - Không có tin nhắn liên quan`)
         };
@@ -768,39 +768,5 @@ module.exports = (client) => {
 				console.log(e);
 			};
     };
-  });
-  
-  client.on("messageCreate", async(message) => {
-    if(!message.guild || !message.guild.available) return;
-    const defaultData = await database.get(message.guild.id);
-    if(!defaultData) return;
-    const data = defaultData.setDefaultMusicData;
-    if(!data.ChannelId || data.ChannelId.length < 5) return;
-    let textChannel = message.guild.channels.cache.get(data.ChannelId) || await message.guild.channels.fetch(data.ChannelId).catch(() => {}) || false;
-    if(!textChannel) return console.log("Không có channel nào được thiết lập");
-    if(textChannel.id != message.channel.id) return;
-    // xoá tin nhắn 
-    if (message.author.id === client.user.id) {
-      setTimeout(() => {
-        if(!message.deleted) {
-          message.delete().catch(() => null);
-        };
-      }, 3000)
-    } else {
-      if(!message.deleted) {
-        message.delete().catch((e) => console.log(e));
-      };
-    };
-    if(message.author.bot) return;
-    // kiểm tra xem thành viên có ở trong voice hay không
-    if(!await message.member.voice.channel) return message.channel.send({ 
-      content: "Bạn cần phải ở trong một kênh voice"
-    });
-    // yêu cầu phát nhạc
-    await client.distube.play(message.member.voice.channel, message.cleanContent, {
-      member: message.member,
-      textChannel: message.channel,
-      message,
-    });
   });
 };

@@ -1,10 +1,6 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
 const { GiveawaysManager } = require("discord-giveaways");
-const { Database } = require("st.db");
 const ms = require("enhanced-ms");
-const giveawayDB = new Database("./Assets/Database/giveaways.json", { 
-  databaseInObject: true 
-});
 
 const GiveawaysHandlers = class extends GiveawaysManager {
   constructor(client) {
@@ -21,7 +17,7 @@ const GiveawaysHandlers = class extends GiveawaysManager {
       * @property {Discord.ColorResolvable} [default.embedColorEnd='#000000'] Màu của giveaway được embed khi chúng kết thúc.
       * @property {Discord.EmojiIdentifierResolvable} [default.reaction='🎁'] Phản ứng khi muốn tham gia giveaway.
       ========================================================*/
-      storage: false, // `${process.cwd()}/Assets/Database/giveawayDatabase.json`, // (Nếu như có hiện tượng bot lag thì mở cái này lên vào giveawayDatabase.json xoá sạch dữ liệu rồi thêm dấu [] vào);
+      storage: `${process.cwd()}/Assets/Database/giveawayDatabase.json`, // (Nếu như có hiện tượng bot lag thì mở cái này lên vào giveawayDatabase.json xoá sạch dữ liệu rồi thêm dấu [] vào);
       forceUpdateEvery: null,
       endedGiveawaysLifetime: null,
       default: {
@@ -64,32 +60,6 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
       }
     };
-  };
-  /*========================================================
-  # một số events 💾
-  ========================================================*/
-  // Hàm này được gọi khi người quản lý cần lấy tất cả giveaway được lưu trữ trong cơ sở dữ liệu.
-  async getAllGiveaways() {
-    // Lấy tất cả giveaway từ cơ sở dữ liệu
-    return giveawayDB.valuesAll();
-  };
-  // Hàm này được gọi khi một giveaway cần được lưu trong cơ sở dữ liệu.
-  async saveGiveaway(messageId, giveawayData) {
-    // Thêm giveaway mới vào cơ sở dữ liệu
-    giveawayDB.set(messageId, giveawayData);
-    return true;
-  };
-  // Hàm này được gọi khi cần chỉnh sửa giveaway trong cơ sở dữ liệu.
-  async editGiveaway(messageId, giveawayData) {
-    // Thay thế giveaway chưa chỉnh sửa bằng giveaway đã chỉnh sửa
-    giveawayDB.set(messageId, giveawayData);
-    return true;
-  };
-  // Hàm này được gọi khi cần xóa giveaway khỏi cơ sở dữ liệu.
-  async deleteGiveaway(messageId) {
-    // Xóa giveaway khỏi cơ sở dữ liệu
-    giveawayDB.delete(messageId);
-    return true;
   };
   /*========================================================
   # Tạo embed được hiển thị khi giveaway đang chạy (với thời gian còn lại)

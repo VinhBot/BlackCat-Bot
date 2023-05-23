@@ -46,15 +46,15 @@ module.exports = {
   run: async(client, interaction) => {
     if(interaction.options.getSubcommand() === "create") {
       const ChannelId = interaction.options.getChannel("channel");
-      return client.ticketHandler.ticketModalSetup(interaction, ChannelId);
+      return client.ticketModalSetup(interaction, ChannelId);
     } else if(interaction.options.getSubcommand() === "close") {
-      return await interaction.reply(await client.ticketHandler.close(interaction, interaction.user));
+      return await interaction.reply(await client.ticketClose(interaction, interaction.user));
     } else if(interaction.options.getSubcommand() === "add") {
       const userId = interaction.options.getString("user_id");
-      return await interaction.reply(await client.ticketHandler.addToTicket(interaction, userId));
+      return await interaction.reply(await client.addToTicket(interaction, userId));
     } else if(interaction.options.getSubcommand() === "remove") {
       const user = interaction.options.getUser("user");
-      return await interaction.reply(await client.ticketHandler.removeFromTicket(interaction, user.id));
+      return await interaction.reply(await client.removeFromTicket(interaction, user.id));
     };
   },
 };
