@@ -1,7 +1,67 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ChannelType, ButtonStyle, TextInputStyle, ComponentType } = require("discord.js");
 const { GiveawaysManager } = require("discord-giveaways");
+const mongoose = require("mongoose");
 const ms = require("enhanced-ms");
-
+// Tạo lược đồ cho giveaway
+const giveawaySchema = new mongoose.Schema({
+        messageId: String,
+        channelId: String,
+        guildId: String,
+        startAt: Number,
+        endAt: Number,
+        ended: Boolean,
+        winnerCount: Number,
+        prize: String,
+        messages: {
+            giveaway: String,
+            giveawayEnded: String,
+            title: String,
+            inviteToParticipate: String,
+            drawing: String,
+            dropMessage: String,
+            winMessage: mongoose.Mixed,
+            embedFooter: mongoose.Mixed,
+            noWinner: String,
+            winners: String,
+            endedAt: String,
+            hostedBy: String
+        },
+        thumbnail: String,
+        image: String,
+        hostedBy: String,
+        winnerIds: { type: [String], default: undefined },
+        reaction: mongoose.Mixed,
+        botsCanWin: Boolean,
+        embedColor: mongoose.Mixed,
+        embedColorEnd: mongoose.Mixed,
+        exemptPermissions: { type: [], default: undefined },
+        exemptMembers: String,
+        bonusEntries: String,
+        extraData: mongoose.Mixed,
+        lastChance: {
+            enabled: Boolean,
+            content: String,
+            threshold: Number,
+            embedColor: mongoose.Mixed
+        },
+        pauseOptions: {
+            isPaused: Boolean,
+            content: String,
+            unPauseAfter: Number,
+            embedColor: mongoose.Mixed,
+            durationAfterPause: Number,
+            infiniteDurationText: String
+        },
+        isDrop: Boolean,
+        allowedMentions: {
+            parse: { type: [String], default: undefined },
+            users: { type: [String], default: undefined },
+            roles: { type: [String], default: undefined }
+        }
+}, { id: false });
+// Tạo mô hình
+const giveawayModel = mongoose.model('giveaways', giveawaySchema);
+// sơ đồ điều khiển
 const GiveawaysHandlers = class extends GiveawaysManager {
   constructor(client) {
     super(client, {
@@ -17,7 +77,7 @@ const GiveawaysHandlers = class extends GiveawaysManager {
       * @property {Discord.ColorResolvable} [default.embedColorEnd='#000000'] Màu của giveaway được embed khi chúng kết thúc.
       * @property {Discord.EmojiIdentifierResolvable} [default.reaction='🎁'] Phản ứng khi muốn tham gia giveaway.
       ========================================================*/
-      storage: `${process.cwd()}/Assets/Database/giveawayDatabase.json`, // (Nếu như có hiện tượng bot lag thì mở cái này lên vào giveawayDatabase.json xoá sạch dữ liệu rồi thêm dấu [] vào);
+      storage: false,
       forceUpdateEvery: null,
       endedGiveawaysLifetime: null,
       default: {
@@ -60,6 +120,32 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
       }
     };
+  };
+  /*========================================================
+  # Khởi tạo database cho bot
+  ========================================================*/
+  // Hàm này được gọi khi người quản lý cần lấy tất cả giveaway được lưu trữ trong cơ sở dữ liệu.
+  async getAllGiveaways() {
+    // Lấy tất cả giveaway từ cơ sở dữ liệu. Chúng tôi tìm nạp tất cả các tài liệu bằng cách chuyển một điều kiện trống.
+    return await giveawayModel.find().lean().exec();
+  };
+  // Hàm này được gọi khi một giveaway cần được lưu trong cơ sở dữ liệu.
+  async saveGiveaway(messageId, giveawayData) {
+    // Thêm giveaway mới vào cơ sở dữ liệu
+    await giveawayModel.create(giveawayData);
+    return true;
+  }
+  // Hàm này được gọi khi cần chỉnh sửa giveaway trong cơ sở dữ liệu.
+  async editGiveaway(messageId, giveawayData) {
+    // Tìm theo messageId và cập nhật nó
+    await giveawayModel.updateOne({ messageId }, giveawayData).exec();
+    return true;
+  };
+  // Hàm này được gọi khi cần xóa giveaway khỏi cơ sở dữ liệu.
+  async deleteGiveaway(messageId) {
+    // Tìm theo messageId và xóa nó
+    await giveawayModel.deleteOne({ messageId }).exec();
+    return true;
   };
   /*========================================================
   # Tạo embed được hiển thị khi giveaway đang chạy (với thời gian còn lại)

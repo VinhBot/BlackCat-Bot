@@ -72,7 +72,7 @@ module.exports = {
         return Dashboard.init();
       };
     };
-    dashboard(true);
+    dashboard(false);
     /*========================================================
     # Autoresume
     ========================================================*/
