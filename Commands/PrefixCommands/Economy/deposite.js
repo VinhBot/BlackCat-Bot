@@ -13,6 +13,7 @@ module.exports = {
     if(!money) return message.reply("Nhập số tiền bạn muốn gửi.");
     let result = await client.cs.deposite({
       user: message.author,
+      guild: { id: null },
       amount: money,
     });
     if(result.error) {

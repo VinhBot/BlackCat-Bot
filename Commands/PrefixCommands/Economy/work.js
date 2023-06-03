@@ -12,6 +12,7 @@ module.exports = {
     let result = await client.cs.work({
       user: message.author,
       maxAmount: 100,
+      guild: { id: null },
       replies: ['Programmer', 'Builder', 'Waiter', 'Busboy', 'Chief', 'Mechanic'],
       cooldown: 25 //25 giây,
     });

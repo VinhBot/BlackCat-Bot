@@ -1,14 +1,9 @@
 const { theme, diaryChannel, setupMusic, welconmeGoodbyeCh, mainSettings } = require(`${process.cwd()}/Events/Dashboard/dashboard.js`);
 const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
 const { ActivityType } = require("discord.js");
-const { Database } = require("st.db");
 const DBD = require("discord-dashboard");
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true 
-});
-const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
-  databaseInObject: true
-});
+const autoresume = require(`${process.cwd()}/Assets/Schemas/autoresume`);
+const prefixSchema = require(`${process.cwd()}/Assets/Schemas/prefix`);
 const config = require(`${process.cwd()}/config.json`);
 module.exports = {
 	eventName: "ready", // tên events
@@ -29,18 +24,6 @@ module.exports = {
       });
     }, 5000);
     /*========================================================
-    # Kiểm tra xem guilds đã có database hay chưa.
-    # và tự động tạo database khi gia nhập guild
-    ========================================================*/
-    client.guilds.cache.forEach(async(guilds) => { 
-      const checkGuilds = await database.has(guilds.id);
-      if(!checkGuilds) {
-        setInterval(async() => {
-          await setupDatabase(guilds);
-        }, 500);
-      };
-    });
-    /*========================================================
     # Dashboard
     ========================================================*/
     const dashboard = async(options) => {
@@ -52,6 +35,7 @@ module.exports = {
         const redirectUri = process.env.redirectUri;
         await DBD.useLicense(config.dashboard.useLicense);
         DBD.Dashboard = DBD.UpdatedClass();
+        let database;
         const Dashboard = new DBD.Dashboard({
           port: config.dashboard.port,
           client: botClient || config.dashboard.client,
@@ -81,51 +65,51 @@ module.exports = {
       function delay(delayInms) {
         return new Promise((resolve) => setTimeout(() => resolve(2), delayInms));
       };
-      let guilds = autoresume.keysAll();
-      console.log(`Autoresume`.brightCyan + ` -Tự động tiếp tục các bài hát:`, guilds);
-      if(!guilds || guilds.length == 0) return;
-      for (const gId of guilds) {
-        try {
-          let guild = client.guilds.cache.get(gId);
-          if(!guild) {
-            autoresume.delete(gId);
-            console.log(`Autoresume`.brightCyan + ` - Bot bị kick ra khỏi Guild`);
-            continue;
-          };
-          let data = autoresume.get(gId);
-          let voiceChannel = guild.channels.cache.get(data.voiceChannel);
-          if(!voiceChannel && data.voiceChannel) voiceChannel = await guild.channels.fetch(data.voiceChannel).catch(() => {}) || false;
-          if(!voiceChannel || !voiceChannel.members) {
-            autoresume.delete(gId);
-            console.log(`Autoresume`.brightCyan + ` - Kênh voice trống / không có người nghe / đã bị xóa`)
-            continue;
-          }; 
-          let textChannel = guild.channels.cache.get(data.textChannel);
-          if(!textChannel) textChannel = await guild.channels.fetch(data.textChannel).catch(() => {}) || false;
-          if(!textChannel) {
-            autoresume.delete(gId);
-            console.log(`Autoresume`.brightCyan + ` - Kênh văn bản đã bị xóa`);
-            continue;
-          };
-          let tracks = data.songs;
-          if(!tracks || !tracks[0]) {
-            console.log(`Autoresume`.brightCyan + ` - Đã hủy trình phát, vì không có bản nhạc nào`);
-            continue;
-          };
-          const makeTrack = async(track) => {
-            return new DisTube.Song(new DisTube.ISearchResult({
-              duration: track.duration,
-              formattedDuration: track.formattedDuration,
-              id: track.id,
-              isLive: track.isLive,
-              name: track.name,
-              thumbnail: track.thumbnail,
-              type: "video",
-              uploader: track.uploader,
-              url: track.url,
-              views: track.views,              
-            }), guild.members.cache.get(track.memberId) || guild.me, track.source);
-          };
+      return await autoresume.find().then(async(guilds) => {
+        if(!guilds || guilds.length == 0) return;
+        for (const gId of guilds) {
+          console.log(`Autoresume`.brightCyan + ` -Tự động tiếp tục các bài hát:`, gId.guild);
+          try {
+            let guild = client.guilds.cache.get(gId.guild);
+            if(!guild) {
+              autoresume.deleteOne({ guild: gId.guild })
+              console.log(`Autoresume`.brightCyan + ` - Bot bị kick ra khỏi Guild`);
+              continue;
+            };
+            let data = await autoresume.findOne({ guild: gId.guild });
+            let voiceChannel = guild.channels.cache.get(data.voiceChannel);
+            if(!voiceChannel && data.voiceChannel) voiceChannel = await guild.channels.fetch(data.voiceChannel).catch(() => {}) || false;
+            if(!voiceChannel || !voiceChannel.members) {
+              autoresume.deleteOne({ guild: gId.guild });
+              console.log(`Autoresume`.brightCyan + ` - Kênh voice trống / không có người nghe / đã bị xóa`)
+              continue;
+            }; 
+            let textChannel = guild.channels.cache.get(data.textChannel);
+            if(!textChannel) textChannel = await guild.channels.fetch(data.textChannel).catch(() => {}) || false;
+            if(!textChannel) {
+              autoresume.findOneAndDelete({ guild: gId.guild });
+              console.log(`Autoresume`.brightCyan + ` - Kênh văn bản đã bị xóa`);
+              continue;
+            };
+            let tracks = data.songs;
+            if(!tracks || !tracks[0]) {
+              console.log(`Autoresume`.brightCyan + ` - Đã hủy trình phát, vì không có bản nhạc nào`);
+              continue;
+            };
+            const makeTrack = async(track) => {
+              return new DisTube.Song(new DisTube.ISearchResult({
+                duration: track.duration,
+                formattedDuration: track.formattedDuration,
+                id: track.id,
+                isLive: track.isLive,
+                name: track.name,
+                thumbnail: track.thumbnail,
+                type: "video",
+                uploader: track.uploader,
+                url: track.url,
+                views: track.views,              
+              }), guild.members.cache.get(track.memberId) || guild.me, track.source);
+            };
           await client.distube.play(voiceChannel, tracks[0].url, {
             member: guild.members.cache.get(tracks[0].memberId) || guild.me,
             textChannel: textChannel
@@ -136,7 +120,7 @@ module.exports = {
           };
           console.log(`Autoresume`.brightCyan + ` - Đã thêm ${newQueue.songs.length} vài hát vào hành đợi và bắt đầu phát ${newQueue.songs[0].name} trong ${guild.name}`);
           // ĐIỀU CHỈNH CÀI ĐẶT HÀNG ĐỢI
-          await newQueue.setVolume(data.volume)
+          await newQueue.setVolume(data.volume);
           if(data.repeatMode && data.repeatMode !== 0) {
             newQueue.setRepeatMode(data.repeatMode);
           };
@@ -147,7 +131,9 @@ module.exports = {
           if(data.filters && data.filters.length > 0){
             await newQueue.filters.set(data.filters, true);
           };
-          autoresume.delete(newQueue.id);
+          await autoresume.findOneAndDelete({ guild: newQueue.id }).then(() => {
+            return console.log("Đã xoá thành công")
+          });
           console.log(`Autoresume`.brightCyan + " - Đã thay đổi theo dõi autoresume để điều chỉnh hàng đợi + đã xóa mục nhập cơ sở dữ liệu");
           if(!data.playing) {
             newQueue.pause();
@@ -156,7 +142,10 @@ module.exports = {
         } catch(e) {
           console.log(e);
         };
-      };
+        };
+      }).catch((Error) => {
+         if(Error) return console.log(Error);
+      });
     }; 
     setTimeout(() =>  autoconnect(), 2 * client.ws.ping);
   },

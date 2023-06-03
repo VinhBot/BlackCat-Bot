@@ -1,9 +1,7 @@
 const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder } = require("discord.js");
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-const { Database } = require("st.db");
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true
-});
+
+
 module.exports = {
   name: "setup", // Tên lệnh 
   description: "Thiết lập commands", // Mô tả lệnh

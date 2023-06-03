@@ -1,10 +1,8 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
 const path = require("node:path");
-const { Database } = require("st.db");
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true
-});
+const database = require(`${process.cwd()}/Assets/Schemas/music`);
+
 module.exports = {
   name: path.parse(__filename).name,
   usage: `${path.parse(__filename).name}`,
@@ -18,14 +16,22 @@ module.exports = {
     var Emojis = [`0️⃣`, `1️⃣`, `2️⃣`, `3️⃣`, `4️⃣`, `5️⃣`, `6️⃣`, `7️⃣`, `8️⃣`, `9️⃣`, `🔟`, `🟥`,`🟧`, `🟨`, `🟩`, `🟦`, `🟪`, `🟫`];
     let channel = message.mentions.channels.first();
     if(!channel) return message.reply({ content: `**Bạn quên ping một Text-Channel!**` });
-    channel.send(musicEmbedDefault(client, message.guild)).then(async(msg) => {
-        const guildData = await database.get(message.guild.id);
+    return channel.send(musicEmbedDefault(client, message.guild)).then(async(msg) => {
+        const guildData = await database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
+        if(!guildData) return database.create({
+          GuildId: message.guild.id, 
+          GuildName: message.guild.name,
+        }).then(() => {
+          return message.reply({ content: "Đã tạo database" });
+        });
         // Cập nhật thuộc tính setDefaultVolume với giá trị mới
-        guildData.setDefaultMusicData.ChannelId = channel.id;
-        guildData.setDefaultMusicData.MessageId = msg.id;
-        // thiết lập thuộc tính với giá trị mới
-        await database.set(message.guild.id, guildData);
-        return message.reply({ content: ` **Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>` });
+        guildData.ChannelId = channel.id;
+        guildData.MessageId = msg.id;
+        guildData.save().then(() => {
+          return message.reply({
+            content: ` **Thiết lập thành công Hệ thống Âm nhạc trong:** <#${channel.id}>`
+          });
+        });
     });
   },
 };

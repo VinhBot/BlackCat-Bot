@@ -17,6 +17,7 @@ module.exports = {
     let result = await client.cs.transferMoney({
       user: message.author,
       user2: user,
+      guild: { id: null },
       amount: money
     });
     try {

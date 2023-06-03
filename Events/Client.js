@@ -1,7 +1,7 @@
 const { Client: DiscordClient, GatewayIntentBits, Partials, Collection } = require("discord.js");
 const mongoose = require("mongoose");
 const { EconomyHandler } = require(`${process.cwd()}/Events/functions`);
-
+const config = require(`${process.cwd()}/config.json`);
 const Client = class extends DiscordClient {
   constructor() {
     super({
@@ -22,10 +22,9 @@ const Client = class extends DiscordClient {
     this._init();
     this._connectMongoodb();
     /*================================================================================================================*/
-    this.login(process.env.token);
+    this.login(process.env.token || config.prefix);
     /*================================================================================================================*/
     this.cs = new EconomyHandler({
-      EcoPath: "./Assets/Database/economy.json",
       setFormat: ["vi-VN", "VND"], // xác định loại tiền của các nước
       // Đặt số tiền ngân hàng mặc định khi người dùng mới được tạo!
       setDefaultWalletAmount: 10000, // trong ví tiền
@@ -38,6 +37,7 @@ const Client = class extends DiscordClient {
     this.aliases = new Collection();
     this.commands = new Collection();
     this.cooldowns = new Collection();
+    this.slashCommands = new Collection();
   };
   _connectMongoodb() {
     const mongo = "mongodb+srv://nguyenvinh:blackcat2k3@cluster0.bgyio.mongodb.net/";

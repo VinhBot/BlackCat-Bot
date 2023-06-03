@@ -1,5 +1,4 @@
 const { ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder } = require("discord.js");
-const { Database } = require("st.db");
 const config = require(`${process.cwd()}/config.json`);
 
 module.exports = {

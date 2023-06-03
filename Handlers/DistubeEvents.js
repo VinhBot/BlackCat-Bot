@@ -3,21 +3,16 @@ const { SoundCloudPlugin } = require("@distube/soundcloud");
 const { SpotifyPlugin } = require("@distube/spotify");
 const { YtDlpPlugin } = require("@distube/yt-dlp");
 const { DisTube } = require("distube");
-const { Database } = require("st.db");
 const playerintervals = new Map();
 const PlayerMap = new Map();
 const maps = new Map();
 let songEditInterval = null;
 let lastEdited = false;
 // Json Data
-const { disspace, MusicRole } = require("../Events/functions");
+const { disspace, MusicRole } = require(`${process.cwd()}//Events/functions`);
+const autoresume = require(`${process.cwd()}/Assets/Schemas/autoresume`);
+const database = require(`${process.cwd()}/Assets/Schemas/music`);
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true 
-});
-const autoresume = new Database("./Assets/Database/autoresumeDatabase.json", { 
-  databaseInObject: true 
-});
 // export module :))) 
 module.exports = (client) => {
   const distube = new DisTube(client, {
@@ -27,7 +22,7 @@ module.exports = (client) => {
 	  emptyCooldown: 25,
     savePreviousSongs: true, 
 	  leaveOnFinish: false,
-	  leaveOnStop: false,
+	  leaveOnStop: true,
 	  nsfw: true,
 	  plugins: [
       new SpotifyPlugin({ 
@@ -51,7 +46,7 @@ module.exports = (client) => {
       youtubeCookie: config.youtubeCookie,
     },
     emitAddListWhenCreatingQueue: true,
-    emitAddSongWhenCreatingQueue: false,
+    emitAddSongWhenCreatingQueue: true,
     emitNewSongOnly: true,
   });
   function generateQueueEmbed(queue, guildId, leave) {
@@ -170,8 +165,8 @@ module.exports = (client) => {
     };                                                                                                           
   };
   const updateMusicSystem = async(queue, leave = false) => {
-    const defaultData = await database.get(queue.id);
-    const data = defaultData.setDefaultMusicData;
+    const data = await database.findOne({ GuildId: queue.id });
+    if(!data) return;
     if(!queue) return;
     if(data.ChannelId && data.ChannelId.length > 5) {
       let guild = client.guilds.cache.get(queue.id);
@@ -193,14 +188,15 @@ module.exports = (client) => {
   client.distube = distube;
   client.maps = maps;
   distube.on("playSong", async(queue, track) => {
-    const defaultData = await database.get(queue.id);
+    const defaultData = await database.findOne({ GuildId: queue.id });
+    if(!defaultData) return;
     var newQueue = distube.getQueue(queue.id);
     updateMusicSystem(newQueue);
     const nowplay = await queue.textChannel?.send(disspace(newQueue, track)).then((message) => {
       PlayerMap.set("currentmsg", message.id);
       return message;
     }).catch((e) => console.log(e));
-    if(queue.textChannel?.id === defaultData.setDefaultMusicData.ChannelId) return;
+    if(queue.textChannel?.id === defaultData.ChannelId) return;
     var collector = nowplay?.createMessageComponentCollector({
       filter: (i) => i.isButton() && i.user && i.message.author.id == client.user.id,
       time: track.duration > 0 ? track.duration * 1000 : 600000
@@ -457,7 +453,7 @@ module.exports = (client) => {
   }).on("finish", async(queue) => {
     return queue.textChannel?.send({ embeds: [new EmbedBuilder().setColor("Random").setDescription("Đã phát hết nhạc trong hàng đợi,.. rời khỏi kênh voice")]}).then((msg) => setTimeout(() => msg.delete(), 10000));
   }).on("addList", async(queue, playlist) => {
-      return queue.textChannel?.send({ embeds: [new EmbedBuilder()
+    return queue.textChannel?.send({ embeds: [new EmbedBuilder()
         .setTitle("Đã thêm vài hát vào hàng đợi")                                                
         .setColor("Random")
         .setThumbnail(playlist.thumbnail.url ? playlist.thumbnail.url : `https://img.youtube.com/vi/${playlist.songs[0].id}/mqdefault.jpg`)
@@ -469,7 +465,7 @@ module.exports = (client) => {
         )
       ]}).then((msg) => setTimeout(() => msg.delete(), 11000));
   }).on("addSong", async(queue, song) => {
-      return queue.textChannel?.send({ embeds: [new EmbedBuilder()
+    return queue.textChannel?.send({ embeds: [new EmbedBuilder()
           .setColor("Random")
           .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
           .setFooter({ text: `💯 ${song.user.tag}`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`})
@@ -496,7 +492,10 @@ module.exports = (client) => {
             playerintervals.delete(`checkrelevantinterval-${queue.id}`);
             // Xóa Khoảng thời gian cho trình tiết kiệm hồ sơ tự động
             clearInterval(playerintervals.get(`autoresumeinterval-${queue.id}`))
-            if(autoresume.has(queue.id)) autoresume.delete(queue.id); //Xóa db nếu nó vẫn ở đó
+            const autoresumeCheck = autoresume.findOne({ guild: queue.id });
+            if(autoresumeCheck) {
+              autoresume.deleteOne({ GuildId: queue.id }); // Xóa db nếu nó vẫn ở đó
+            };
             playerintervals.delete(`autoresumeinterval-${queue.id}`);
             // Xóa khoảng thời gian cho Hệ thống Embed Chỉnh sửa Nhạc
             clearInterval(playerintervals.get(`musicsystemeditinterval-${queue.id}`))
@@ -512,10 +511,9 @@ module.exports = (client) => {
           ]}).catch((ex) => {});
     };
   }).on("initQueue", async(queue) => {
+    const data = await database.findOne({ GuildId: queue.id });
+    if(!data) return;
     var newQueue = client.distube.getQueue(queue.id);
-    const defaultData = await database.get(queue.id);
-    if(!defaultData) return;
-    const data = defaultData.setDefaultMusicData;
     let channelId = data.ChannelId;
     let messageId = data.MessageId;
     if(PlayerMap.has(`deleted-${queue.id}`)) {
@@ -566,11 +564,11 @@ module.exports = (client) => {
       };
     }, 7000);
     /**
-     * AUTO-RESUME-DATABASING
-     */
+    * AUTO-RESUME-DATABASING
+    */
     var autoresumeinterval = setInterval(async() => {
-      if(newQueue && newQueue.id && data.DefaultAutoresume) {
-        await autoresume.set(newQueue.id, {
+      if(newQueue && newQueue.id && false) {
+        const saveAutoresume = new autoresume({
           guild: newQueue.id,
           voiceChannel: newQueue.voiceChannel ? newQueue.voiceChannel.id : null,
           textChannel: newQueue.textChannel ? newQueue.textChannel.id : null,
@@ -581,22 +579,23 @@ module.exports = (client) => {
           volume: newQueue.volume,
           filters: [...newQueue.filters.names].filter(Boolean),
           songs: newQueue.songs && newQueue.songs.length > 0 ? [...newQueue.songs].map((track) => {
-            return {
-              memberId: track.member.id, 
-              source: track.source,
-              duration: track.duration,
-              formattedDuration: track.formattedDuration,
-              id: track.id,
-              isLive: track.isLive,
-              name: track.name,
-              thumbnail: track.thumbnail,
-              type: "video",
-              uploader: track.uploader,
-              url: track.url,
-              views: track.views,
-            };
+              return {
+                memberId: track.member.id, 
+                source: track.source,
+                duration: track.duration,
+                formattedDuration: track.formattedDuration,
+                id: track.id,
+                isLive: track.isLive,
+                name: track.name,
+                thumbnail: track.thumbnail,
+                type: "video",
+                uploader: track.uploader,
+                url: track.url,
+                views: track.views,
+              };
           }) : null,
         });
+        saveAutoresume.save();
       };
     }, 4000);
   
@@ -636,9 +635,11 @@ module.exports = (client) => {
   client.on("interactionCreate", async(interaction) => {
     if(!interaction.isButton() && !interaction.isStringSelectMenu()) return;
     var { guild, message, channel, member, user, customId } = interaction;
-    const defaultData = await database.get(interaction.guild.id);
-    if(!defaultData) return;
-    const data = defaultData.setDefaultMusicData;
+    const data = await database.findOne({
+      GuildId: interaction.guild.id,
+      GuildName: interaction.guild.name
+    });
+    if(!data) return;
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
     if(!guild) return;
     //nếu chưa setup, return

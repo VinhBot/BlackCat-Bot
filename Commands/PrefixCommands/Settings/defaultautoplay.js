@@ -1,4 +1,4 @@
-const { Database } = require("st.db");
+const database = require(`${process.cwd()}/Assets/Schemas/music`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,23 +10,18 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const database = new Database("./Assets/Database/defaultDatabase.json", { 
-       databaseInObject: true
-    });
+    const guildData = database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
     if(!args[0]) return message.reply({
       content: "Vui lòng chọn true: bật hoặc false: tắt"
     });
-    const guildData = await database.get(message.guild.id);
     if(args[0] === "bật") {
       var autoplay = Boolean(args[0]);
-      // Cập nhật thuộc tính setDefaultVolume với giá trị mới
       guildData.setDefaultMusicData.DefaultAutoplay = autoplay;
     } else {
       var autoplay = Boolean(args[1]);
-      // Cập nhật thuộc tính setDefaultVolume với giá trị mới
       guildData.setDefaultMusicData.DefaultAutoplay = autoplay;
     };
-    await database.set(message.guild.id, guildData);
+    await guildData.save();
     return message.reply({
       content: ` Chế độ tự động phát đã được ${autoplay ? "bật" : "tắt"}`
     }); 

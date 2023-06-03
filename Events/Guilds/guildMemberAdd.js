@@ -1,16 +1,14 @@
+const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
 const { AttachmentBuilder, EmbedBuilder } = require("discord.js");
 const { join } = require('node:path');
 const Canvas = require('canvas');
 const axios = require('axios');
-const { Database } = require("st.db");
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true 
-});
 
 module.exports = {
 	eventName: "guildMemberAdd", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, member) => {
+    return database.findOne({ GuildId: member.guild.id, GuildName: member.guild.name }).then(async(getData) => {
       const profile = {
          "dot":"https://cdn.discordapp.com/attachments/869133321010032731/889068805060435979/dot.png",
          "status": {
@@ -22,10 +20,11 @@ module.exports = {
         "main_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889093992367673354/main_profile.png",
         "raw_profile": "https://cdn.discordapp.com/attachments/869133321010032731/889033867724468224/raw_profile.png"
       };
-      const { setDefaultWelcomeGoodbyeData: data } = await database.get(member.guild.id);
-      if(!data) return;
-      const channel = member.guild.channels.cache.find((channel) => channel.id === data.WelcomeChannel);
-      if(!channel) return;
+      if(!getData) return;
+      const channels = member.guild.channels.cache.find((channel) => {
+        return channel.id === getData.WelcomeChannel;
+      });
+      if(!channels) return;
       Canvas.registerFont(join(__dirname, '..', '..', 'Assets', 'Fonts', 'HelveticaNeue.otf'), { family: 'HelveticaNeue', weight: "regular", style: "normal" });
       Canvas.registerFont(join(__dirname, '..', '..', 'Assets', 'Fonts', 'HelveticaNeue-Bold.otf'), { family: 'HelveticaNeueBold', weight: "regular", style: "normal" });
       // create canvas
@@ -87,7 +86,7 @@ module.exports = {
       ctx.font = `20px HelveticaNeueBold`
       ctx.fillText(activity?.status?.length > 22 ? activity?.status.slice(0, 22) + "..." : activity?.status, 20, 339);
       const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: 'image.png' });
-      channel.send({ embeds: [new EmbedBuilder()
+      channels.send({ embeds: [new EmbedBuilder()
          .setTitle("Welcome " + member.user.username)
          .setDescription(`
 🏤 chào mừng <@${member.user.id}> đã đến với ${member.guild.name} 
@@ -111,5 +110,8 @@ module.exports = {
           });
         };
       };
+    }).catch((Error) => {
+       if(Error) return console.log(Error);
+    });
   },
 };

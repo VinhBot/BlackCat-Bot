@@ -1,19 +1,17 @@
 const { EmbedBuilder } = require('discord.js')
-const { Database } = require("st.db");
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true 
-});
-    
+const database = require(`${process.cwd()}/Assets/Schemas/logChannels`);
+
 module.exports = {
 	eventName: "guildMemberUpdate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, oldMember, newMember) => {
-    const getData = await database.get(oldMember.guild.id);
-    if(!getData) return;
-    let guilds = client.guilds.cache.get(getData.defaultGuildId);
-    let channels = guilds.channels.cache.get(getData.setDiaryChannel.guildMemberUpdate);
-    if(!channels) return;
-    if(newMember.nickname !== oldMember.nickname) {
+    return database.findOne({ GuildId: oldMember.guild.id, GuildName: oldMember.guild.name }).then(async(getData) => {
+      if(!getData) return;
+      const channels = oldMember.guild.channels.cache.find((channel) => {
+        return channel.id === getData.guildMemberUpdate;
+      });
+      if(!channels) return;
+      if(newMember.nickname !== oldMember.nickname) {
         let oldNickname = oldMember.nickname ? oldMember.nickname : oldMember.user.username;
         let newNickname = newMember.nickname ? newMember.nickname : newMember.user.username;
         return channels.send({
@@ -25,7 +23,7 @@ module.exports = {
            .setThumbnail(`${newMember.user.avatarURL()}`)
           ] 
         });
-    } else if(newMember.user.username !== oldMember.user.username) {
+      } else if(newMember.user.username !== oldMember.user.username) {
         return channels.send({
           embeds: [new EmbedBuilder()
             .setTitle(`${newMember.user.tag}`)
@@ -35,7 +33,7 @@ module.exports = {
             .setThumbnail(`${newMember.user.avatarURL()}`)
           ]
         });
-    } else if(newMember.user.avatarURL() !== oldMember.user.avatarURL()) {
+      } else if(newMember.user.avatarURL() !== oldMember.user.avatarURL()) {
         return channels.send({
           embeds: [new EmbedBuilder()
             .setTitle(`${newMember.user.tag}`)
@@ -45,10 +43,13 @@ module.exports = {
             .setThumbnail(`${newMember.user.avatarURL()}`)
           ] 
         });
-    } else {
-      return channels.send({
-        content: "[guildMemberUpdate] Đã sảy ra lỗi trong quá trình thực thi kết quả"
-      });
-    };
+      } else {
+        return channels.send({
+          content: "[guildMemberUpdate] Đã sảy ra lỗi trong quá trình thực thi kết quả"
+        });
+      };
+    }).catch((Error) => {
+       if(Error) return console.log(Error);
+    });
   },
 };

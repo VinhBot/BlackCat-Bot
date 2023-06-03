@@ -1,54 +1,9 @@
 const { EmbedBuilder, StringSelectMenuBuilder, parseEmoji, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType, Collection, SelectMenuBuilder } = require("discord.js");
-const { Database } = require("st.db");
 const fetch = require("node-fetch");
+const musicDb = require(`${process.cwd()}/Assets/Schemas/music`);
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true 
-});
-/*========================================================
-# khởi tạo database cho guilds
-========================================================*/
-const setupDatabase = async(guild) => {
-  const checkData = await database.has(guild.id);
-  if(!checkData) { // kiểm tra xem guilds đã có trong cơ sở dữ liệu hay là chưa 
-    console.log(`Đã tạo database cho: ${guild.name}`); // thông báo ra bảng điều khiển
-    await database.set(guild.id, {       // nếu chưa có thì nhập guilds vào cơ sở dữ liệu
-      defaultGuildId: guild.id,
-      defaultGuildName: guild.name,            // tên guilds
-      setDefaultPrefix: config.prefix,         // đặt prefix mặc định cho guild
-      setDefaultMusicData: {                   // thiết lập mặc định dành cho hệ thống âm nhạc
-        DefaultAutoresume: true,               // 1: chế độ mặc định tự đông phát lại nhạc bot gặp sự cố
-        DefaultAutoplay: false,                // 2: chế độ tự động phát nhạc khi kết thúc bài hát
-        DefaultVolume: 50,                     // 3: cài đặt âm lượng mặc định cho guild
-        DefaultFilters: ['bassboost', '3d'],   // 4: cài đặt filters mặc định cho guils
-        MessageId: "",                         // 5: thiết lập id tin nhắn 
-        ChannelId: "",                         // 6: thiết lập channelid
-        ChannelAutoCreateVoice: "",            // 7: thiết lập id channel voice 
-        Djroles: [],                           // 8: thiết lập role chuyên nhạc                  
-      },
-      setDefaultWelcomeGoodbyeData: {          // thiết lập welcome, googbye, 
-        WelcomeChannel: "",
-        GoodbyeChannel: "",
-        AutoAddRoleWel: [], 
-      },
-      setDiaryChannel: {
-        // voice
-        voiceStateUpdate: "",
-        // channel
-        channelCreate: "",
-        channelDelete: "",
-        channelUpdate: "",
-        // Guild
-        guildMemberUpdate: "",
-        guildCreate: "",
-        guildDelete: "",
-        guildUpdate: ""
-      },
-    });
-  };
-};
 // tạo thời gian hồi lệnh
-function onCoolDown(cooldowns, message, commands) {
+const onCoolDown = (cooldowns, message, commands) => {
   if (!message || !commands) return;
   let { member } = message;
   if(!cooldowns.has(commands.name)) {
@@ -120,9 +75,9 @@ const musicEmbedDefault = (client, guilds) => {
     ]};
 };
 // MusicRole
-function MusicRole(client, member, song) {
-    if(!client) return false; // nếu không có tin nhắn được thêm trở lại
-    var roleid = database.get(member.guild.id); // lấy quyền quản trị
+const MusicRole = (client, member, song) => {
+    if(!client) return false; // nếu không có tin nhắn được thêm trở lại 
+    var roleid = musicDb.findOne({ GuildId: member.guild.id }); // lấy quyền quản trị
     if(String(roleid) == "") return false; // nếu không có musicrole trả về false, để nó tiếp tục
     var isdj = false; // định nghĩa các biến
     for (let i = 0; i < roleid.length; i++) { // lặp qua các roles
@@ -141,8 +96,8 @@ function MusicRole(client, member, song) {
 };
 // music handler
 const disspace = function(newQueue, newTrack, queue) {
-    const dataMusic = database.get(newQueue.id);
-    var djs = dataMusic.setDefaultMusicData.Djroles;
+    const dataMusic = musicDb.findOne({ GuildId: newQueue.id });
+    var djs = dataMusic.Djroles;
     if(!djs || !Array.isArray(djs)) {
       djs = [];
     } else djs = djs.map(r => `<@&${r}>`);
@@ -229,11 +184,9 @@ const baseURL = async(url, options) => {
 /*========================================================
 # EconomyHandler
 ========================================================*/
+const { Inventory: inv, Currency: cs } = require(`${process.cwd()}/Assets/Schemas/economy`);
 const EconomyHandler = class {
   constructor(options) {
-    this.database = new Database(options.EcoPath, { 
-      databaseInObject: true 
-    });
     // ===================================================================
     this.formats = options.setFormat; // thiết lập phân loại tiền tệ các nước
     this.workCooldown = 0; // work, info
@@ -272,8 +225,468 @@ const EconomyHandler = class {
     if(parseInt(amount)) this.maxWallet = amount || 0;
   };
   /*====================================================================
+  # Shop and item 
+  ====================================================================*/
+  async buy(settings) {
+    return await this._buy(settings);
+  };
+  // ===================================================================
+  async addUserItem(settings) {
+    return await this._buy(settings);
+  };
+  // ===================================================================
+  async addItem(settings) {
+    if(!settings.inventory) return {
+      error: true,
+      type: "No-Inventory",
+    };
+    if(!settings.inventory.name) return {
+      error: true,
+      type: "No-Inventory-Name",
+    };
+    if(!settings.inventory.price) return {
+      error: true,
+      type: "No-Inventory-Price",
+    };
+    if (!parseInt(settings.inventory.price)) return {
+      error: true,
+      type: "Invalid-Inventory-Price",
+    };
+    const item = {
+      name: String(settings.inventory.name) || "Mèo Béo",
+      price: parseInt(settings.inventory.price) || 0,
+      description: String(settings.inventory.description) || "Không có mô tả",
+      itemId: this.makeid(),
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    inv.findOneAndUpdate({
+      guildID: settings.guild.id || null,
+    }, {
+      $push: {
+        inventory: item,
+      },
+    }, {
+      upsert: true,
+      useFindAndModify: false,
+    }).catch((e) => {
+        if(e) return console.log(e);
+    });
+    return {
+      error: false,
+      item: item,
+    };
+  };
+  // ===================================================================
+  async removeItem(settings) {
+    let inventoryData = await this.getInventory(settings);
+    let thing = parseInt(settings.item);
+    if(!thing) return {
+      error: true,
+      type: "Invalid-Item-Number",
+    };
+    thing = thing - 1;
+    if(!inventoryData.inventory[thing]) return {
+      error: true,
+      type: "Unknown-Item",
+    };
+    const deletedDB = inventoryData.inventory[thing];
+    inventoryData.inventory.splice(thing, 1);
+    inventoryData.save();
+    return {
+      error: false,
+      inventory: deletedDB,
+    };
+  };
+  // ===================================================================
+  async setItems(settings) {
+    if(!settings.shop) return {
+      error: true,
+      type: "No-Shop",
+    };
+    if(!Array.isArray(settings.shop)) return {
+      error: true,
+      type: "Invalid-Shop",
+    };
+    for (const x of settings.shop) {
+      if(!x.name) return {
+        error: true,
+        type: "Invalid-Shop-name",
+      };
+      if(!x.price) return {
+        error: true,
+        type: "Invalid-Shop-price",
+      };
+      if (!x.description) x.description = "No Description.";
+    };
+    inv.findOneAndUpdate(
+      { guildID: settings.guild.id || null },
+      { $set: { inventory: settings.shop }},
+      { upsert: true, useFindAndModify: false }
+    ).catch((e) => {
+        if(e) return console.log(e);
+    });
+    return {
+      error: false,
+      type: "success",
+    };
+  };
+  // ===================================================================
+  async removeUserItem(settings) {
+    let data = await this.findUser(settings, null, null, "removeUserItem");
+    let item = null;
+    let thing = parseInt(settings.item);
+    if(!thing) return {
+      error: true,
+      type: "Invalid-Item-Number",
+    };
+    thing = thing - 1;
+    if(!data.inventory[thing]) return {
+      error: true,
+      type: "Unknown-Item",
+    };
+    let done = false;
+    // Lưu thay đổi
+    let data_user = {};
+    let data_error = {
+      error: true,
+      type: "Invalid-Item-Number",
+    };
+    // Nếu người dùng muốn xóa tất cả các mục
+    if(settings.amount == "all") {
+      // Tìm chỉ mục của mặt hàng
+      let i = data.inventory.findIndex((i) => i === data.inventory.filter((inv) => inv.name === thing)) + 1;
+      let data_to_save = {
+        count: 0,
+        name: data.inventory[i].name,
+        deleted: data.inventory[i].amount,
+        itemId: data.inventory[i].itemId,
+      };
+      data_user = data_to_save;
+      item = data.inventory[i];
+      data.inventory.splice(i, 1);
+      done = true;
+    } else {
+      for (let i in data.inventory) {
+        if(data.inventory[i] === data.inventory[thing]) {
+          // Nếu trong kho số lượng mặt hàng lớn hơn 1 và không chỉ định số lượng
+          if(data.inventory[i].amount > 1 && !settings?.amount) {
+            item = data.inventory[i];
+            data.inventory[i].amount--;
+            let data_to_save = {
+              count: data.inventory[i].amount,
+              name: data.inventory[i].name,
+              deleted: 1,
+              itemId: data.inventory[i].itemId,
+            };
+            data_user = data_to_save;
+            done = true;
+            // Nếu trong kho số lượng mặt hàng bằng 1 và không chỉ định số lượng
+          } else if(data.inventory[i].amount === 1 && !settings?.amount) {
+            let data_to_save = {
+              count: 0,
+              name: data.inventory[i].name,
+              deleted: 1,
+              itemId: data.inventory[i].itemId,
+            };
+            data_user = data_to_save;
+            item = data.inventory[i];
+            data.inventory.splice(i, 1);
+            done = true;
+            // Nếu số được chỉ định
+          } else if(settings?.amount !== "all") {
+            // Nếu số được chỉ định lớn hơn số mục trong kho
+            if(settings.amount > data.inventory[i].amount) {
+              done = false;
+              data_error.type = "Invalid-Amount";
+            } else if(String(settings.amount).includes("-")) {
+              done = false;
+              data_error.type = "Negative-Amount";
+            } else if(parseInt(settings.amount) === 0) {
+              done = false;
+              data_error.type = "Invalid-Amount";
+            } else {
+              item = data.inventory[i];
+              data.inventory[i].amount -= settings.amount;
+              let data_to_save = {
+                count: data.inventory[i].amount,
+                name: data.inventory[i].name,
+                deleted: settings.amount,
+                itemId: data.inventory[i].itemId,
+              };
+              data_user = data_to_save;
+              done = true;
+            }
+          }
+        }
+      }
+    }
+    if(done == false) return data_error;
+    cs.findOneAndUpdate(
+      {
+        guildID: settings.guild.id || null,
+        userID: settings.user.id || null,
+      },
+      {
+        $set: {
+          inventory: data.inventory,
+        },
+      },
+      {
+        upsert: true,
+        useFindAndModify: false,
+    }).catch((e) => {
+        if(e) return console.log(e);
+    });
+    return {
+      error: false,
+      inventory: data_user,
+      rawData: data,
+      item: item,
+    };
+  };
+  // ===================================================================
+  async transferItem(settings) {
+    if (!settings.guild) settings.guild = {
+      id: null,
+    };
+    let user1 = await this.findUser({ user: settings.user1, guild: settings.guild }, null, null, "transferItem");
+    let user2 = await this.findUser({ user: settings.user2, guild: settings.guild }, null, null, "transferItem");
+    let name, amount_to_transfer, itemsLeft;
+    // mục 
+    let thing = parseInt(settings.item);
+    if(!thing) return {
+      error: true,       
+      type: "No-Item",
+    };
+    thing = thing - 1;
+    // kiểm tra nếu mục tồn tại
+    if (!user1.inventory[thing]) return { error: true, type: "Invalid-Item" };
+    // Số lượng
+    amount_to_transfer = settings.amount;
+    if (amount_to_transfer === "all" || amount_to_transfer === "max") {
+      let user2_has_item = false;
+      let ifHasItem_then_index = 0;
+      for (let i = 0; i < user1.inventory.length; i++) {
+        if (user2.inventory[i].name === user1.inventory[thing].name) {
+          user2_has_item = true;
+          ifHasItem_then_index = i;
+        }
+      }
+      amount_to_transfer = user1.inventory[thing].amount;
+      name = user1.inventory[thing].name;
+      itemsLeft = 0;
+      if(user2_has_item === false) {
+        user2.inventory.push(user1.inventory[thing]);
+      } else
+        user2.inventory[ifHasItem_then_index].amount += user1.inventory[thing].amount;
+      user1.inventory.splice(thing, 1);
+    } else {
+      amount_to_transfer = parseInt(amount_to_transfer) || 1;
+      if (amount_to_transfer <= 0)
+        return { error: true, type: "Invalid-Amount" };
+      if (amount_to_transfer > user1.inventory[thing].amount)
+        return { error: true, type: "In-Sufficient-Amount" };
+      let user2_has_item = false;
+      let ifHasItem_then_index = 0;
+      for (let i = 0; i < user2.inventory.length; i++) {
+        if (user2.inventory[i].name === user1.inventory[thing].name) {
+          user2_has_item = true;
+          ifHasItem_then_index = i;
+        }
+      }
+      name = user1.inventory[thing].name;
+      if (user2_has_item === false)
+        user2.inventory.push({
+          name: user1.inventory[thing].name,
+          amount: amount_to_transfer,
+        });
+      else user2.inventory[ifHasItem_then_index].amount += amount_to_transfer;
+      user1.inventory[thing].amount -= amount_to_transfer;
+      itemsLeft = user1.inventory[thing].amount;
+    }
+    user1.markModified("inventory");
+    user2.markModified("inventory");
+    await this.saveUser(user1, user2);
+    return {
+      error: false,
+      type: "success",
+      transfered: amount_to_transfer,
+      itemName: name,
+      itemsLeft: itemsLeft,
+    };
+  };
+  // ===================================================================
+  async _buy(settings) {
+    let inventoryData = await this.getInventory(settings);
+    let data = await this.findUser(settings, null, null, "buy");
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let amount_to_add = parseInt(settings.amount) || 1;
+    let thing = parseInt(settings.item);
+    if(!thing) return {
+      error: true,
+      type: "No-Item",
+    };
+    thing = thing - 1;
+    if(!inventoryData.inventory[thing]) return {
+      error: true,
+      type: "Invalid-Item",
+    };
+    let price = inventoryData.inventory[thing].price;
+    if(amount_to_add > 1) price = amount_to_add * inventoryData.inventory[thing].price;
+    if(data.wallet < price) return {
+      error: true,
+      type: "low-money",
+    };
+    if(amount_to_add <= 0) return { error: true, type: "Invalid-Amount" };
+    data.wallet -= price;
+    let done = false;
+    for (let j in data.inventory) {
+      if(inventoryData.inventory[thing].name === data.inventory[j].name) {
+        data.inventory[j].amount += amount_to_add || 1;
+        if(!data.inventory[j].itemId)
+          data.inventory[j].itemId = inventoryData.inventory[thing].itemId || this.makeid();
+        done = true;
+      }
+    }
+    if(done == false) {
+      data.inventory.push({
+        name: inventoryData.inventory[thing].name,
+        amount: amount_to_add || 1,
+        itemId: inventoryData.inventory[thing].itemId || makeid(),
+      });
+    }
+    cs.findOneAndUpdate(
+      {
+        guildID: settings.guild.id || null,
+        userID: settings.user.id || null,
+      },{
+        $set: {
+          inventory: data.inventory,
+          wallet: data.wallet,
+        },
+      },{
+      upsert: true,
+      useFindAndModify: false,
+    }).catch((e) => {
+        if(e) return console.log(e);
+    });
+    return {
+      error: false,
+      type: "success",
+      inventory: inventoryData.inventory[thing],
+      price: price,
+      amount: amount_to_add,
+    };
+  };
+  // ===================================================================
+  makeid(length = 5) {
+    let result = "";
+    let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for (let i = 0; i < length; i++)
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    return result;
+  };
+  /*====================================================================
   # global.js 👨‍💻
   ====================================================================*/
+  async info(userID, guildID) {
+    let data = await this.findUser({}, userID, guildID);
+    let lastHourlyy = true;
+    let lastHaflyy = true;
+    let lastDailyy = true;
+    let lastWeeklyy = true;
+    let lastMonthlyy = true;
+    let lastBeggedy = true;
+    let lastQuaterlyy = true;
+    let lastWorkk = true;
+    let lastYearlyy = true;
+    if(data.lastBegged !== null && (data.begTimeout || 240) - (Date.now() - data.lastBegged) / 1000 > 0) lastBeggedy = false;
+    if(data.lastHourly !== null && 3600 - (Date.now() - data.lastHourly) / 1000 > 0) lastHourlyy = false;
+    if(data.lastDaily !== null && 86400 - (Date.now() - data.lastDaily) / 1000 > 0) lastDailyy = false;
+    if(data.lastHafly !== null && 43200 - (Date.now() - data.lastHafly) / 1000 > 0) lastHaflyy = false;
+    if(data.lastQuaterly !== null && 12600 - (Date.now() - data.lastQuaterly) / 1000 > 0) lastQuaterlyy = false;
+    if(data.lastWeekly !== null && 604800 - (Date.now() - data.lastWeekly) / 1000 > 0) lastWeeklyy = false;
+    if(data.lastMonthly !== null && 2.592e6 - (Date.now() - data.lastMonthly) / 1000 > 0) lastMonthlyy = false;
+    if(data.lastWork !== null && this.workCooldown - (Date.now() - data.lastWork) / 1000 > 0) lastWorkk = false;
+    if(data.lastYearly !== null && (31536000000 - (Date.now() - data.lastYearly)) / 1000 > 0) lastYearlyy = false;
+    return {
+      error: false,
+      rawData: data,
+      info: Object.entries({
+        Hourly: {
+          used: lastHourlyy,
+          timeLeft: this.parseSeconds(Math.floor(3600 - (Date.now() - data.lastHourly) / 1000)),
+        },
+        Hafly: {
+          used: lastHaflyy,
+          timeLeft: this.parseSeconds(Math.floor(43200 - (Date.now() - data.lastHafly) / 1000)),
+        },
+        Daily: {
+          used: lastDailyy,
+          timeLeft: this.parseSeconds(Math.floor(86400 - (Date.now() - data.lastDaily) / 1000)),
+        },
+        Weekly: {
+          used: lastWeeklyy,
+          timeLeft: this.parseSeconds(Math.floor(604800 - (Date.now() - data.lastWeekly) / 1000)),
+        },
+        Monthly: {
+          used: lastMonthlyy,
+          timeLeft: this.parseSeconds(Math.floor(2.592e6 - (Date.now() - data.lastMonthly) / 1000)),
+        },
+        Begged: {
+          used: lastBeggedy,
+          timeLeft: this.parseSeconds(Math.floor((data.begTimeout || 240) - (Date.now() - data.lastBegged) / 1000)),
+        },
+        Quaterly: {
+          used: lastQuaterlyy,
+          timeLeft: this.parseSeconds(Math.floor(12600 - (Date.now() - data.lastQuaterly) / 1000)),
+        },
+        Work: {
+          used: lastWorkk,
+          timeLeft: this.parseSeconds(Math.floor(12600 - (Date.now() - data.lastWork) / 1000)),
+        },
+        Yearly: {
+          used: lastYearlyy,
+          timeLeft: this.parseSeconds(Math.floor((31536000000 - (Date.now() - data.lastYearly)) / 1000)),
+        },
+      }),
+    };
+  };
+  // ===================================================================
+  async work(settings) {
+    let data = await this.findUser(settings, null, null);
+    const oldData = data;
+    let lastWork = data.lastWork;
+    let timeout = settings.cooldown;
+    workCooldown = timeout;
+    if(lastWork !== null && timeout - (Date.now() - lastWork) / 1000 > 0) {
+      return {
+        error: true,
+        type: "time",
+        time: parseSeconds(Math.floor(timeout - (Date.now() - lastWork) / 1000)),
+      };
+    } else {
+      let amountt = Math.floor(Math.random() * settings.maxAmount || 100) + 1;
+      data.lastWork = Date.now();
+      data = this.amount(data, "add", "wallet", amountt);
+      await this.saveUser(data);
+      let result = Math.floor(Math.random() * settings.replies.length);
+      return {
+        error: false,
+        type: "success",
+        workType: settings.replies[result],
+        amount: amountt,
+      };
+    };
+  };
+  // ===================================================================  
   parseSeconds(seconds) {
     if(String(seconds).includes("-")) return "0 giây";
     let days = parseInt(seconds / 86400);
@@ -294,71 +707,92 @@ const EconomyHandler = class {
   /*====================================================================
   # management.js 👨‍💻👨‍💻
   ====================================================================*/
-  async makeUser(settings) {
-    const newUser = await this.database.set(settings.id, {
-      userName: settings.username,
-      userID: settings.id,
-      wallet: this.wallet || 0,
-      bank: this.bank || 0,
-      bankSpace: this.maxBank || 0,
-      networth: 0,
-      bankSpace: 0,
-      inventory: [],
-      streak: {
-        hourly: 1,
-        daily: 1,
-        weekly: 1,
-        monthly: 1,
-        yearly: 1,
-        hafly: 1,
-        quaterly: 1,
-      },
-      timeline: {
-        begTimeout: 240,
-        lastUpdated: new Date(),
-        lastHourly: 0,
-        lastQuaterly: 0,
-        lastHafly: 0,
-        lastRob: 0,
-        lastDaily: 0,
-        lastWeekly: 0,
-        lastMonthly: 0,
-        lastYearly: 0,
-        lastBegged: 0,
-        lastWork: 0,
-      },
-    });
-    if(!newUser) {
-      console.error("Thiếu dữ liệu để tìm nạp từ DB. (Một chức năng trong Hệ thống được sử dụng và ID người dùng không được cung cấp.)");
+  async addMoneyToAllUsers(settings) {
+    if(String(settings.amount).includes("-")) return {
+      error: true,
+      type: "negative-money",
     };
-    return newUser;
+    let amountt = parseInt(settings.amount) || 0;
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let data = await cs.find({
+      guildID: settings.guild.id || null,
+    });
+    if(!data) return {
+      error: true,
+      type: "no-users",
+    };
+
+    data.forEach(async(user) => {
+      if(settings.wheretoPutMoney === "bank") {
+        user = this.amount(user, "add", "bank", amountt);
+      } else {
+        user = this.amount(user, "add", "wallet", amountt);
+      };
+    });
+
+    data.forEach((a) => a.save().then((err, saved) => {
+      if(err) return console.log(err);
+    }));
+    return {
+      error: false,
+      type: "success",
+      rawData: data,
+    };
   };
   // ===================================================================
-  async findUser(settings) {
-    if(typeof settings.user === "string") {
-      settings.user = {
-        id: settings.user,
-      };
+  async removeMoneyFromAllUsers(settings) {
+    if(String(settings.amount).includes("-")) return {
+      error: true,
+      type: "negative-money",
     };
-    if(!await this.database.has(settings.user.id)) {
-      await this.makeUser(settings.user);
+    let amountt = parseInt(settings.amount) || 0;
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
     };
-    const find = await this.database.get(settings.user.id);
-    if(this.maxBank > 0 && find.bankSpace == 0) find.bankSpace = this.maxBank;
-    if(!find.streak) find.streak = {};
-    if(!find.streak.hourly) find.streak.hourly = 0;
-    if(!find.streak.daily) find.streak.daily = 0;
-    if(!find.streak.weekly) find.streak.weekly = 0;
-    if(!find.streak.monthly) find.streak.monthly = 0;
-    if(!find.streak.yearly) find.streak.yearly = 0;
-    if(!find.streak.hafly) find.streak.hafly = 0;
-    if(!find.streak.quaterly) find.streak.quaterly = 0;
-    return find;
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let data = await cs.find({
+    guildID: settings.guild.id || null,
+  });
+    if(!data) return {
+      error: true,
+      type: "no-users",
+    };
+
+    data.forEach(async(user) => {
+      if(settings.wheretoPutMoney === "bank") {
+        if(settings.amount === "all" || settings.amount === "max") {
+          user.bank = 0;
+        } else {
+          user = this.amount(user, "remove", "bank", parseInt(settings.amount) || 0);
+        };
+      } else {
+        if(settings.amount === "all" || settings.amount === "max") {
+          user.wallet = 0;
+        } else {
+          user = this.amount(user, "remove", "wallet", parseInt(settings.amount) || 0);
+        };
+      }
+    });
+    data.forEach((a) => a.save().then(function(err, saved) {
+      if(err) return console.log(err);
+    }));
+    return {
+      error: false,
+      type: "success",
+      rawData: data,
+    };                                               
   };
   // ===================================================================
   async addMoney(settings) {
-    let data = await this.findUser(settings);
-    if (String(settings.amount).includes("-")) return {
+    let data = await this.findUser(settings, null, null);
+    if(String(settings.amount).includes("-")) return {
       error: true,
       type: "negative-money",
     };
@@ -368,7 +802,7 @@ const EconomyHandler = class {
     } else {
       data = this.amount(data, "add", "wallet", amountt);
     };
-    await this.database.set(settings.user.id, data);
+    await this.saveUser(data);
     return {
       error: false,
       type: "success",
@@ -377,7 +811,8 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async removeMoney(settings) {
-    let data = await this.findUser(settings);
+    let data = await this.findUser(settings, null, null);
+    const oldData = data;
     if(String(settings.amount).includes("-")) return {
       error: true,
       type: "negative-money",
@@ -395,36 +830,108 @@ const EconomyHandler = class {
         data = this.amount(data, "remove", "wallet", parseInt(settings.amount) || 0);
       };
     };
-    await this.database.set(settings.user.id, data);
+    await this.saveUser(data);
     return {
       error: false,
       type: "success",
       rawData: data,
     };
-  }
+  };
   // ===================================================================
-  amount(data, type = "add", where = "wallet", amount, by) {
-    if(!data.bankSpace) data.bankSpace = this.maxBank || 0;
-    if(where === "bank") {
-      if (type === "add") {
-        data.bank += amount;
-      } else data.bank -= amount;
-    } else {
-      if(type === "add") {
-        data.wallet += amount;
-      } else data.wallet -= amount;
-    }
-    if(data.bankSpace > 0 && data.bank > data.bankSpace) {
-      data.bank = data.bankSpace;
-      data.wallet += Math.abs(data.bank - data.bankSpace);
+  async findUser(settings, uid, gid, by) {
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
     };
-    if (!data.networth) data.networth = 0;
-    data.networth = data.bank + data.wallet;
-    return data;
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let find = await cs.findOne({
+      userID: uid || settings.user.id,
+      guildID: gid || settings.guild.id || null,
+    });
+    if(!find) find = await this.makeUser(settings, false, uid, gid);
+    if(this.maxBank > 0 && find.bankSpace == 0) find.bankSpace = this.maxBank;
+    if(!find.streak) find.streak = {};
+    if(!find.streak.hourly) find.streak.hourly = 0;
+    if(!find.streak.daily) find.streak.daily = 0;
+    if(!find.streak.weekly) find.streak.weekly = 0;
+    if(!find.streak.monthly) find.streak.monthly = 0;
+    if(!find.streak.yearly) find.streak.yearly = 0;
+    if(!find.streak.hafly) find.streak.hafly = 0;
+    if(!find.streak.quaterly) find.streak.quaterly = 0;
+    return find;
+  };
+  // ===================================================================  
+  async makeUser(settings, user2 = false, uid, gid) {
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let user = uid || settings.user.id;
+    if(user2) user = settings.user2.id;
+    const newUser = new cs({
+      userID: user,
+      guildID: gid || settings.guild.id || null,
+      wallet: this.wallet || 0,
+      bank: this.bank || 0,
+      bankSpace: this.maxBank || 0,
+      streak: {
+        hourly: 0,
+        daily: 0,
+        weekly: 0,
+        monthly: 0,
+        yearly: 0,
+        hafly: 0,
+        quaterly: 0,
+      },
+    });
+    if(!newUser) return console.log("Thiếu dữ liệu để tìm nạp từ DB. (Một chức năng trong Hệ thống economy được sử dụng và ID người dùng không được cung cấp.)");
+    return newUser;
+  };
+  // ===================================================================  
+  async saveUser(data, data2) {
+    process.nextTick(async() => {
+      await this.sleep(Math.floor(Math.random() * 10 + 1) * 100); // Trình tạo số ngẫu nhiên 100 - 1000
+      data.save().then((_) => _ ? "" : console.error(`Lỗi Xảy ra khi lưu dữ liệu (economy Handlers) \n${"=".repeat(50)}\n${_ + "\n" + "=".repeat(50)}`));
+      if(data2) data2.save().then((_) => _ ? "" : console.error(`Lỗi Xảy ra khi lưu dữ liệu (economy Handlers) \n${"=".repeat(50)}\n${_ + "\n" + "=".repeat(50)}`));
+    }, data, data2 );
+  };
+  // ===================================================================
+  async setBankSpace(userID, guildID, newAmount) {
+    let data = await this.findUser({}, userID, guildID);
+    newAmount = parseInt(newAmount);
+    if(!newAmount && newAmount !== 0) return {
+      error: true,
+      type: "no-amount-provided",
+      rawData: data,
+    };
+    let oldData = Object.assign({}, data);
+    data.bankSpace = newAmount;
+    await this.saveUser(data);
+    if(oldData.bankSpace !== data.bankSpace) {
+      return {
+        error: false,
+        type: "success",
+        amount: data.bankSpace,
+        rawData: data,
+      };
+    } else return {
+        error: true,
+        type: "same-amount",
+        rawData: data,
+    };
   };
   // ===================================================================
   async withdraw(settings) {
-    let data = await this.findUser(settings);
+    let data = await this.findUser(settings, null, null);
     let money = String(settings.amount);
     if(!money) return {
       error: true,
@@ -443,7 +950,7 @@ const EconomyHandler = class {
       data.bank = 0;
       if(!data.networth) data.networth = 0;
       data.networth = data.bank + data.wallet;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         rawData: data,
@@ -465,7 +972,7 @@ const EconomyHandler = class {
       };
       data.wallet += money;
       data.bank -= money;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -476,7 +983,7 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async deposite(settings) {
-    let data = await this.findUser(settings);
+    let data = await this.findUser(settings, null, null);
     let money = String(settings.amount);
     if(!money) return {
       error: true,
@@ -486,6 +993,7 @@ const EconomyHandler = class {
       error: true,
       type: "negative-money",
     };
+
     if(money === "all" || money === "max") {
       if(data.wallet === 0) return {
         error: true,
@@ -503,9 +1011,10 @@ const EconomyHandler = class {
         data.bank = data.bankSpace;
         data.wallet += Math.abs(a - data.bankSpace);
       };
-      if (!data.networth) data.networth = 0;
+
+      if(!data.networth) data.networth = 0;
       data.networth = data.bank + data.wallet;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         rawData: data,
@@ -536,10 +1045,11 @@ const EconomyHandler = class {
       if(!data.networth) data.networth = 0;
       data.networth = data.bank + data.wallet;
       if(data.bankSpace > 0 && data.bank > data.bankSpace) {
+        const a = data.bank;
         data.bank = data.bankSpace;
-        data.wallet += Math.abs(data.bank - data.bankSpace);
+        data.wallet += Math.abs(a - data.bankSpace);
       };
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         rawData: data,
@@ -550,40 +1060,71 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async transferMoney(settings) {
-      if(typeof settings.user === "string") {
-        settings.user = {
-          id: settings.user,
-        };
-      };
-      let user1 = await this.findUser(settings);
-      let user2 = await this.database.get(settings.user2.id);
-      if(!user2) {
-        return await this.makeUser(settings.user2);
-      };
-      let money = parseInt(settings.amount);
-      if(user1.wallet < money) return {
-        error: true,
-        type: "low-money",
-      };
-      user1 = this.amount(user1, "remove", "wallet", money);
-      user2 = this.amount(user2, "add", "wallet", money);
-      await this.database.set(settings.user.id, user1).catch((ex) => {});
-      await this.database.set(settings.user2.id, user2).catch((ex) => {});
-      return {
-        error: false,
-        type: "success",
-        money: money,
-        user: settings.user,
-        user2: settings.user2,
-        rawData: user1,
-        rawData1: user2,
-      };
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let user1 = await this.findUser(settings, null, null);
+    const oldData = user1;
+    let user2 = await cs.findOne({
+      userID: settings.user2.id,
+      guildID: settings.guild.id || null,
+    });
+    if(!user2) user2 = await this.makeUser(settings, true);
+    const oldData1 = user2;
+    let money = parseInt(settings.amount);
+    if(user1.wallet < money) return {
+      error: true,
+      type: "low-money",
+    };
+    user1 = this.amount(user1, "remove", "wallet", money);
+    user2 = this.amount(user2, "add", "wallet", money);
+    await this.saveUser(user1, user2);
+    return {
+      error: false,
+      type: "success",
+      money: money,
+      user: settings.user,
+      user2: settings.user2,
+      rawData: user1,
+      rawData1: user2,
+    };
+  };
+  // ===================================================================  
+  sleep(milliseconds) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, milliseconds);
+    });
+  };
+  // ===================================================================
+  amount(data, type = "add", where = "wallet", amount, by) {
+    if(!data.bankSpace) data.bankSpace = this.maxBank || 0;
+    if(where === "bank") {
+      if(type === "add") data.bank += amount;
+      else data.bank -= amount;
+    } else {
+      if(type === "add") data.wallet += amount;
+      else data.wallet -= amount;
+    };
+    if(data.bankSpace > 0 && data.bank > data.bankSpace) {
+      const a = data.bank;
+      data.bank = data.bankSpace;
+      data.wallet += Math.abs(a - data.bankSpace);
+    };
+    if(!data.networth) data.networth = 0;
+    data.networth = data.bank + data.wallet;
+    return data;
   };
   /*====================================================================
   # informative.js 👨‍💻👨‍💻👨‍💻
   ====================================================================*/
   async balance(settings) {
-    let data = await this.findUser(settings);
+    let data = await this.findUser(settings, null, null);
     if(!data.networth) data.networth = 0;
     data.networth = data.wallet + data.bank;
     return {
@@ -593,15 +1134,23 @@ const EconomyHandler = class {
       networth: data.networth,
     };
   };
-  //====================================================================
+  // ===================================================================
+  async leaderboard(guildid) {
+    let data = await cs.find({ guildID: guildid || null });
+    data.sort((a, b) => {
+      return b.networth - a.networth;
+    });
+    return data;
+  };
+  // ===================================================================
   async globalLeaderboard() {
-    let array = this.database.valuesAll();
+    let array = await cs.find();
     var output = [];
-    array.forEach((item) => {
-      var existing = output.find((v, i) => {
+    array.forEach(function (item) {
+      var existing = output.filter(function (v, i) {
         return v.userID == item.userID;
       });
-      if(existing) {
+      if(existing.length) {
         var existingIndex = output.indexOf(existing[0]);
         output[existingIndex].bank = output[existingIndex].bank + item.bank;
         output[existingIndex].wallet = output[existingIndex].wallet + item.wallet;
@@ -615,88 +1164,110 @@ const EconomyHandler = class {
     });
     return output;
   };
-  /*====================================================================
-  # moneyMaking.js 👨‍💻👨‍💻👨‍💻👨‍💻
-  ====================================================================*/
-  async work(settings) {
-    let data = await this.findUser(settings);
-    let lastWork = data.timeline.lastWork;
-    let timeout = settings.cooldown;
-    this.workCooldown = timeout;
-    if(lastWork !== null && timeout - (Date.now() - lastWork) / 1000 > 0) {
-      return {
-        error: true,
-        type: "time",
-        time: this.parseSeconds(Math.floor(timeout - (Date.now() - lastWork) / 1000)),
-      };
-    } else {
-      let amountt = Math.floor(Math.random() * settings.maxAmount || 100) + 1;
-      data.timeline.lastWork = Date.now();
-      data = this.amount(data, "add", "wallet", amountt);
-      await this.database.set(settings.user.id, data);
-      let result = Math.floor(Math.random() * settings.replies.length);
-      return {
-        error: false,
-        type: "success",
-        workType: settings.replies[result],
-        amount: amountt,
-      };
-    };
-  }
-  //====================================================================
-  async hourly(settings) {
-    let data = await this.findUser(settings);
-    let lastHourly = data.timeline.lastHourly;
-    let timeout = 3600;
-    if(lastHourly !== null && timeout - (Date.now() - lastHourly) / 1000 > 0) {
-      return {
-        error: true,
-        type: "time",
-        time: this.parseSeconds(Math.floor(timeout - (Date.now() - lastHourly) / 1000)),
-      };
-    } else {
-      data.timeline.lastHourly = Date.now();
-      data = this.amount(data, "add", "wallet", settings.amount);
-      if((Date.now() - lastHourly) / 1000 > timeout * 2) data.streak.hourly = 0;
-      data.streak.hourly += 1;
-      await this.database.set(settings.user.id, data);
-      return {
-        error: false,
-        type: "success",
-        amount: settings.amount,
-        rawData: data,
-      };
+  // ===================================================================
+  async getUserItems(settings) {
+    let data = await this.findUser(settings, null, null);
+    return {
+      error: false,
+      inventory: data.inventory,
+      rawData: data,
     };
   };
   // ===================================================================
-  async weekly(settings) {
-    let data = await this.findUser(settings);
-    let weekly = data.timeline.lastWeekly;
-    let timeout = 604800;
-    if(weekly !== null && timeout - (Date.now() - weekly) / 1000 > 0) {
-      return {
-        error: true,
-        type: "time",
-        time: this.parseSeconds(Math.floor(timeout - (Date.now() - weekly) / 1000)),
-      };
-    } else {
-      data.timeline.lastWeekly = Date.now();
-      data = this.amount(data, "add", "wallet", settings.amount);
-      if((Date.now() - data.lastWeekly) / 1000 > timeout * 2) data.streak.weekly = 0;
-      data.streak.weekly += 1;
-      await this.database.set(settings.user.id, data);
-      return {
-        error: false,
-        type: "success",
-        amount: settings.amount,
-        rawData: data,
-      };
+  async getShopItems(settings) {
+    let data = await this.getInventory(settings);
+    return {
+      error: false,
+      inventory: data.inventory,
+      rawData: data,
     };
-  }
+  };
   // ===================================================================
+  async getInventory(settings) {
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let find = await inv.findOne({
+      guildID: settings.guild.id || null,
+    });
+    if(!find) find = await this.makeInventory(settings);
+    if(find.inventory.length > 0)
+      find.inventory.forEach((a) => {
+        if (!a.description) a.description = "Không có mô tả.";
+      });
+    return find;
+  };
+  // ===================================================================
+  async makeInventory(settings) {
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    const inventory = new inv({
+      guildID: settings.guild.id || null,
+      inventory: [],
+    });
+    return inventory;
+  };
+  // ===================================================================
+  async updateInventory(mongoURL, newData, settings, collection = "inventory-currencies") {
+    if(typeof settings.user === "string") settings.user = {
+      id: settings.user,
+    };
+    if(typeof settings.guild === "string") settings.guild = {
+      id: settings.guild,
+    };
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let query = {
+      guildID: settings.guild.id || null,
+    };
+    if(settings.user) query = {
+      userID: settings.user.id,
+      guildID: settings.guild.id || null,
+    };
+    new (require("mongodb").MongoClient)(mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).connect(function (err, db) {
+      if(err) return console.log("Không thể kết nối với MongoDB (Chức năng updateInventory)")
+      console.log("Đã kết nối với MongoDB (Chức năng updateInventory)");
+      db.db(mongoURL.split("/")[mongoURL.split("/").length - 1]).collection(collection).updateOne(query, {
+        $set: {
+          inventory: newData,
+        },
+      }, {
+        upsert: true,
+      }, function(err, res) {
+          if(err) return console.log("Không thể lưu dữ liệu vào MongoDB (Chức năng updateInventory)", err)
+          if(res.result.n) {
+            return console.log("Đã lưu dữ liệu thành công (Chức năng updateInventory)")
+          } else {
+            console.log("MongoDB không cập nhật DB.  (Chức năng updateInventory)")
+            db.close();
+          };
+      });
+    });
+  };
+  /*====================================================================
+  # moneyMaking.js 👨‍💻👨‍💻👨‍💻👨‍💻
+  ====================================================================*/
   async monthly(settings) {
-    let data = await this.findUser(settings);
-    let monthly = data.timeline.lastMonthly;
+    let data = await this.findUser(settings, null, null);
+    const oldData = data;
+    let monthly = data.lastMonthly;
     let timeout = 2.592e6;
     if(monthly !== null && timeout - (Date.now() - monthly) / 1000 > 0) {
       return {
@@ -705,11 +1276,11 @@ const EconomyHandler = class {
         time: this.parseSeconds(Math.floor(timeout - (Date.now() - monthly) / 1000)),
       };
     } else {
-      data.timeline.lastMonthly = Date.now();
+      data.lastMonthly = Date.now();
       data = this.amount(data, "add", "wallet", settings.amount);
       if((Date.now() - monthly) / 1000 > timeout * 2) data.streak.monthly = 0;
       data.streak.monthly += 1;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -720,8 +1291,8 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async yearly(settings) {
-    let data = await this.findUser(settings);
-    let yearly = data.timeline.lastYearly;
+    let data = await this.findUser(settings, null, null);
+    let yearly = data.lastYearly;
     let timeout = 31536000000;
     if(yearly !== null && (timeout - (Date.now() - yearly)) / 1000 >= 0) {
       return {
@@ -730,11 +1301,37 @@ const EconomyHandler = class {
         time: this.parseSeconds(Math.floor((timeout - (Date.now() - yearly)) / 1000)),
       };
     } else {
-      data.timeline.lastYearly = Date.now();
+      data.lastYearly = Date.now();
       data = this.amount(data, "add", "wallet", settings.amount);
       if((Date.now() - yearly) / 1000 > timeout * 2) data.streak.yearly = 0;
       data.streak.yearly += 1;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
+      return {
+        error: false,
+        type: "success",
+        amount: settings.amount,
+        rawData: data,
+      };
+    };                                                                     
+  };
+  // ===================================================================
+  async weekly(settings) {
+    let data = await this.findUser(settings, null, null);
+    let weekly = data.lastWeekly;
+    let timeout = 604800;
+    if(weekly !== null && timeout - (Date.now() - weekly) / 1000 > 0) {
+      return {
+        error: true,
+        type: "time",
+        time: this.parseSeconds(Math.floor(timeout - (Date.now() - weekly) / 1000)),
+      };
+    } else {
+      data.lastWeekly = Date.now();
+      data = this.amount(data, "add", "wallet", settings.amount);
+      if((Date.now() - data.lastWeekly) / 1000 > timeout * 2)
+        data.streak.weekly = 0;
+      data.streak.weekly += 1;
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -745,8 +1342,8 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async quaterly(settings) {
-    let data = await this.findUser(settings);
-    let quaterly = data.timeline.lastQuaterly;
+    let data = await this.findUser(settings, null, null);
+    let quaterly = data.lastQuaterly;
     let timeout = 21600;
     if(quaterly !== null && timeout - (Date.now() - quaterly) / 1000 > 0) {
       return {
@@ -755,11 +1352,11 @@ const EconomyHandler = class {
         time: this.parseSeconds(Math.floor(timeout - (Date.now() - quaterly) / 1000)),
       };
     } else {
-      data.timeline.lastQuaterly = Date.now();
+      data.lastQuaterly = Date.now();
       data = this.amount(data, "add", "wallet", settings.amount);
       if((Date.now() - quaterly) / 1000 > timeout * 2) data.streak.quaterly = 0;
       data.streak.quaterly += 1;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -770,8 +1367,8 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async hafly(settings) {
-    let data = await this.findUser(settings);
-    let hafly = data.timeline.lastHafly;
+    let data = await this.findUser(settings, null, null);
+    let hafly = data.lastHafly;
     let timeout = 43200;
     if(hafly !== null && timeout - (Date.now() - hafly) / 1000 > 0) {
       return {
@@ -780,11 +1377,11 @@ const EconomyHandler = class {
         time: this.parseSeconds(Math.floor(timeout - (Date.now() - hafly) / 1000)),
       };
     } else {
-      data.timeline.lastHafly = Date.now();
+      data.lastHafly = Date.now();
       data = this.amount(data, "add", "wallet", settings.amount);
-      if ((Date.now() - data.timeline.lastHafly) / 1000 > timeout * 2) data.streak.hafly = 0;
+      if((Date.now() - data.lastHafly) / 1000 > timeout * 2) data.streak.hafly = 0;
       data.streak.hafly += 1;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -795,8 +1392,8 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async daily(settings) {
-    let data = await this.findUser(settings);
-    let daily = data.timeline.lastDaily;
+    let data = await this.findUser(settings, null, null);
+    let daily = data.lastDaily;
     let timeout = 86400;
     if(daily !== null && timeout - (Date.now() - daily) / 1000 > 0) {
       return {
@@ -805,11 +1402,11 @@ const EconomyHandler = class {
         time: this.parseSeconds(Math.floor(timeout - (Date.now() - daily) / 1000)),
       };
     } else {
-      data.timeline.lastDaily = Date.now();
+      data.lastDaily = Date.now();
       data = this.amount(data, "add", "wallet", settings.amount);
       if((Date.now() - daily) / 1000 > timeout * 2) data.streak.daily = 0;
       data.streak.daily += 1;
-      await this.database.set(settings.user.id, data);
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
@@ -819,78 +1416,78 @@ const EconomyHandler = class {
     };
   };
   // ===================================================================
-  async beg(settings) {
-    let data = await this.findUser(settings);
-    let beg = data.timeline.lastBegged;
-    let timeout = 240;
-    if (parseInt(settings.cooldown)) timeout = parseInt(settings.cooldown);
-    if(beg !== null && timeout - (Date.now() - beg) / 1000 > 0) {
+  async hourly(settings) {
+    let data = await this.findUser(settings, null, null);
+    let lastHourly = data.lastHourly;
+    let timeout = 3600;
+    if(lastHourly !== null && timeout - (Date.now() - lastHourly) / 1000 > 0) {
       return {
         error: true,
         type: "time",
-        time: this.parseSeconds(Math.floor(timeout - (Date.now() - beg) / 1000)),
+        time: this.parseSeconds(Math.floor(timeout - (Date.now() - lastHourly) / 1000)),
       };
     } else {
-      const amountt = Math.round((settings.minAmount || 200) + Math.random() * (settings.maxAmount || 400));
-      data.timeline.lastBegged = Date.now();
-      data.timeline.begTimeout = timeout;
-      data = this.amount(data, "add", "wallet", amountt);
-      await this.database.set(settings.user.id, data);
+      data.lastHourly = Date.now();
+      data = this.amount(data, "add", "wallet", settings.amount);
+      if((Date.now() - lastHourly) / 1000 > timeout * 2) data.streak.hourly = 0;
+      data.streak.hourly += 1;
+      await this.saveUser(data);
       return {
         error: false,
         type: "success",
-        amount: amountt,
+        amount: settings.amount,
+        rawData: data,
       };
-    };
-  };
+    }
+  }
   // ===================================================================
   async rob(settings) {
     function testChance(successPercentage) {
       let random = Math.random() * 10;
       return (random -= successPercentage) < 0;
     };
+    if(typeof settings.guild === "string") settings.guild.id = settings.guild;
     if(typeof settings.user === "string") settings.user.id = settings.user;
-    let user1 = await this.findUser(settings);
-    if(!await this.database.has(settings.user2.id)) {
-      await this.makeUser(settings);
+    if(!settings.guild) settings.guild = {
+      id: null,
     };
-    let user2 = await this.database.get(settings.user2.id);
-    let lastRob = user1.timeline.lastRob;
+    let user1 = await this.findUser(settings, null, null);
+    const oldData = user1;
+    let user2 = await cs.findOne({
+      userID: settings.user2.id,
+      guildID: settings.guild.id || null,
+    });
+    if(!user2) user2 = await makeUser(settings, true);
+    const oldData2 = user2;
+    let lastRob = user1.lastRob;
     let timeout = settings.cooldown;
-    if(lastRob !== null && timeout - (Date.now() - lastRob) / 1000 > 0) {
-      return {
-        error: true,
-        type: "time",
-        time: this.parseSeconds(Math.floor(timeout - (Date.now() - lastRob) / 1000)),
-      };
+    if(lastRob !== null && timeout - (Date.now() - lastRob) / 1000 > 0) return {
+      error: true,
+      type: "time",
+      time: this.parseSeconds(Math.floor(timeout - (Date.now() - lastRob) / 1000)),
     };
-    if(user1.wallet < settings.minAmount - 2) {
-      return {
-        error: true,
-        type: "low-money",
-        minAmount: settings.minAmount,
-      };
+    if(user1.wallet < settings.minAmount - 2) return {
+      error: true,
+      type: "low-money",
+      minAmount: settings.minAmount,
     };
-    if(user2.wallet < settings.minAmount - 2) {
-      return {
-        error: true,
-        type: "low-wallet",
-        user2: settings.user2,
-        minAmount: settings.minAmount,
-      };
+    if(user2.wallet < settings.minAmount - 2) return {
+      error: true,
+      type: "low-wallet",
+      user2: settings.user2,
+      minAmount: settings.minAmount,
     };
     let max = settings.maxRob;
-    if (!max || max < 1000) max = 1000;
+    if(!max || max < 1000) max = 1000;
     let random = Math.floor(Math.random() * (Math.floor(max || 1000) - 99)) + 99;
     if(random > user2.wallet) random = user2.wallet;
-    user1.timeline.lastRob = Date.now();
+    user1.lastRob = Date.now();
     // 5 đây là phần trăm thành công.
     if(testChance(settings.successPercentage || 5)) {
-      // Thành công!
+    // Thành công!
       user2 = this.amount(user2, "remove", "wallet", random);
       user1 = this.amount(user1, "add", "wallet", random);
-      await this.database.set(settings.user.id, user1).catch((ex) => {});
-      await this.database.set(settings.user2.id, user2).catch((ex) => {});
+      await this.saveUser(user1, user2);
       return {
         error: false,
         type: "success",
@@ -903,8 +1500,7 @@ const EconomyHandler = class {
       if(random > user1.wallet) random = user1.wallet;
       user2 = this.amount(user2, "add", "wallet", random);
       user1 = this.amount(user1, "remove", "wallet", random);
-      await this.database.set(settings.user.id, user1).catch((ex) => {});
-      await this.database.set(settings.user2.id, user2).catch((ex) => {});
+      await this.saveUser(user1, user2);
       return {
         error: true,
         type: "caught",
@@ -914,11 +1510,34 @@ const EconomyHandler = class {
       };
     };
   };
-  /*====================================================================
-  # Test 👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻👨‍💻
-  ====================================================================*/
+  // ===================================================================
+  async beg(settings) {
+    let data = await this.findUser(settings, null, null);
+    const oldData = data;
+    let beg = data.lastBegged; 
+    let timeout = 240;
+    if(parseInt(settings.cooldown)) timeout = parseInt(settings.cooldown);
+    if(beg !== null && timeout - (Date.now() - beg) / 1000 > 0) {
+      return {
+        error: true,
+        type: "time",
+        time: this.parseSeconds(Math.floor(timeout - (Date.now() - beg) / 1000)),
+      };
+    } else {
+      const amountt = Math.round((settings.minAmount || 200) + Math.random() * (settings.maxAmount || 400));
+      data.lastBegged = Date.now();
+      data.begTimeout = timeout;
+      data = this.amount(data, "add", "wallet", amountt);
+      await this.saveUser(data);
+      return {
+        error: false,
+        type: "success",
+        amount: amountt,
+      };
+    };
+  };
 };
 
 module.exports = {
-  onCoolDown, disspace, setupDatabase, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
+  onCoolDown, disspace, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
 };

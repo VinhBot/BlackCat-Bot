@@ -1,6 +1,7 @@
 const { EmbedBuilder, AttachmentBuilder } = require("discord.js");
-const path = require("node:path");
 const Canvas = require('canvas');
+const path = require("node:path");
+
 module.exports = {
   name: path.parse(__filename).name,
   usage: path.parse(__filename).name,

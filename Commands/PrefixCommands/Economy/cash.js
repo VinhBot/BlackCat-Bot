@@ -12,6 +12,7 @@ module.exports = {
     const user = message.mentions.users.first() || message.author;
     let result = await client.cs.balance({
       user: user,
+      guild: { id: null }
     });
     return message.reply({
       content: `${user.username}, Bạn có ${await client.cs.formatter(result.wallet)} trong ví và ${await client.cs.formatter(result.bank)} trong ngân hàng.`

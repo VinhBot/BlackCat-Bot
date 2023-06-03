@@ -10,9 +10,12 @@ module.exports = {
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
     const user = message.mentions.users.first();
+    if(!user) return message.reply("Vui lòng thêm người cần add tiền");
     const money = parseInt(args[1]);
+    if(!money) return message.reply("Bạn vui lòng nhập thêm số tiền")
     let result = await client.cs.addMoney({ 
       user: user, // mention
+      guild: { id : null },
       amount: money,
       wheretoPutMoney: "wallet"
     });

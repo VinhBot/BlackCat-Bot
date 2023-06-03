@@ -1,10 +1,7 @@
 const { EmbedBuilder, PermissionsBitField, Collection, ActivityType } = require("discord.js");
-const { Database } = require("st.db");
 const { onCoolDown } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
-const database = new Database("./Assets/Database/defaultDatabase.json", { 
-  databaseInObject: true
-});
+const prefixSchema = require(`${process.cwd()}/Assets/Schemas/prefix`);
 const cooldowns = new Collection();
 
 module.exports = {
@@ -12,12 +9,12 @@ module.exports = {
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, message) => {
     if(message.author.bot || !message.guild) return;
-    const data = await database.get(message.guild.id);
-    const prefix = data?.setDefaultPrefix || config.prefix;
+    const data = await prefixSchema.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
+    const prefix = data ? data.Prefix : config.prefix;
     const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
     if(!prefixRegex.test(message.content)) return;
-    const [ matchedPrefix ] = message.content.match(prefixRegex);
+    const [matchedPrefix] = message.content.match(prefixRegex);
     if(!message.content.startsWith(matchedPrefix)) return;   
     const args = message.content.slice(matchedPrefix.length).trim().split(/ +/g);
     const cmd = args.shift().toLowerCase();

@@ -1,4 +1,4 @@
-const { Database } = require("st.db");
+const database = require(`${process.cwd()}/Assets/Schemas/music`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,9 +10,7 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const database = new Database("./Assets/Database/defaultDatabase.json", { 
-       databaseInObject: true
-    });
+    const guildData = database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
     if(!args[0]) return message.reply({
       content: "Vui lòng nhập mức âm lượng mong muốn"
     });
@@ -20,12 +18,10 @@ module.exports = {
     if(!volume || (volume > 150 || volume < 1)) return message.reply({
       content: "Bạn chỉ có thể nhập tối thiểu là 1 và nhiều nhất là 150"
     });
-    // Lấy dữ liệu guilds hiện tại từ cơ sở dữ liệu
-    const guildData = await database.get(message.guild.id);
     // Cập nhật thuộc tính setDefaultVolume với giá trị mới
     guildData.setDefaultMusicData.DefaultVolume = volume;
     // thiết lập thuộc tính với giá trị mới
-    await database.set(message.guild.id, guildData);
+    await guildData.save();
     return message.reply({
       content: `Đã đặt ${volume} làm volume mặc định`,
     });

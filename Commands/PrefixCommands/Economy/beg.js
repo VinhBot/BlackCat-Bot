@@ -11,6 +11,7 @@ module.exports = {
   run: async(client, message, args, prefix) => {
     let result = await client.cs.beg({
         user: message.author,
+        guild: { id: null },
         minAmount: 100,
         maxAmount: 1000,
         cooldown: 10 // 10 giây

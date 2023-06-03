@@ -10,17 +10,22 @@ module.exports = {
   category:"Economy", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    let data = await client.cs.globalLeaderboard();
-    if (data.length < 1) return message.reply("Chưa có ai trong bảng xếp hạng.");
+    let data = await client.cs.leaderboard(null);
+    if(data.length < 1) return message.reply("Chưa có ai trong bảng xếp hạng.");
     const msg = new EmbedBuilder();
-    msg.setTitle("Bảng xếp hàng người có tiền");
-    msg.setColor("Random");
     let pos = 0;
-    data.slice(0, 10).map(async(e) => {
+    // Điều này là để có được 10 người dùng đầu tiên )
+    let arr = [];
+    data.slice(0, 10).map((e) => {
+      if(!client.users.cache.get(e.userID)) return;
       pos++;
-      msg.addFields({ name: `${pos} - **${e.userName}**`, value: `Wallet: **${e.wallet}** - Bank: **${e.bank}**`, inline: true });
-     // msg.addFields({ name: `${pos} - **${e.userName}**`, value: `Wallet: **${await client.cs.formatter(e.wallet)}** - Bank: **${await client.cs.formatter(e.bank)}**`, inline: true });
+      arr.push({
+        name: `${pos} - **${client.users.cache.get(e.userID).username}**`,
+        value: `Wallet: **${e.wallet}** - Bank: **${e.bank}**`,
+        inline: true,
+      });
     });
-    return message.reply({ embeds: [msg] }).catch();
+    msg.addFields(arr);
+    message.reply({ embeds: [msg] }).catch();
   },
 };

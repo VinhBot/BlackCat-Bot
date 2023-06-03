@@ -11,6 +11,7 @@ module.exports = {
   run: async(client, message, args, prefix) => {
     let result = await client.cs.monthly({
         user: message.author,
+        guild: { id: null },
         amount: 6000,
     });
     if(result.error) {

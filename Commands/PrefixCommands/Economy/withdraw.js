@@ -13,6 +13,7 @@ module.exports = {
     if(!money) return message.reply({ content: "Nhập số tiền bạn muốn rút." });
     let result = await client.cs.withdraw({
       user: message.author,
+      guild: { id: null },
       amount: money,
     });
     if(result.error) {

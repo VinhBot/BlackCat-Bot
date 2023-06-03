@@ -11,6 +11,7 @@ module.exports = {
   run: async(client, message, args, prefix) => {
     let result = await client.cs.daily({
       user: message.author,
+      guild: { id: null },
       amount: 100,
     });
     if(result.error) {

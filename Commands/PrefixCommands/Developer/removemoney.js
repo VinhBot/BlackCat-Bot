@@ -15,6 +15,7 @@ module.exports = {
     let result = await client.cs.removeMoney({
       user: user,
       amount: amount,
+      guild: { id: null },
       wheretoPutMoney: wheretoPutMoney,
     });
     if(result.error) {
