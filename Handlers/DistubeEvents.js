@@ -45,8 +45,8 @@ module.exports = (client) => {
       dlChunkSize: 1024 * 1024 * 4,
       youtubeCookie: config.youtubeCookie,
     },
-    emitAddListWhenCreatingQueue: true,
-    emitAddSongWhenCreatingQueue: true,
+    emitAddListWhenCreatingQueue: false,
+    emitAddSongWhenCreatingQueue: false,
     emitNewSongOnly: true,
   });
   function generateQueueEmbed(queue, guildId, leave) {
@@ -436,11 +436,11 @@ module.exports = (client) => {
               };
             };
         });
-        collector?.on('end', async(collected, reason) => {
-          if(reason === "time") {
-            nowplay.edit({ components: [] });
-          };
-     });
+    collector?.on('end', async(collected, reason) => {
+      if(reason === "time") {
+        nowplay.edit({ components: [] });
+      };
+    });
   }).on("finishSong", (queue, song) => {
     return queue.textChannel?.messages?.fetch(PlayerMap.get("currentmsg")).then((msg) => {
       msg.edit({ embeds: [new EmbedBuilder()
@@ -478,7 +478,7 @@ module.exports = (client) => {
             { name: `👎 Dislikes`, value: `${(queue.songs[0].dislikes).toLocaleString()}`, inline: true},
             { name: `🌀 **Thời lượng hàng đợi**`, value: `\`${queue.formattedDuration}\``, inline: true },
           ])
-      ]}).then((msg) => setTimeout(() => msg.delete(), 30000));
+      ]}).catch((e) => {});
   }).on("deleteQueue", async(queue) => {
     var newQueue = client.distube.getQueue(queue.id);
     if(!PlayerMap.has(`deleted-${queue.id}`)) {
@@ -492,9 +492,9 @@ module.exports = (client) => {
             playerintervals.delete(`checkrelevantinterval-${queue.id}`);
             // Xóa Khoảng thời gian cho trình tiết kiệm hồ sơ tự động
             clearInterval(playerintervals.get(`autoresumeinterval-${queue.id}`))
-            const autoresumeCheck = autoresume.findOne({ guild: queue.id });
+            const autoresumeCheck = await autoresume.findOne({ guild: queue.id });
             if(autoresumeCheck) {
-              autoresume.deleteOne({ GuildId: queue.id }); // Xóa db nếu nó vẫn ở đó
+              await autoresume.deleteOne({ guild: queue.id }); // Xóa db nếu nó vẫn ở đó
             };
             playerintervals.delete(`autoresumeinterval-${queue.id}`);
             // Xóa khoảng thời gian cho Hệ thống Embed Chỉnh sửa Nhạc

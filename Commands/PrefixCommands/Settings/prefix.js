@@ -1,4 +1,4 @@
-
+const prefixDB = require(`${process.cwd()}/Assets/Schemas/prefix`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
@@ -10,19 +10,16 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const database = new Database("./Assets/Database/defaultDatabase.json", { 
-       databaseInObject: true
-    });
     if(!args[0]) return message.reply({
       content: "Vui lòng nhập prefix bạn muốn đặt"
     });
     let newPrefix = args[0];
-    // Lấy dữ liệu guilds hiện tại từ cơ sở dữ liệu
-    const guildData = await database.get(message.guild.id);
+    // Lấy dữ liệu guilds hiện tại từ cơ sở dữ liệu 
+    const guildData = await prefixDB.findOne({ GuildId: message.guild.id });
     // Cập nhật thuộc tính setDefaultVolume với giá trị mới
     guildData.setDefaultPrefix = newPrefix;
     // thiết lập thuộc tính với giá trị mới
-    await database.set(message.guild.id, guildData);
+    guildData.save();
     return message.reply({
       content: `Prefix đã được đặt thành ${newPrefix}`
     }); 

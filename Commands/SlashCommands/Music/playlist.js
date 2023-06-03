@@ -89,6 +89,44 @@ module.exports = {
           required: true
         }
       ],
+    },{ 
+      name: "privacy", 
+      description: "Thay đổi quyền riêng tư của danh sách phát", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [
+        {
+          name: "playlist-id", 
+          description: "id của danh sách phát", 
+          type: ApplicationCommandOptionType.String,
+          required: true
+        },{
+          name: "options", 
+          description: "Quyền riêng tư của danh sách phát.", 
+          type: ApplicationCommandOptionType.String,
+          required: true,
+          choices: [
+            { name: 'Công cộng', value: 'public' },
+            { name: 'Riêng tư', value: 'private' }
+          ]
+        }
+      ],
+    },{ 
+      name: "remove", 
+      description: "Xóa một bài hát khỏi danh sách phát.", 
+      type: ApplicationCommandOptionType.Subcommand, 
+      options: [
+        {
+          name: "playlist-id", 
+          description: "id của danh sách phát", 
+          type: ApplicationCommandOptionType.String,
+          required: true
+        },{
+          name: "song-position", 
+          description: "Vị trí của bài hát cần xóa.", 
+          type: ApplicationCommandOptionType.Integer,
+          required: true
+        }
+      ],
     },
   ],
   run: async(client, interaction) => {
@@ -304,7 +342,74 @@ module.exports = {
             .setDescription(`✅ | Danh sách có ID: **${queueId}** đã được phát.`),
           ],
         });
-      }
+      };
+    } else if(options.getSubcommand() === "privacy") {
+      const playlistId = options.getString('playlist-id');
+      const choices = options.getString('options');
+      let data = await Playlist.findOne({
+        userId: user.id,
+        _id: playlistId,
+      });
+      if(!data) return interaction.reply({ content: 'Bạn không có danh sách phát nào.' });
+      if(user.id !== data.userId) return interaction.reply({ 
+        content: 'Bạn không có quyền thay đổi chế độ riêng tư của danh sách phát này.' 
+      });
+      if(choices === "public") {
+        if(data.privacy === false) return interaction.reply({ 
+          content: 'Danh sách phát này đã được công khai.'
+        });
+        data.privacy = false;
+        await data.save();
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor('#2a9454')
+            .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **CÔNG CỘNG**`),
+          ],
+        });
+      } else if(choices === "private") {
+        if(data.privacy === true) return interaction.reply({ 
+          content: 'Danh sách phát này đã được riêng tư.'
+        });
+        data.privacy = true;
+        await data.save();
+        return interaction.reply({
+          embeds: [new EmbedBuilder()
+            .setColor('#2a9454')
+            .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **RIÊNG TƯ**`),
+          ],
+        });
+      };
+    } else if(options.getSubcommand() === "remove") {
+      const queueId = options.getString('playlist-id');
+      const position = options.getInteger('song-position');
+      const data = await Playlist.findOne({ _id: queueId }).catch(() => {
+        return interaction.reply({ content: 'Danh sách phát này không tồn tại.' });
+      });
+      if(data.userId !== user.id) return interaction.reply({ 
+        content: 'Bạn chỉ có thể xóa các bài hát khỏi danh sách phát của riêng mình.'
+      });
+      const name = data.songs.name;
+      const url = data.songs.url;
+      const filtered = parseInt(position -1 );
+
+      if(filtered > name.length - 1) return interaction.reply({
+        content: 'Cung cấp vị trí bài hát hợp lệ, sử dụng `/playlist info` để kiểm tra tất cả các vị trí bài hát'
+      });
+
+      const afName = name.splice(filtered, 1);
+      const afUrl = url.splice(filtered, 1);
+
+      const rmvName = afName.filter(x => !name.includes(x));
+      const rmvUrl = afUrl.filter(x => !url.includes(x));
+      
+      await data.save();
+      
+      return interaction.reply({
+        embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setDescription(`✅ | Đã xóa thành công **[${rmvName}](${rmvUrl})** khỏi Danh sách phát`)
+        ],
+      });
     };
   },
 };
