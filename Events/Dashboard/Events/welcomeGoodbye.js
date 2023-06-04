@@ -1,10 +1,11 @@
 const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
+const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
 /*========================================================
 # Thiết lập welcome & goodbye 
 ========================================================*/
-const welconmeGoodbyeCh = (client, database, config) => {
+const welconmeGoodbyeCh = (client, config) => {
   return {
     categoryId: 'WelcomeGoodbye-setup',
     categoryName: "Welcome & Goodbye 👋",
@@ -22,16 +23,16 @@ const welconmeGoodbyeCh = (client, database, config) => {
               optionDescription: "Thiết lập kênh welcome",
               optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
               getActualSet: async({ guild, user }) => {
-                const getChannel = await database.get(guild.id);
-                return (getChannel.setDefaultWelcomeGoodbyeData.WelcomeChannel);
+                const getChannel = await database.findOne({ GuildId: guild.id });
+                return (getChannel.WelcomeChannel);
               },
               setNew: async({ guild, newData }) => {
-                const getChannel = await database.get(guild.id);
-                getChannel.setDefaultWelcomeGoodbyeData.WelcomeChannel = newData;
+                const getChannel = await database.findOne({ GuildId: guild.id });
+                getChannel.WelcomeChannel = newData;
                 client.channels.fetch(newData).then((channel) => {
                   channel.send('Kênh welcome đã được thiết lập!');
                 });
-                return await database.set(guild.id, getChannel);
+                return await getChannel.save();
               },
             },{
               optionId: "ChannelGoodbye",
@@ -39,16 +40,16 @@ const welconmeGoodbyeCh = (client, database, config) => {
               optionDescription: "Thiết lập kênh goodbye",
               optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
               getActualSet: async({ guild, user }) => {
-                const getChannel = await database.get(guild.id);
-                return (getChannel.setDefaultWelcomeGoodbyeData.GoodbyeChannel);
+                const getChannel = await database.findOne({ GuildId: guild.id });
+                return (getChannel.GoodbyeChannel);
               },
               setNew: async({ guild, newData }) => {
-                const getChannel = await database.get(guild.id);
-                getChannel.setDefaultWelcomeGoodbyeData.GoodbyeChannel = newData;
+                const getChannel = await database.findOne({ GuildId: guild.id });
+                getChannel.GoodbyeChannel = newData;
                 client.channels.fetch(newData).then((channel) => {
                   channel.send('Kênh Goodbye đã được thiết lập!');
                 });
-                return await database.set(guild.id, getChannel);
+                return await getChannel.save();
               },
             },{
               optionId: "roleWelcome",
@@ -56,13 +57,13 @@ const welconmeGoodbyeCh = (client, database, config) => {
               optionDescription: "Thiết lập role tự động add khi thành viên tham gia guild",
               optionType: DBD.formTypes.rolesMultiSelect(false, true, false, true),
               getActualSet: async({ guild, user }) => {
-                const getRoles = await database.get(guild.id);
-                return (getRoles.setDefaultWelcomeGoodbyeData.AutoAddRoleWel);
+                const getRoles = await database.findOne({ GuildId: guild.id });
+                return (getRoles.AutoAddRoleWel);
               },
               setNew: async({ guild, newData }) => {
-                const getRoles = await database.get(guild.id);
-                getRoles.setDefaultWelcomeGoodbyeData.AutoAddRoleWel = newData;
-                return await database.set(guild.id, getRoles);
+                const getRoles = await database.findOne({ GuildId: guild.id });
+                getRoles.AutoAddRoleWel = newData;
+                return await getRoles.save();
               },
             },
         ]),

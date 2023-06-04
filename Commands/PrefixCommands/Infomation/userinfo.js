@@ -11,7 +11,7 @@ module.exports = {
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
     try {
-      const member = message.guild.members.cache.get(message.mentions.members.first().id || message.member);
+      const member = message.guild.members.cache.get(message.mentions.members.first().id);
       if(!member) return;
       const badgeFlags = {
         DEVELOPER: "👨‍💻",
@@ -66,6 +66,7 @@ module.exports = {
         ])                     
       ]});
     } catch(e) {
+      console.log(e)
       return message.reply({ content: "Bạn quên vẫn chưa ping một ai đó" });
     }
   },

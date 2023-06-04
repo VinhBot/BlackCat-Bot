@@ -227,7 +227,7 @@ const Slots = class {
     if(!Array.isArray(options.slots)) throw new TypeError('INVALID_SLOTS: tùy chọn vị trí phải là một mảng.');
     this.client = client;
     this.options = options;
-    this.money = options.moneyNumber;
+    this.money = options.moneyNumber || 5000;
     this.message = options.message;
     this.slot1 = this.slot2 = this.slot3 = 0;
     this.slots = options.slots;

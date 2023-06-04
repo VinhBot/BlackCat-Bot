@@ -2,11 +2,11 @@ const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-
+const database = require(`${process.cwd()}/Assets/Schemas/music`);
 /*========================================================
 # Thiết lập music Channel
 ========================================================*/
-const setupMusic = (client, database, config) => {
+const setupMusic = (client, config) => {
   const BotFilters = {
     "3d": "3d",
     "bassboost": "bassboost",
@@ -41,18 +41,18 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập kênh tự động phát nhạc theo yêu cầu",
             optionType: DBD.formTypes.channelsSelect(false, [ChannelType.GuildText]),
             getActualSet: async({ guild, user }) => {
-              const getChannel = await database.get(guild.id);
-              return (getChannel.setDefaultMusicData.ChannelId);
+              const getChannel = await database.findOne({ GuildId: guild.id });
+              return (getChannel.ChannelId);
             },
             setNew: async({ guild, newData }) => {
               client.channels.fetch(newData).then((channel) => {
                 channel.send(musicEmbedDefault(client, guild)).then(async(msg) => {
-                  const guildData = await database.get(guild.id);
+                  const guildData = await database.findOne({ GuildId: guild.id });
                   // Cập nhật thuộc tính setDefaultMusicData với giá trị mới
-                  guildData.setDefaultMusicData.ChannelId = channel.id;
-                  guildData.setDefaultMusicData.MessageId = msg.id;
+                  guildData.ChannelId = channel.id;
+                  guildData.MessageId = msg.id;
                   // thiết lập thuộc tính với giá trị mới
-                  return await database.set(guild.id, guildData);
+                  return await guildData.save();
                 }).catch((ex) => {});
               });
             }, 
@@ -62,13 +62,13 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập mặc định mức âm lượng (1 - 150)",
             optionType: SoftUI.formTypes.numberPicker(1, 150, false),
             getActualSet: async ({ guild }) => {
-              const getVolume = database.get(guild.id);
-              return (getVolume.setDefaultMusicData.DefaultVolume) || 50;
+              const getVolume = database.findOne({ GuildId: guild.id });
+              return (getVolume.DefaultVolume) || 50;
             },
             setNew: async ({ guild, newData }) => {
-              const getVolume = database.get(guild.id);
-              getVolume.setDefaultMusicData.DefaultVolume = Number(newData);
-              await database.set(guild.id, getVolume);
+              const getVolume = database.findOne({ GuildId: guild.id });
+              getVolume.DefaultVolume = Number(newData);
+              await getVolume.save();
             }
           },{
             optionId: 'autoplay',
@@ -76,13 +76,13 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập chế độ mặc định tự động phát",
             optionType: DBD.formTypes.switch(),
             getActualSet: async({ guild }) => {
-              const defaultAutopl = database.get(guild.id);
-              return (defaultAutopl.setDefaultMusicData.DefaultAutoplay);
+              const defaultAutopl = database.findOne({ GuildId: guild.id });
+              return (defaultAutopl.DefaultAutoplay);
             },
             setNew: async({ guild, newData }) => {
-              const defaultAutopl = database.get(guild.id);
-              defaultAutopl.setDefaultMusicData.DefaultAutoplay = Boolean(newData);
-              await database.set(guild.id, defaultAutopl);
+              const defaultAutopl = database.findOne({ GuildId: guild.id });
+              defaultAutopl.DefaultAutoplay = Boolean(newData);
+              await defaultAutopl.save();
             }
           },{
             optionId: 'autoresume',
@@ -90,13 +90,13 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập chế độ mặc định tự động phát lại nhạc khi bot lỗi",
             optionType: DBD.formTypes.switch(),
             getActualSet: async({ guild }) => {
-              const defaultAutore = database.get(guild.id);
-              return (defaultAutore.setDefaultMusicData.DefaultAutoresume);
+              const defaultAutore = database.findOne({ GuildId: guild.id });
+              return (defaultAutore.DefaultAutoresume);
             },
             setNew: async({ guild, newData }) => {
-              const defaultAutore = database.get(guild.id);
-              defaultAutore.setDefaultMusicData.DefaultAutoresume = Boolean(newData);
-              await database.set(guild.id, defaultAutore);
+              const defaultAutore = database.findOne({ GuildId: guild.id });
+              defaultAutore.DefaultAutoresume = Boolean(newData);
+              await defaultAutore.save();
             }
           },{
             optionId: 'djrole',
@@ -104,13 +104,13 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập role dành riêng để phát nhạc (Hiện chưa thể dùng)",
             optionType: DBD.formTypes.rolesMultiSelect(false, true, false, true),
             getActualSet: async ({ guild }) => {
-              const defaultAutopl = database.get(guild.id);
-              return (defaultAutopl.setDefaultMusicData.Djroles);
+              const defaultAutopl = database.findOne({ GuildId: guild.id });;
+              return (defaultAutopl.Djroles);
             },
             setNew: async ({ guild, newData }) => {
-              const defaultAutopl = database.get(guild.id);
-              defaultAutopl.setDefaultMusicData.Djroles = newData;
-              await database.set(guild.id, defaultAutopl);
+              const defaultAutopl = database.findOne({ GuildId: guild.id });
+              defaultAutopl.Djroles = newData;
+              await defaultAutopl.save();
             }
           },{
             optionId: "filters",
@@ -118,13 +118,13 @@ const setupMusic = (client, database, config) => {
             optionDescription: "Thiết lập Filters mặc định khi phát nhạc",
             optionType: DBD.formTypes.multiSelect(BotFilters),
             getActualSet: async ({ guild }) => {
-              const defaultFilters = database.get(guild.id);
-              return (defaultFilters.setDefaultMusicData.DefaultFilters);
+              const defaultFilters = database.findOne({ GuildId: guild.id });
+              return (defaultFilters.DefaultFilters);
             },
             setNew: async ({ guild, newData }) => {
-              const defaultFilters = database.get(guild.id);
-              defaultFilters.setDefaultMusicData.DefaultFilters = newData;
-              await database.set(guild.id, defaultFilters);
+              const defaultFilters = database.findOne({ GuildId: guild.id });
+              defaultFilters.DefaultFilters = newData;
+              await defaultFilters.save();
             }
           },
         ])

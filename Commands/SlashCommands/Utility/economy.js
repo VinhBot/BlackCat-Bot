@@ -1,4 +1,4 @@
-const { ApplicationCommandOptionType } = require("discord.js");
+const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
 module.exports = {
   name: "economy", // Tên lệnh 
   description: "hệ thống tiền tệ :))", // Mô tả lệnh
@@ -105,6 +105,7 @@ module.exports = {
     if(interaction.options.getSubcommand() === "cash") {
       const user = interaction.options.getUser("user") || interaction.user;
       const cash = await client.cs.balance({
+        guild: { id: null },
         user: user,
       });
       return interaction.reply({ content: `${user.username}, Bạn có ${await client.cs.formatter(cash.wallet)} trong ví và ${await client.cs.formatter(cash.bank)} trong ngân hàng` });
@@ -115,6 +116,7 @@ module.exports = {
       let result = await client.cs.transferMoney({
         user: interaction.user,
         user2: user,
+        guild: { id: null },
         amount: amount
       });
       try {
@@ -129,6 +131,7 @@ module.exports = {
     } else if(interaction.options.getSubcommand() === "deposite") {
       let deposite = await client.cs.deposite({
         user: interaction.user,
+        guild: { id: null },
         amount: interaction.options.getNumber("amount"),
       });
       if(deposite.error) {
@@ -144,6 +147,7 @@ module.exports = {
     } else if(interaction.options.getSubcommand() === "withdraw") {
       let result = await client.cs.withdraw({
         user: interaction.user,
+        guild: { id: null },
         amount: interaction.options.getNumber("amount"),
       });
       if(result.error) {
@@ -161,6 +165,7 @@ module.exports = {
       let results = await client.cs.rob({
         user: interaction.user,
         user2: user,
+        guild: { id: null },
         minAmount: 100,
         successPercentage: 5,
         cooldown: 25, //25 giây,
@@ -196,6 +201,7 @@ async function moneyEvents(client, interaction) {
   if(interaction.options.getSubcommand() === "beg") {
       result = await client.cs.beg({
         user: interaction.user,
+        guild: { id: null },
         minAmount: 100,
         maxAmount: 1000,
         cooldown: 10 // 10 giây
@@ -203,41 +209,49 @@ async function moneyEvents(client, interaction) {
   } else if(interaction.options.getSubcommand() === "daily") {
       result = await client.cs.daily({
         user: interaction.user,
+        guild: { id: null },
         amount: 100,
       });
   } else if(interaction.options.getSubcommand() === "hafly") {
       result = await client.cs.hafly({
         user: interaction.user,
+        guild: { id: null },
         amount: 100,
       });
   } else if(interaction.options.getSubcommand() === "hourly") {
       result = await client.cs.hourly({
         user: interaction.user,
+        guild: { id: null },
         amount: 100,
       });
   } else if(interaction.options.getSubcommand() === "monthly") {
       result = await client.cs.monthly({
         user: interaction.user,
+        guild: { id: null },
         amount: 6000,
       });
   } else if(interaction.options.getSubcommand() === "quaterly") {
       result = await client.cs.quaterly({
         user: interaction.user,
+        guild: { id: null },
         amount: 100,
       });
   } else if(interaction.options.getSubcommand() === "weekly") {
       result = await client.cs.weekly({
         user: interaction.user,
+        guild: { id: null },
         amount: 100,
       });
   } else if(interaction.options.getSubcommand() === "yearly") {
       result = await client.cs.yearly({
         user: interaction.user,
+        guild: { id: null },
         amount: 27000,
       });
   } else if(interaction.options.getSubcommand() === "") {
       result = await client.cs.work({
         user: interaction.user,
+        guild: { id: null },
         maxAmount: 500,
         replies: ['Programmer', 'Builder', 'Waiter', 'Busboy', 'Chief', 'Mechanic'],
         cooldown: 25 //25 giây,

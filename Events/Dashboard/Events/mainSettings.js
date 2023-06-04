@@ -1,5 +1,5 @@
 const DBD = require("discord-dashboard");
-
+const prefixDB = require(`${process.cwd()}/Assets/Schemas/prefix`);
 const mainSettings = (client, database, config) => {
   return {
     categoryId: 'mainSettings-option',
@@ -13,13 +13,13 @@ const mainSettings = (client, database, config) => {
         optionDescription: "Thay đổi prefix cho guilds (nhỏ nhất 1, lớn nhất 5 chữ cái, kí hiệu)",
         optionType: DBD.formTypes.input("Prefix của bạn là gì ?", 1, 5),
         getActualSet: async ({ guild }) => {
-          const getPrefix = database.get(guild.id);
-          return (getPrefix.setDefaultPrefix);
+          const getPrefix = prefixDB.findOne({ GuildId: guild.id });
+          return (getPrefix.Prefix);
         },
         setNew: async({ guild, newData }) => {
-          const getPrefix = database.get(guild.id);
-          getPrefix.setDefaultPrefix = newData;
-          return await database.set(guild.id, getPrefix);
+          const getPrefix = prefixDB.findOne({ GuildId: guild.id });
+          getPrefix.Prefix = newData;
+          return await getPrefix.save();
         }
       },
     ]

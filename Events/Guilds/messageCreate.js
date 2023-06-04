@@ -9,8 +9,16 @@ module.exports = {
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, message) => {
     if(message.author.bot || !message.guild) return;
-    const data = await prefixSchema.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
-    const prefix = data ? data.Prefix : config.prefix;
+    const prefixDT = await prefixSchema.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
+    if(!prefixDT) {
+      const newPrefix = new prefixSchema({
+        GuildId: message.guild.id,
+      });
+      await newPrefix.save().catch((e) => {
+        console.log("Lỗi:", e);
+      });
+    };
+    const prefix = prefixDT ? prefixDT.Prefix : config.prefix;
     const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
     if(!prefixRegex.test(message.content)) return;

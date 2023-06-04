@@ -62,7 +62,6 @@ module.exports = {
         oldChannel.delete().catch((e) => null);
       };
     };
-    
     }).catch((Error) => {
        if(Error) return console.log(Error);
     });

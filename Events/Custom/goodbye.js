@@ -6,7 +6,7 @@ module.exports = {
 	eventName: "guildMemberRemove", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, member) => {
-    return database.findOne({ GuildId: member.guild.id, GuildName: member.guild.name }).then(async(getData) => {
+    return database.findOne({ GuildId: member.guild.id }).then(async(getData) => {
       if(!getData) return;
       const channels = member.guild.channels.cache.find((channel) => {
         return channel.id === getData.GoodbyeChannel;

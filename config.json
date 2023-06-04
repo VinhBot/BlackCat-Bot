@@ -2,6 +2,7 @@
   "token": "token bot",
   "prefix": "!",
   "developer": "788208207465938954",
+  "mongourl": "mongodb+srv://nguyenvinh:blackcat2k3@cluster0.bgyio.mongodb.net/",
   "_______________________": "________________________________",
   "name" : "XLC is the best",
   "avatar" : "https://cdn.discordapp.com/avatars/885451756593618944/fad45b659b3de3650d502ddd21ba2577.jpg",

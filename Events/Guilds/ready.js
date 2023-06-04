@@ -93,6 +93,37 @@ const autoresumeHandler = (client) => {
   }; 
   setTimeout(() =>  autoconnect(), 2 * client.ws.ping);
 };
+
+const dashboard = async(client, options) => {
+  if(options) {
+    const botClient = {
+      id: process.env.botID,
+      secret: process.env.botSecret
+    };
+    const redirectUri = process.env.redirectUri;
+    await DBD.useLicense(config.dashboard.useLicense);
+    DBD.Dashboard = DBD.UpdatedClass();
+    const Dashboard = new DBD.Dashboard({
+      port: config.dashboard.port,
+      client: botClient || config.dashboard.client,
+      redirectUri: redirectUri || config.dashboard.redirectUri,
+      domain: config.dashboard.domain,
+      ownerIDs: config.dashboard.ownerIDs,
+      useThemeMaintenance: true,
+      useTheme404: true,
+      bot: client,
+      theme: theme(client, config),
+      settings: [
+        mainSettings(client, config),
+        welconmeGoodbyeCh(client, config), 
+        setupMusic(client, config), 
+        diaryChannel(client, config),
+      ]
+    });
+    return Dashboard.init();
+  };
+};
+    
 module.exports = {
 	eventName: "ready", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
@@ -114,37 +145,7 @@ module.exports = {
     /*========================================================
     # Dashboard
     ========================================================*/
-    const dashboard = async(options) => {
-      if(options) {
-        const botClient = {
-          id: process.env.botID,
-          secret: process.env.botSecret
-        };
-        const redirectUri = process.env.redirectUri;
-        await DBD.useLicense(config.dashboard.useLicense);
-        DBD.Dashboard = DBD.UpdatedClass();
-        let database;
-        const Dashboard = new DBD.Dashboard({
-          port: config.dashboard.port,
-          client: botClient || config.dashboard.client,
-          redirectUri: redirectUri || config.dashboard.redirectUri,
-          domain: config.dashboard.domain,
-          ownerIDs: config.dashboard.ownerIDs,
-          useThemeMaintenance: true,
-          useTheme404: true,
-          bot: client,
-          theme: theme(client, config),
-          settings: [
-            mainSettings(client, database, config),
-            welconmeGoodbyeCh(client, database, config), 
-            setupMusic(client, database, config), 
-            diaryChannel(client, database, config),
-          ]
-        });
-        return Dashboard.init();
-      };
-    };
-    dashboard(false);
+    dashboard(client, false);
     /*========================================================
     # Autoresume
     ========================================================*/
