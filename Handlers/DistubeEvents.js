@@ -1,54 +1,14 @@
 const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, EmbedBuilder, ChannelType } = require("discord.js");
-const { SoundCloudPlugin } = require("@distube/soundcloud");
-const { SpotifyPlugin } = require("@distube/spotify");
-const { YtDlpPlugin } = require("@distube/yt-dlp");
-const { DisTube } = require("distube");
-const playerintervals = new Map();
-const PlayerMap = new Map();
-const maps = new Map();
-let songEditInterval = null;
-let lastEdited = false;
-// Json Data
 const { disspace, MusicRole } = require(`${process.cwd()}//Events/functions`);
 const autoresume = require(`${process.cwd()}/Assets/Schemas/autoresume`);
 const database = require(`${process.cwd()}/Assets/Schemas/music`);
 const config = require(`${process.cwd()}/config.json`);
+const playerintervals = new Map();
+const PlayerMap = new Map();
+let songEditInterval = null;
+let lastEdited = false;
 // export module :))) 
 module.exports = (client) => {
-  const distube = new DisTube(client, {
-    searchSongs: 0,
-	  searchCooldown: 30,
-	  leaveOnEmpty: true,
-	  emptyCooldown: 25,
-    savePreviousSongs: true, 
-	  leaveOnFinish: false,
-	  leaveOnStop: true,
-	  nsfw: true,
-	  plugins: [
-      new SpotifyPlugin({ 
-        parallel: true, 
-        emitEventsAfterFetching: true,
-        api: {
-          clientId: config.clientId,
-          clientSecret: config.clientSecret 
-        }
-      }),
-      new SoundCloudPlugin(),
-        new YtDlpPlugin({ update: true })
-    ],
-    youtubeCookie: config.youtubeCookie,
-    ytdlOptions: {
-      highWaterMark: 1024 * 1024 * 64,
-      quality: "highestaudio",
-      format: "audioonly",
-      liveBuffer: 60000,
-      dlChunkSize: 1024 * 1024 * 4,
-      youtubeCookie: config.youtubeCookie,
-    },
-    emitAddListWhenCreatingQueue: false,
-    emitAddSongWhenCreatingQueue: false,
-    emitNewSongOnly: true,
-  });
   function generateQueueEmbed(queue, guildId, leave) {
     const createBar = (total, current, size = 25, line = "▬", slider = "🌟") => {
       if(!total) return;
@@ -185,8 +145,7 @@ module.exports = (client) => {
   /*========================================================
   # Bắt đầu chạy các evnets
   ========================================================*/
-  client.distube = distube;
-  client.maps = maps;
+  const distube = client.distube;
   distube.on("playSong", async(queue, track) => {
     const defaultData = await database.findOne({ GuildId: queue.id });
     if(!defaultData) return;
@@ -483,8 +442,8 @@ module.exports = (client) => {
     var newQueue = client.distube.getQueue(queue.id);
     if(!PlayerMap.has(`deleted-${queue.id}`)) {
           PlayerMap.set(`deleted-${queue.id}`, true);
-          if(maps.has(`beforeshuffle-${queue.id}`)){
-            maps.delete(`beforeshuffle-${newQueue.id}`);
+          if(client.maps.has(`beforeshuffle-${queue.id}`)){
+            client.maps.delete(`beforeshuffle-${newQueue.id}`);
           };
           try {
             //Xóa khoảng thời gian để kiểm tra hệ thống thông báo liên quan
@@ -512,61 +471,21 @@ module.exports = (client) => {
     };
   }).on("initQueue", async(queue) => {
     const data = await database.findOne({ GuildId: queue.id });
-    if(!data) return;
     var newQueue = client.distube.getQueue(queue.id);
+    if(!data) return;
     let channelId = data.ChannelId;
     let messageId = data.MessageId;
     if(PlayerMap.has(`deleted-${queue.id}`)) {
-      PlayerMap.delete(`deleted-${queue.id}`)
+      PlayerMap.delete(`deleted-${queue.id}`);
     };
     queue.autoplay = Boolean(data.DefaultAutoplay);
     queue.volume = Number(data.DefaultVolume);
     queue.filters.set(data.DefaultFilters);
     queue.voice.setSelfDeaf(true); 
-    /** 
-     * Kiểm tra các thông báo có liên quan bên trong Kênh yêu cầu hệ thống âm nhạc
-     */
-    var checkrelevantinterval = setInterval(async() => {
-      if(channelId && channelId.length > 5) {
-        console.log(`Music System - Relevant Checker`.brightCyan + ` - Kiểm tra các tin nhắn không liên quan`);
-        let guild = client.guilds.cache.get(queue.id);
-        if(!guild) return console.log(`Music System - Relevant Checker`.brightCyan + ` - Không tìm thấy Guild!`);
-        let channel = guild.channels.cache.get(channelId);
-        if (!channel) channel = await guild.channels.fetch(channelId).catch(() => {}) || false;
-        if (!channel) return console.log(`Music System - Relevant Checker`.brightCyan + ` - Không tìm thấy kênh!`);
-        let messages = await channel.messages.fetch();
-        if(messages.filter(m => m.id != messageId).size > 0) {
-          channel.bulkDelete(messages.filter(m => m.id != messageId)).catch(() => {}).then(messages => console.log(`Music System - Relevant Checker`.brightCyan + ` - Đã xóa hàng loạt ${messages.size ? messages.size : "0"} tin nhắn`));
-        } else {
-          console.log(`Music System - Relevant Checker`.brightCyan + ` - Không có tin nhắn liên quan`)
-        };
-      };
-    }, 60000);
-    /**
-     * Music System Edit Embeds
-     */
-    var musicsystemeditinterval = setInterval(async() => {
-      if(channelId  && channelId.length > 5) {
-        let guild = client.guilds.cache.get(queue.id);
-        if (!guild) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy Guild!`)
-        let channel = guild.channels.cache.get(channelId);
-        if(!channel) channel = await guild.channels.fetch(channelId).catch(() => {}) || false;
-        if(!channel) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy kênh!`)
-        let message = channel.messages.cache.get(messageId);
-        if(!message) message = await channel.messages.fetch(messageId).catch(() => {}) || false;
-        if(!message) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy tin nhắn!`)
-        if(!message.editedTimestamp) return console.log(`Music System Edit Embeds`.brightCyan + ` - Chưa từng chỉnh sửa trước đây!`)
-        if(Date.now() - message.editedTimestamp > (7000) - 100) {
-          message.edit(generateQueueEmbed(client, queue.id)).catch((e) => console.log(e)).then(() => {
-            console.log("Music System Edit Embeds".brightMagenta + ` - Đã chỉnh sửa Nhúng hệ thống âm nhạc, vì không có chỉnh sửa nào khác trong ${Math.floor((7000) / 1000)} giây!`)
-          });
-        };
-      };
-    }, 7000);
     /**
     * AUTO-RESUME-DATABASING
     */
-    var autoresumeinterval = setInterval(async() => {
+    playerintervals.set(`autoresumeinterval-${queue.id}`, setInterval(async() => {
       if(newQueue && newQueue.id && false) {
         const saveAutoresume = new autoresume({
           guild: newQueue.id,
@@ -597,11 +516,47 @@ module.exports = (client) => {
         });
         saveAutoresume.save();
       };
-    }, 4000);
-  
-    playerintervals.set(`autoresumeinterval-${queue.id}`, autoresumeinterval);
-    playerintervals.set(`checkrelevantinterval-${queue.id}`, checkrelevantinterval);
-    playerintervals.set(`musicsystemeditinterval-${queue.id}`, musicsystemeditinterval);
+    }, 4000));
+    /** 
+    * Kiểm tra các thông báo có liên quan bên trong Kênh yêu cầu hệ thống âm nhạc
+    */
+    playerintervals.set(`checkrelevantinterval-${queue.id}`, setInterval(async() => {
+      if(channelId && channelId.length > 5) {
+        console.log(`Music System - Relevant Checker`.brightCyan + ` - Kiểm tra các tin nhắn không liên quan`);
+        let guild = client.guilds.cache.get(queue.id);
+        if(!guild) return console.log(`Music System - Relevant Checker`.brightCyan + ` - Không tìm thấy Guild!`);
+        let channel = guild.channels.cache.get(channelId);
+        if (!channel) channel = await guild.channels.fetch(channelId).catch(() => {}) || false;
+        if (!channel) return console.log(`Music System - Relevant Checker`.brightCyan + ` - Không tìm thấy kênh!`);
+        let messages = await channel.messages.fetch();
+        if(messages.filter(m => m.id != messageId).size > 0) {
+          channel.bulkDelete(messages.filter(m => m.id != messageId)).catch(() => {}).then(messages => console.log(`Music System - Relevant Checker`.brightCyan + ` - Đã xóa hàng loạt ${messages.size ? messages.size : "0"} tin nhắn`));
+        } else {
+          console.log(`Music System - Relevant Checker`.brightCyan + ` - Không có tin nhắn liên quan`)
+        };
+      };
+    }, 60000));
+    /**
+    * Music System Edit Embeds
+    */
+    playerintervals.set(`musicsystemeditinterval-${queue.id}`, setInterval(async() => {
+      if(channelId  && channelId.length > 5) {
+        let guild = client.guilds.cache.get(queue.id);
+        if (!guild) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy Guild!`)
+        let channel = guild.channels.cache.get(channelId);
+        if(!channel) channel = await guild.channels.fetch(channelId).catch(() => {}) || false;
+        if(!channel) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy kênh!`)
+        let message = channel.messages.cache.get(messageId);
+        if(!message) message = await channel.messages.fetch(messageId).catch(() => {}) || false;
+        if(!message) return console.log(`Music System Edit Embeds`.brightMagenta + ` - Music System - Không tìm thấy tin nhắn!`)
+        if(!message.editedTimestamp) return console.log(`Music System Edit Embeds`.brightCyan + ` - Chưa từng chỉnh sửa trước đây!`)
+        if(Date.now() - message.editedTimestamp > (7000) - 100) {
+          message.edit(generateQueueEmbed(client, queue.id)).catch((e) => console.log(e)).then(() => {
+            console.log("Music System Edit Embeds".brightMagenta + ` - Đã chỉnh sửa Nhúng hệ thống âm nhạc, vì không có chỉnh sửa nào khác trong ${Math.floor((7000) / 1000)} giây!`)
+          });
+        };
+      };
+    }, 7000));
   }).on("disconnect", (queue) => {
     return queue.textChannel?.send({ embeds: [new EmbedBuilder().setDescription(":x: | Đã ngắt kết nối khỏi kênh voice")]}).then((msg) => {
       setTimeout(() => msg.delete(), 10000);
@@ -628,7 +583,7 @@ module.exports = (client) => {
   }).on("searchNoResult", (message) => {
     return message.channel.send({ content: "Không thể tìm kiếm bài hát" }).catch((e) => console.log(e));
   }).on("searchResult", (message, results) => {
-    let i = 0
+    let i = 0;
     return message.channel.send({ content: `**Chọn một tùy chọn từ bên dưới**\n${results.map((song) => `**${++i}**. ${song.name} - \`${song.formattedDuration}\``).join("\n")}\n*Nhập bất kỳ thứ gì khác hoặc đợi 60 giây để hủy*` });
   });
   
@@ -639,10 +594,10 @@ module.exports = (client) => {
       GuildId: interaction.guild.id,
       GuildName: interaction.guild.name
     });
-    if(!data) return;
+    if(!data) return; // trả về nếu không tìm thấy data
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
-    if(!guild) return;
-    //nếu chưa setup, return
+    if(!guild) return; // trả về nếu không tìm thấy guilds
+    // nếu chưa setup, return
     if(!data.ChannelId || data.ChannelId.length < 5) return;
     if(!data.MessageId || data.MessageId.length < 5) return;
     // nếu kênh không tồn tại, hãy thử lấy và trả về nếu vẫn không tồn tại
@@ -657,12 +612,12 @@ module.exports = (client) => {
     if(!member) return;
     // nếu thành viên không được kết nối với voice, return
     if(!member.voice.channel) return interaction.reply({
-      content: `**Vui lòng kết nối với kênh voice trước!**`, ephemeral: true,
+      content: `**Vui lòng kết nối với kênh voice trước!**`
     });
     let newQueue = client.distube.getQueue(guild.id);
     if(interaction.isButton()) {
       if(!newQueue || !newQueue.songs || !newQueue.songs[0]) return interaction.reply({
-        content: "Hiện tại không phát bài hát nào :))", ephemeral: true
+        content: "Hiện tại không phát bài hát nào :))"
       });
       if(customId === "Stop") {
         if(newQueue) {
@@ -692,7 +647,7 @@ module.exports = (client) => {
         newQueue.toggleAutoplay();
         return interaction.reply({ content: `Tự động phát đã được ${newQueue.autoplay ? "bật" : "tắt"}` });
       } else if(customId === "Shuffle") {
-        maps.set(`beforeshuffle-${newQueue.id}`, newQueue.songs.map(track => track).slice(1));
+        client.maps.set(`beforeshuffle-${newQueue.id}`, newQueue.songs.map(track => track).slice(1));
         await newQueue.shuffle();
         return interaction.reply({ content: `Đã xáo trộn ${newQueue.songs.length} bài hát` });
       } else if(customId === "Song") {

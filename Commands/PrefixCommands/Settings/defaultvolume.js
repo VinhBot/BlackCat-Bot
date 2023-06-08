@@ -10,7 +10,7 @@ module.exports = {
   category:"Settings", // tên folder chứa lệnh
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
-    const guildData = database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
+    const guildData = await database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
     if(!args[0]) return message.reply({
       content: "Vui lòng nhập mức âm lượng mong muốn"
     });

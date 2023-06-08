@@ -3,8 +3,8 @@ const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,
   usage: path.parse(__filename).name,
-  aliases: [""], // lệnh phụ
-  description: "", // mô tả lệnh
+  aliases: ["inv"], // lệnh phụ
+  description: "Xem trong kho bạn có món hàng gì", // mô tả lệnh
   userPerms: [], // Administrator, ....
   owner: false, //: tắt // true : bật
   category: "Economy", // tên folder chứa lệnh

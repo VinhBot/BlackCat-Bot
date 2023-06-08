@@ -264,9 +264,7 @@ const EconomyHandler = class {
     if(!settings.guild) settings.guild = {
       id: null,
     };
-    inv.findOneAndUpdate({
-      guildID: settings.guild.id || null,
-    }, {
+    inv.findOneAndUpdate({ guildID: settings.guild.id || null }, {
       $push: {
         inventory: item,
       },
@@ -274,7 +272,7 @@ const EconomyHandler = class {
       upsert: true,
       useFindAndModify: false,
     }).catch((e) => {
-        if(e) return console.log(e);
+      if(e) return console.log(e);
     });
     return {
       error: false,
@@ -321,7 +319,7 @@ const EconomyHandler = class {
         error: true,
         type: "Invalid-Shop-price",
       };
-      if (!x.description) x.description = "No Description.";
+      if(!x.description) x.description = "No Description.";
     };
     inv.findOneAndUpdate(
       { guildID: settings.guild.id || null },
@@ -426,21 +424,15 @@ const EconomyHandler = class {
       }
     }
     if(done == false) return data_error;
-    cs.findOneAndUpdate(
-      {
-        guildID: settings.guild.id || null,
-        userID: settings.user.id || null,
+    cs.findOneAndUpdate({ guildID: settings.guild.id || null, userID: settings.user.id || null }, {
+      $set: {
+        inventory: data.inventory,
       },
-      {
-        $set: {
-          inventory: data.inventory,
-        },
-      },
-      {
-        upsert: true,
-        useFindAndModify: false,
+    }, {
+      useFindAndModify: false,
+      upsert: true
     }).catch((e) => {
-        if(e) return console.log(e);
+      if(e) return console.log(e);
     });
     return {
       error: false,
@@ -451,7 +443,7 @@ const EconomyHandler = class {
   };
   // ===================================================================
   async transferItem(settings) {
-    if (!settings.guild) settings.guild = {
+    if(!settings.guild) settings.guild = {
       id: null,
     };
     let user1 = await this.findUser({ user: settings.user1, guild: settings.guild }, null, null, "transferItem");
@@ -468,11 +460,11 @@ const EconomyHandler = class {
     if (!user1.inventory[thing]) return { error: true, type: "Invalid-Item" };
     // Số lượng
     amount_to_transfer = settings.amount;
-    if (amount_to_transfer === "all" || amount_to_transfer === "max") {
+    if(amount_to_transfer === "all" || amount_to_transfer === "max") {
       let user2_has_item = false;
       let ifHasItem_then_index = 0;
       for (let i = 0; i < user1.inventory.length; i++) {
-        if (user2.inventory[i].name === user1.inventory[thing].name) {
+        if(user2.inventory[i].name === user1.inventory[thing].name) {
           user2_has_item = true;
           ifHasItem_then_index = i;
         }
@@ -482,30 +474,31 @@ const EconomyHandler = class {
       itemsLeft = 0;
       if(user2_has_item === false) {
         user2.inventory.push(user1.inventory[thing]);
-      } else
+      } else {
         user2.inventory[ifHasItem_then_index].amount += user1.inventory[thing].amount;
+      };
       user1.inventory.splice(thing, 1);
     } else {
       amount_to_transfer = parseInt(amount_to_transfer) || 1;
-      if (amount_to_transfer <= 0)
-        return { error: true, type: "Invalid-Amount" };
-      if (amount_to_transfer > user1.inventory[thing].amount)
-        return { error: true, type: "In-Sufficient-Amount" };
+      if(amount_to_transfer <= 0) return { error: true, type: "Invalid-Amount" };
+      if(amount_to_transfer > user1.inventory[thing].amount) return { error: true, type: "In-Sufficient-Amount" };
       let user2_has_item = false;
       let ifHasItem_then_index = 0;
       for (let i = 0; i < user2.inventory.length; i++) {
-        if (user2.inventory[i].name === user1.inventory[thing].name) {
+        if(user2.inventory[i].name === user1.inventory[thing].name) {
           user2_has_item = true;
           ifHasItem_then_index = i;
         }
       }
       name = user1.inventory[thing].name;
-      if (user2_has_item === false)
+      if(user2_has_item === false) {
         user2.inventory.push({
           name: user1.inventory[thing].name,
           amount: amount_to_transfer,
         });
-      else user2.inventory[ifHasItem_then_index].amount += amount_to_transfer;
+      } else {
+        user2.inventory[ifHasItem_then_index].amount += amount_to_transfer;
+      };
       user1.inventory[thing].amount -= amount_to_transfer;
       itemsLeft = user1.inventory[thing].amount;
     }
@@ -521,76 +514,12 @@ const EconomyHandler = class {
     };
   };
   // ===================================================================
-  async _buy(settings) {
-    let inventoryData = await this.getInventory(settings);
-    let data = await this.findUser(settings, null, null, "buy");
-    if(!settings.guild) settings.guild = {
-      id: null,
-    };
-    let amount_to_add = parseInt(settings.amount) || 1;
-    let thing = parseInt(settings.item);
-    if(!thing) return {
-      error: true,
-      type: "No-Item",
-    };
-    thing = thing - 1;
-    if(!inventoryData.inventory[thing]) return {
-      error: true,
-      type: "Invalid-Item",
-    };
-    let price = inventoryData.inventory[thing].price;
-    if(amount_to_add > 1) price = amount_to_add * inventoryData.inventory[thing].price;
-    if(data.wallet < price) return {
-      error: true,
-      type: "low-money",
-    };
-    if(amount_to_add <= 0) return { error: true, type: "Invalid-Amount" };
-    data.wallet -= price;
-    let done = false;
-    for (let j in data.inventory) {
-      if(inventoryData.inventory[thing].name === data.inventory[j].name) {
-        data.inventory[j].amount += amount_to_add || 1;
-        if(!data.inventory[j].itemId)
-          data.inventory[j].itemId = inventoryData.inventory[thing].itemId || this.makeid();
-        done = true;
-      }
-    }
-    if(done == false) {
-      data.inventory.push({
-        name: inventoryData.inventory[thing].name,
-        amount: amount_to_add || 1,
-        itemId: inventoryData.inventory[thing].itemId || makeid(),
-      });
-    }
-    cs.findOneAndUpdate(
-      {
-        guildID: settings.guild.id || null,
-        userID: settings.user.id || null,
-      },{
-        $set: {
-          inventory: data.inventory,
-          wallet: data.wallet,
-        },
-      },{
-      upsert: true,
-      useFindAndModify: false,
-    }).catch((e) => {
-        if(e) return console.log(e);
-    });
-    return {
-      error: false,
-      type: "success",
-      inventory: inventoryData.inventory[thing],
-      price: price,
-      amount: amount_to_add,
-    };
-  };
-  // ===================================================================
   makeid(length = 5) {
     let result = "";
     let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for (let i = 0; i < length; i++)
+    for (let i = 0; i < length; i++) {
       result += characters.charAt(Math.floor(Math.random() * characters.length));
+    };
     return result;
   };
   /*====================================================================
@@ -598,15 +527,7 @@ const EconomyHandler = class {
   ====================================================================*/
   async info(userID, guildID) {
     let data = await this.findUser({}, userID, guildID);
-    let lastHourlyy = true;
-    let lastHaflyy = true;
-    let lastDailyy = true;
-    let lastWeeklyy = true;
-    let lastMonthlyy = true;
-    let lastBeggedy = true;
-    let lastQuaterlyy = true;
-    let lastWorkk = true;
-    let lastYearlyy = true;
+    let lastHourlyy = true, lastHaflyy = true, lastDailyy = true, lastWeeklyy = true, lastMonthlyy = true, lastBeggedy = true, lastQuaterlyy = true, lastWorkk = true, lastYearlyy = true;
     if(data.lastBegged !== null && (data.begTimeout || 240) - (Date.now() - data.lastBegged) / 1000 > 0) lastBeggedy = false;
     if(data.lastHourly !== null && 3600 - (Date.now() - data.lastHourly) / 1000 > 0) lastHourlyy = false;
     if(data.lastDaily !== null && 86400 - (Date.now() - data.lastDaily) / 1000 > 0) lastDailyy = false;
@@ -735,7 +656,7 @@ const EconomyHandler = class {
       };
     });
 
-    data.forEach((a) => a.save().then((err, saved) => {
+    data.forEach((a) => a.save().catch((err) => {
       if(err) return console.log(err);
     }));
     return {
@@ -757,9 +678,7 @@ const EconomyHandler = class {
     if(!settings.guild) settings.guild = {
       id: null,
     };
-    let data = await cs.find({
-    guildID: settings.guild.id || null,
-  });
+    let data = await cs.find({ guildID: settings.guild.id || null });
     if(!data) return {
       error: true,
       type: "no-users",
@@ -778,9 +697,9 @@ const EconomyHandler = class {
         } else {
           user = this.amount(user, "remove", "wallet", parseInt(settings.amount) || 0);
         };
-      }
+      };
     });
-    data.forEach((a) => a.save().then(function(err, saved) {
+    data.forEach((a) => a.save().catch(function(err) {
       if(err) return console.log(err);
     }));
     return {
@@ -993,7 +912,6 @@ const EconomyHandler = class {
       error: true,
       type: "negative-money",
     };
-
     if(money === "all" || money === "max") {
       if(data.wallet === 0) return {
         error: true,
@@ -1011,7 +929,6 @@ const EconomyHandler = class {
         data.bank = data.bankSpace;
         data.wallet += Math.abs(a - data.bankSpace);
       };
-
       if(!data.networth) data.networth = 0;
       data.networth = data.bank + data.wallet;
       await this.saveUser(data);
@@ -1146,7 +1063,7 @@ const EconomyHandler = class {
   async globalLeaderboard() {
     let array = await cs.find();
     var output = [];
-    array.forEach(function (item) {
+    array.forEach(function(item) {
       var existing = output.filter(function (v, i) {
         return v.userID == item.userID;
       });
@@ -1157,7 +1074,7 @@ const EconomyHandler = class {
         output[existingIndex].networth = output[existingIndex].wallet + output[existingIndex].bank;
       } else {
         output.push(item);
-      }
+      };
     });
     output.sort((a, b) => {
       return b.networth - a.networth;
@@ -1199,7 +1116,7 @@ const EconomyHandler = class {
     if(!find) find = await this.makeInventory(settings);
     if(find.inventory.length > 0)
       find.inventory.forEach((a) => {
-        if (!a.description) a.description = "Không có mô tả.";
+        if(!a.description) a.description = "Không có mô tả.";
       });
     return find;
   };
@@ -1214,10 +1131,7 @@ const EconomyHandler = class {
     if(!settings.guild) settings.guild = {
       id: null,
     };
-    const inventory = new inv({
-      guildID: settings.guild.id || null,
-      inventory: [],
-    });
+    const inventory = new inv({ guildID: settings.guild.id || null, inventory: [] });
     return inventory;
   };
   // ===================================================================
@@ -1231,9 +1145,7 @@ const EconomyHandler = class {
     if(!settings.guild) settings.guild = {
       id: null,
     };
-    let query = {
-      guildID: settings.guild.id || null,
-    };
+    let query = { guildID: settings.guild.id || null };
     if(settings.user) query = {
       userID: settings.user.id,
       guildID: settings.guild.id || null,
@@ -1534,6 +1446,71 @@ const EconomyHandler = class {
         type: "success",
         amount: amountt,
       };
+    };
+  };
+  // ===================================================================
+  async _buy(settings) {
+    let inventoryData = await this.getInventory(settings);
+    let data = await this.findUser(settings, null, null, "buy");
+    if(!settings.guild) settings.guild = {
+      id: null,
+    };
+    let amount_to_add = parseInt(settings.amount) || 1;
+    let thing = parseInt(settings.item);
+    if(!thing) return {
+      error: true,
+      type: "No-Item",
+    };
+    thing = thing - 1;
+    if(!inventoryData.inventory[thing]) return {
+      error: true,
+      type: "Invalid-Item",
+    };
+    let price = inventoryData.inventory[thing].price;
+    if(amount_to_add > 1) price = amount_to_add * inventoryData.inventory[thing].price;
+    if(data.wallet < price) return {
+      error: true,
+      type: "low-money",
+    };
+    if(amount_to_add <= 0) return { error: true, type: "Invalid-Amount" };
+    data.wallet -= price;
+    let done = false;
+    for (let j in data.inventory) {
+      if(inventoryData.inventory[thing].name === data.inventory[j].name) {
+        data.inventory[j].amount += amount_to_add || 1;
+        if(!data.inventory[j].itemId)
+          data.inventory[j].itemId = inventoryData.inventory[thing].itemId || this.makeid();
+        done = true;
+      }
+    }
+    if(done == false) {
+      data.inventory.push({
+        name: inventoryData.inventory[thing].name,
+        amount: amount_to_add || 1,
+        itemId: inventoryData.inventory[thing].itemId || makeid(),
+      });
+    }
+    cs.findOneAndUpdate(
+      {
+        guildID: settings.guild.id || null,
+        userID: settings.user.id || null,
+      },{
+        $set: {
+          inventory: data.inventory,
+          wallet: data.wallet,
+        },
+      },{
+      upsert: true,
+      useFindAndModify: false,
+    }).catch((e) => {
+        if(e) return console.log(e);
+    });
+    return {
+      error: false,
+      type: "success",
+      inventory: inventoryData.inventory[thing],
+      price: price,
+      amount: amount_to_add,
     };
   };
 };

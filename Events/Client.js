@@ -1,20 +1,27 @@
 const { Client: DiscordClient, GatewayIntentBits, Partials, Collection, Routes, REST } = require("discord.js");
+const { SoundCloudPlugin } = require("@distube/soundcloud");
+const { SpotifyPlugin } = require("@distube/spotify");
+const { YtDlpPlugin } = require("@distube/yt-dlp");
+const { DisTube } = require("distube");
 const ascii = require("ascii-table");
 const mongoose = require("mongoose");
 const fs = require("node:fs");
+require("colors");
 const { EconomyHandler } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
 const Client = class extends DiscordClient {
   constructor() {
     super({
       messageCacheLifetime: 60,
-      fetchAllMembers: false,
       messageCacheMaxSize: 10,
+      fetchAllMembers: false,
       restTimeOffset: 0,
       restWsBridgetimeout: 100,
       shards: "auto",
       allowedMentions: {
         parse: ["roles", "users", "everyone"],
+        users: [],
+        roles: [],
         repliedUser: false,
       },
       partials: Object.keys(Partials),
@@ -27,22 +34,59 @@ const Client = class extends DiscordClient {
   };
   /*================================================================================================================*/
   _init() {
+    this.maps = new Map();
     this.aliases = new Collection();
     this.commands = new Collection();
     this.cooldowns = new Collection();
     this.slashCommands = new Collection();
+    // Hệ thống tiền tệ
     this.cs = new EconomyHandler({
       setFormat: ["vi-VN", "VND"], // xác định loại tiền của các nước
       // Đặt số tiền ngân hàng mặc định khi người dùng mới được tạo!
       setDefaultWalletAmount: 10000, // trong ví tiền
       setDefaultBankAmount: 10000, // trong ngân hàng
-      setMaxWalletAmount: 10000,// Đặt số lượng tiền trong ví tiền tối đa mặc định mà người dùng có thể có! ở đây 0 có nghĩa là vô hạn.
+      setMaxWalletAmount: 0,// Đặt số lượng tiền trong ví tiền tối đa mặc định mà người dùng có thể có! ở đây 0 có nghĩa là vô hạn.
       setMaxBankAmount: 0, // Giới hạn dung lượng ngân hàng của nó ở đây 0 có nghĩa là vô hạn.
+    });
+    // Distube - bảng điều khiển nhạc nhẽo các thứ
+    this.distube = new DisTube(this, {
+      searchSongs: 0,
+	    searchCooldown: 30,
+	    leaveOnEmpty: true,
+	    emptyCooldown: 25,
+      savePreviousSongs: true, 
+	    leaveOnFinish: false,
+	    leaveOnStop: true,
+	    nsfw: true,
+	    plugins: [
+        new SpotifyPlugin({ 
+          parallel: true, 
+          emitEventsAfterFetching: true,
+          api: {
+            clientId: config.clientId,
+            clientSecret: config.clientSecret 
+          }
+        }),
+        new SoundCloudPlugin(),
+        new YtDlpPlugin({ update: true })
+      ],
+      youtubeCookie: config.youtubeCookie,
+      ytdlOptions: {
+        highWaterMark: 1024 * 1024 * 64,
+        quality: "highestaudio",
+        format: "audioonly",
+        liveBuffer: 60000,
+        dlChunkSize: 1024 * 1024 * 4,
+        youtubeCookie: config.youtubeCookie,
+      },
+      emitAddListWhenCreatingQueue: false,
+      emitAddSongWhenCreatingQueue: false,
+      emitNewSongOnly: true,
     });
   };
   /*================================================================================================================*/
   _launchEvent() {
-    this.login(process.env.token || config.token).then(() => {
+    return this.login(process.env.token || config.token).then(() => {
       this.executeEvents({
         eventsPath: `${process.cwd()}/Events/`,
         Events: ["Guilds", "Custom"]
@@ -53,15 +97,15 @@ const Client = class extends DiscordClient {
       this.slashHandlers({
         setSlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`
       });
-    });
+    }).catch(() => console.warn("[Client] Đã sảy ra lỗi khi khởi chạy".red));
   };
   /*================================================================================================================*/
   _connectMongoodb() {
     const mongo = process.env.mongourl || config.mongourl;
-    mongoose.set("strictQuery", false);
     if(!mongo) {
       console.warn("[WARN] URI/URL Mongo không được cung cấp! (Không yêu cầu)".red);
     } else {
+      mongoose.set("strictQuery", false);
       mongoose.connect(mongo, {
         useNewUrlParser: true,
         useUnifiedTopology: true
