@@ -1,4 +1,4 @@
-const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
+const { welcomeGoodbye: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,

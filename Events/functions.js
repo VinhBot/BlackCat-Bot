@@ -1,6 +1,6 @@
 const { EmbedBuilder, StringSelectMenuBuilder, parseEmoji, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType, Collection, SelectMenuBuilder } = require("discord.js");
+const { Inventory: inv, Currency: cs, Music } = require(`${process.cwd()}/Assets/Schemas/database`);
 const fetch = require("node-fetch");
-const musicDb = require(`${process.cwd()}/Assets/Schemas/music`);
 const config = require(`${process.cwd()}/config.json`);
 // tạo thời gian hồi lệnh
 const onCoolDown = (cooldowns, message, commands) => {
@@ -46,7 +46,7 @@ const musicEmbedDefault = (client, guilds) => {
         .setColor("Random")
         .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
         .setImage(randomGenshin)
-        .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh thoại và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
+        .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
         .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
       ], components: [new ActionRowBuilder().addComponents([
         new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Gaming`, `NCS | No Copyright Music`].map((t, index) => {
@@ -77,7 +77,7 @@ const musicEmbedDefault = (client, guilds) => {
 // MusicRole
 const MusicRole = (client, member, song) => {
     if(!client) return false; // nếu không có tin nhắn được thêm trở lại 
-    var roleid = musicDb.findOne({ GuildId: member.guild.id }); // lấy quyền quản trị
+    var roleid = Music.findOne({ GuildId: member.guild.id }); // lấy quyền quản trị
     if(String(roleid) == "") return false; // nếu không có musicrole trả về false, để nó tiếp tục
     var isdj = false; // định nghĩa các biến
     for (let i = 0; i < roleid.length; i++) { // lặp qua các roles
@@ -94,81 +94,6 @@ const MusicRole = (client, member, song) => {
         return false;
     };
 };
-// music handler
-const disspace = function(newQueue, newTrack, queue) {
-    const dataMusic = musicDb.findOne({ GuildId: newQueue.id });
-    var djs = dataMusic.Djroles;
-    if(!djs || !Array.isArray(djs)) {
-      djs = [];
-    } else djs = djs.map(r => `<@&${r}>`);
-    if(djs.length == 0 ) {
-      djs = `\`Không thiết lập\``;
-    } else djs.slice(0, 15).join(`, `);
-    let skip = new ButtonBuilder().setStyle('Primary').setCustomId('skip').setEmoji(`⏭`).setLabel(`Bỏ qua`);
-    let stop = new ButtonBuilder().setStyle('Danger').setCustomId('stop').setEmoji(`😢`).setLabel(`Dừng phát`);
-    let pause = new ButtonBuilder().setStyle('Success').setCustomId('pause').setEmoji('⏸').setLabel(`Tạm dừng`);
-    let autoplay = new ButtonBuilder().setStyle('Success').setCustomId('autoplay').setEmoji('🧭').setLabel(`Tự động phát`);
-    let shuffle = new ButtonBuilder().setStyle('Primary').setCustomId('shuffle').setEmoji('🔀').setLabel(`Xáo trộn`);
-    let songloop = new ButtonBuilder().setStyle('Success').setCustomId('song').setEmoji(`🔁`).setLabel(`Bài hát`);
-    let queueloop = new ButtonBuilder().setStyle('Success').setCustomId('queue').setEmoji(`🔂`).setLabel(`Hàng chờ`);
-    let forward = new ButtonBuilder().setStyle('Primary').setCustomId('seek').setEmoji('⏩').setLabel(`+10 Giây`);
-    let rewind = new ButtonBuilder().setStyle('Primary').setCustomId('seek2').setEmoji('⏪').setLabel(`-10 Giây`);
-    let lyrics = new ButtonBuilder().setStyle('Primary').setCustomId('lyrics').setEmoji('📝').setLabel(`Lời nhạc`);
-    let volumeUp = new ButtonBuilder().setStyle('Primary').setCustomId('volumeUp').setEmoji('🔊').setLabel(`+10`);
-    let volumeDown = new ButtonBuilder().setStyle('Primary').setCustomId('volumeDown').setEmoji('🔉').setLabel(`-10`);
-    let discord = new ButtonBuilder().setStyle("Link").setEmoji('🏤').setLabel(`Vào discord`).setURL(`${config.discord}`);
-    let invitebot = new ButtonBuilder().setStyle("Link").setEmoji('🗿').setLabel(`Mời Bot`).setURL(`${config.discordBot}`);
-    if(!newQueue) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
-    if(!newTrack) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
-    if(!newQueue.playing) {
-      pause = pause.setStyle('Success').setEmoji('▶️').setLabel(`Tiếp tục`)
-    } else if(newQueue.autoplay) {
-      autoplay = autoplay.setStyle('Secondary')
-    } else if(newQueue.repeatMode === 0) {
-      songloop = songloop.setStyle('Success')
-      queueloop = queueloop.setStyle('Success')
-    } else if(newQueue.repeatMode === 1) {
-      songloop = songloop.setStyle('Secondary')
-      queueloop = queueloop.setStyle('Success')
-    } else if(newQueue.repeatMode === 2) {
-      songloop = songloop.setStyle('Success')
-      queueloop = queueloop.setStyle('Secondary')
-    };
-    if(Math.floor(newQueue.currentTime) < 10) {
-      rewind = rewind.setDisabled()
-    } else {
-      rewind = rewind.setDisabled(false)
-    };
-    if(Math.floor((newTrack.duration - newQueue.currentTime)) <= 10) {
-      forward = forward.setDisabled()
-    } else {
-      forward = forward.setDisabled(false)
-    };
-    return { 
-      embeds: [new EmbedBuilder()
-        .setAuthor({ name: `${newTrack.name}`, iconURL: "https://i.pinimg.com/originals/ab/4d/e0/ab4de08ece783245be1fb1f7fde94c6f.gif", url: newTrack.url })
-        .setImage(`https://img.youtube.com/vi/${newTrack.id}/mqdefault.jpg`).setColor("Random")
-        .addFields([
-          { name: `Thời lượng:`, value: `>>> \`${newQueue.formattedCurrentTime} / ${newTrack.formattedDuration}\`` },
-          { name: `Hàng chờ:`, value: `>>> \`${newQueue.songs.length} bài hát\`\n\`${newQueue.formattedDuration}\`` },
-          { name: `Âm lượng:`, value: `>>> \`${newQueue.volume} %\`` },
-          { name: `vòng lặp:`, value: `>>> ${newQueue.repeatMode ? newQueue.repeatMode === 2 ? `✔️ hàng chờ` : `✔️ Bài hát` : `❌`}` },
-          { name: `Tự động phát:`, value: `>>> ${newQueue.autoplay ? `✔️` : `❌`}` },
-          { name: `Filters:`, value: `\`${newQueue.filters.names.join(", ") || "Tắt"}\`` },
-          { name: `MusicRole:`, value: `${djs}` },
-          { name: `Tải nhạc về:`, value: `>>> [Click vào đây](${newTrack.streamURL})` },
-          { name: `Lượt xem:`, value: `${Intl.NumberFormat().format(newQueue.songs[0].views)}` },
-          { name: `Likes`, value: `👍 ${Intl.NumberFormat().format(newQueue.songs[0].likes)}` },
-          { name: `Dislikes`, value: `👎 ${Intl.NumberFormat().format(newQueue.songs[0].dislikes)}` },
-        ])
-      ], 
-      components: [
-        new ActionRowBuilder().addComponents([ skip, lyrics, pause, autoplay, shuffle ]),
-        new ActionRowBuilder().addComponents([ songloop, queueloop, rewind, forward, volumeDown ]),
-        new ActionRowBuilder().addComponents([ volumeUp, stop, discord, invitebot ]),
-      ] 
-  };
-};
 /*========================================================
 # baseURL
 ========================================================*/
@@ -184,7 +109,6 @@ const baseURL = async(url, options) => {
 /*========================================================
 # EconomyHandler
 ========================================================*/
-const { Inventory: inv, Currency: cs } = require(`${process.cwd()}/Assets/Schemas/economy`);
 const EconomyHandler = class {
   constructor(options) {
     // ===================================================================
@@ -1516,5 +1440,5 @@ const EconomyHandler = class {
 };
 
 module.exports = {
-  onCoolDown, disspace, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
+  onCoolDown, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
 };

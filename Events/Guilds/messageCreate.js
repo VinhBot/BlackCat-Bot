@@ -1,8 +1,7 @@
-const { EmbedBuilder, PermissionsBitField, Collection, ActivityType } = require("discord.js");
+const { EmbedBuilder, PermissionsBitField, ActivityType } = require("discord.js");
 const { onCoolDown } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
 const prefixSchema = require(`${process.cwd()}/Assets/Schemas/prefix`);
-const cooldowns = new Collection();
 
 module.exports = {
 	eventName: "messageCreate", // tên events
@@ -41,8 +40,8 @@ module.exports = {
             embeds: [embed.setDescription(`Bạn không có quyền ${command.userPerms} để sử dụng lệnh này`)],
           });
         };
-        if(onCoolDown(cooldowns, message, command)) return message.reply({
-          content: `❌ Bạn đã sử dụng lệnh quá nhanh vui lòng đợi ${onCoolDown(cooldowns, message, command).toFixed()} giây trước khi sử dụng lại \`${command.name}\``
+        if(onCoolDown(client.cooldowns, message, command)) return message.reply({
+          content: `❌ Bạn đã sử dụng lệnh quá nhanh vui lòng đợi ${onCoolDown(client.cooldowns, message, command).toFixed()} giây trước khi sử dụng lại \`${command.name}\``
         });
         if(command.owner && message.author.id !== config.developer) return message.reply({ 
           embeds: [embed.setDescription(`Bạn không thể sử dụng lệnh này chỉ có <@${config.developer}> mới có thể sử dụng`)]

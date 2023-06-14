@@ -5,10 +5,36 @@ const { YtDlpPlugin } = require("@distube/yt-dlp");
 const { DisTube } = require("distube");
 const ascii = require("ascii-table");
 const mongoose = require("mongoose");
+const colors = require("colors");
 const fs = require("node:fs");
-require("colors");
+// yêu cầu các files
 const { EconomyHandler } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
+/*========================================================
+# Distube Events
+========================================================*/
+const spotifyPlugin = new SpotifyPlugin({ 
+  parallel: true, // Mặc định là true. Có hoặc không tìm kiếm danh sách phát song song.
+  emitEventsAfterFetching: true, // Mặc định là false. Phát addList và playSong sự kiện trước hoặc sau khi tìm nạp tất cả các bài hát.
+  api: {
+    clientId: config.clientId, // Client ID của ứng dụng Spotify của bạn (Tùy chọn - Được sử dụng khi plugin không thể tự động lấy thông tin đăng nhập)
+    clientSecret: config.clientSecret, // Client Secret của ứng dụng Spotify của bạn (Tùy chọn - Được sử dụng khi plugin không thể tự động lấy thông tin đăng nhập)
+    topTracksCountry: "VN", // Mã quốc gia của các bản nhạc của nghệ sĩ hàng đầu (mã quốc gia ISO 3166-1 alpha-2). Mặc định là US.
+  }
+});
+const ytDlpPlugin = new YtDlpPlugin({
+  update: true // Mặc định là true. Cập nhật tệp nhị phân yt-dlp khi plugin được khởi chạy.
+});
+const soundCloudPlugin = new SoundCloudPlugin(/*{
+  clientId : "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", // Id khách hàng của tài khoản của bạn.
+  oauthToken : "0-000000-000000000-xxxxxxxxxxxxxx", // Mã thông báo oauth của tài khoản của bạn. Được sử dụng để tìm nạp thêm dữ liệu bằng tài khoản SoundCloud Go+.
+}*/);
+// token, mongourl
+const token = process.env.token || config.token;
+const mongo = process.env.mongourl || config.mongourl;
+/*========================================================
+# DiscordClient Events
+========================================================*/
 const Client = class extends DiscordClient {
   constructor() {
     super({
@@ -58,18 +84,7 @@ const Client = class extends DiscordClient {
 	    leaveOnFinish: false,
 	    leaveOnStop: true,
 	    nsfw: true,
-	    plugins: [
-        new SpotifyPlugin({ 
-          parallel: true, 
-          emitEventsAfterFetching: true,
-          api: {
-            clientId: config.clientId,
-            clientSecret: config.clientSecret 
-          }
-        }),
-        new SoundCloudPlugin(),
-        new YtDlpPlugin({ update: true })
-      ],
+	    plugins: [spotifyPlugin, ytDlpPlugin, soundCloudPlugin],
       youtubeCookie: config.youtubeCookie,
       ytdlOptions: {
         highWaterMark: 1024 * 1024 * 64,
@@ -86,7 +101,7 @@ const Client = class extends DiscordClient {
   };
   /*================================================================================================================*/
   _launchEvent() {
-    return this.login(process.env.token || config.token).then(() => {
+    return this.login(token).then(() => {
       this.executeEvents({
         eventsPath: `${process.cwd()}/Events/`,
         Events: ["Guilds", "Custom"]
@@ -97,11 +112,10 @@ const Client = class extends DiscordClient {
       this.slashHandlers({
         setSlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`
       });
-    }).catch(() => console.warn("[Client] Đã sảy ra lỗi khi khởi chạy".red));
+    }).catch((e) => console.warn(`[Client] Đã sảy ra lỗi khi khởi chạy ${e}`.red));
   };
   /*================================================================================================================*/
   _connectMongoodb() {
-    const mongo = process.env.mongourl || config.mongourl;
     if(!mongo) {
       console.warn("[WARN] URI/URL Mongo không được cung cấp! (Không yêu cầu)".red);
     } else {
@@ -190,7 +204,7 @@ const Client = class extends DiscordClient {
         });
       };
     });
-    const rest = new REST({ version: "10" }).setToken(process.env.token || config.token);
+    const rest = new REST({ version: "10" }).setToken(token);
     this.on("ready", () => (async() => {
       try {
         await rest.put(Routes.applicationCommands(this.user.id), { 

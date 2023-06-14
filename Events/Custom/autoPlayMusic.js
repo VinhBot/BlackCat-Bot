@@ -1,4 +1,4 @@
-const database = require(`${process.cwd()}/Assets/Schemas/music`);
+const { Music: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 
 module.exports = {
 	eventName: "messageCreate", // tên events
@@ -15,12 +15,12 @@ module.exports = {
       if (message.author.id === client.user.id) {
         setTimeout(() => {
           if(!message.deleted) {
-            message.delete().catch(() => null);
+            message.delete().catch(() => {});
           };
-        }, 3000)
+        }, 3000);
       } else {
         if(!message.deleted) {
-          message.delete().catch((e) => console.log(e));
+          message.delete().catch((e) => {});
         };
       };
       if(message.author.bot) return;

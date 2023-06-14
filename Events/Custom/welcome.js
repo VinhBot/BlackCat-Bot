@@ -1,4 +1,4 @@
-const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
+const { welcomeGoodbye: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const { AttachmentBuilder, EmbedBuilder } = require("discord.js");
 const { join } = require('node:path');
 const Canvas = require('canvas');

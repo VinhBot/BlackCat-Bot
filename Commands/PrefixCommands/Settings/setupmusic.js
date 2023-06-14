@@ -1,7 +1,7 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, StringSelectMenuBuilder } = require("discord.js");
 const path = require("node:path");
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-const database = require(`${process.cwd()}/Assets/Schemas/music`);
+const { Music: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 
 module.exports = {
   name: path.parse(__filename).name,

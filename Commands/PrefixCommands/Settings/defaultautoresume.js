@@ -1,4 +1,4 @@
-const database = require(`${process.cwd()}/Assets/Schemas/music`);
+const { Music: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,

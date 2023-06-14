@@ -1,8 +1,8 @@
-const { theme, diaryChannel, setupMusic, welconmeGoodbyeCh, mainSettings } = require(`${process.cwd()}/Events/Dashboard/dashboard.js`);
+const { theme, welconmeGoodbyeCh } = require(`${process.cwd()}/Events/Dashboard/dashboard.js`);
 const { setupDatabase } = require(`${process.cwd()}/Events/functions`);
 const { ActivityType } = require("discord.js");
 const DBD = require("discord-dashboard");
-const autoresume = require(`${process.cwd()}/Assets/Schemas/autoresume`);
+const { Autoresume: autoresume } = require(`${process.cwd()}/Assets/Schemas/database`);
 const prefixSchema = require(`${process.cwd()}/Assets/Schemas/prefix`);
 const config = require(`${process.cwd()}/config.json`);
 
@@ -19,7 +19,7 @@ const autoresumeHandler = (client) => {
           try {
             let guild = client.guilds.cache.get(gId.guild);
             if(!guild) {
-              autoresume.deleteOne({ guild: gId.guild })
+             await autoresume.deleteMany({ guild: gId.guild })
               console.log(`Autoresume`.brightCyan + ` - Bot bị kick ra khỏi Guild`);
               continue;
             };
@@ -27,14 +27,14 @@ const autoresumeHandler = (client) => {
             let voiceChannel = guild.channels.cache.get(data.voiceChannel);
             if(!voiceChannel && data.voiceChannel) voiceChannel = await guild.channels.fetch(data.voiceChannel).catch(() => {}) || false;
             if(!voiceChannel || !voiceChannel.members) {
-              autoresume.deleteOne({ guild: gId.guild });
+              await autoresume.deleteMany({ guild: gId.guild });
               console.log(`Autoresume`.brightCyan + ` - Kênh voice trống / không có người nghe / đã bị xóa`)
               continue;
             }; 
             let textChannel = guild.channels.cache.get(data.textChannel);
             if(!textChannel) textChannel = await guild.channels.fetch(data.textChannel).catch(() => {}) || false;
             if(!textChannel) {
-              autoresume.deleteOne({ guild: gId.guild });
+              await autoresume.deleteMany({ guild: gId.guild });
               console.log(`Autoresume`.brightCyan + ` - Kênh văn bản đã bị xóa`);
               continue;
             };
@@ -78,7 +78,7 @@ const autoresumeHandler = (client) => {
           if(data.filters && data.filters.length > 0){
             await newQueue.filters.set(data.filters, true);
           };
-          await autoresume.deleteOne({ guild: newQueue.id }).then(() => {
+          await autoresume.deleteMany({ guild: newQueue.id }).then(() => {
             return console.log("Đã xoá thành công")
           });
           console.log(`Autoresume`.brightCyan + " - Đã thay đổi theo dõi autoresume để điều chỉnh hàng đợi + đã xóa mục nhập cơ sở dữ liệu");
@@ -114,10 +114,7 @@ const dashboard = async(client, options) => {
       bot: client,
       theme: theme(client, config),
       settings: [
-        mainSettings(client, config),
         welconmeGoodbyeCh(client, config), 
-        setupMusic(client, config), 
-        diaryChannel(client, config),
       ]
     });
     return Dashboard.init();

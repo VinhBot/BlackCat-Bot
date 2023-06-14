@@ -1,5 +1,5 @@
 const { ApplicationCommandOptionType, EmbedBuilder } = require("discord.js");
-const Playlist = require(`${process.cwd()}/Assets/Schemas/playlist`);
+const { Playlist } = require(`${process.cwd()}/Assets/Schemas/database`);
 
 module.exports = {
   name: "playlists", // Tên lệnh 
@@ -281,11 +281,10 @@ module.exports = {
         content: '🚫 | Bạn phải ở trong một phòng Voice để sử dụng lệnh này !'
       });
       const queue = await client.distube.getQueue(VoiceChannel);
-      if(queue) {
-        if(guild.members.me.voice.channelId && VoiceChannel.id !== guild.members.me.voice.channelId) {
-          return interaction.reply({ content: `🚫 | Bạn phải ở cùng một phòng Voice để sử dụng lệnh này. Bài hát đang được phát tại ${guild.members.me.voice.channel}` });
-        };
+      if(queue && guild.members.me.voice.channelId && VoiceChannel.id !== guild.members.me.voice.channelId) {
+        return interaction.reply({ content: `🚫 | Bạn phải ở cùng một phòng Voice để sử dụng lệnh này. Bài hát đang được phát tại ${guild.members.me.voice.channel}` });
       };
+   
       const queueId = options.getString('playlist-id');
 
       const data = await Playlist.findOne({ _id: queueId }).catch(() => {

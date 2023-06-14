@@ -1,7 +1,7 @@
 const { ChannelType } = require("discord.js");
 const DBD = require("discord-dashboard");
 const SoftUI = require('dbd-soft-ui');
-const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
+const { welcomeGoodbye: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 /*========================================================
 # Thiết lập welcome & goodbye 
 ========================================================*/

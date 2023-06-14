@@ -1,6 +1,6 @@
 const { ApplicationCommandOptionType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder } = require("discord.js");
 const { musicEmbedDefault } = require(`${process.cwd()}/Events/functions`);
-const musicDb = require(`${process.cwd()}/Assets/Schemas/music`);
+const { Music: musicDb } = require(`${process.cwd()}/Assets/Schemas/database`);
 
 module.exports = {
   name: "setup", // Tên lệnh 

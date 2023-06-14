@@ -1,17 +1,17 @@
+const { welcomeGoodbye: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const { AttachmentBuilder } = require("discord.js");
 const Canvas = require('canvas');
-const database = require(`${process.cwd()}/Assets/Schemas/welcomeGoodbye`);
 
 module.exports = {
 	eventName: "guildMemberRemove", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, member) => {
     return database.findOne({ GuildId: member.guild.id }).then(async(getData) => {
-      if(!getData) return;
+      if(!getData) return; // nếu không có data, return
       const channels = member.guild.channels.cache.find((channel) => {
         return channel.id === getData.GoodbyeChannel;
       });
-      if(!channels) return;
+      if(!channels) return; // nếu không thấy channel, return 
       const canvas = Canvas.createCanvas(1772, 633);     
       const ctx = canvas.getContext('2d');     
       const background = await Canvas.loadImage("https://cdn.discordapp.com/attachments/1055150050357022843/1089624908570566836/welcome.png");

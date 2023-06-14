@@ -7,7 +7,7 @@ module.exports = {
     if(interaction.type === InteractionType.ApplicationCommand) {
       if(!client.slashCommands.has(interaction.commandName) || !interaction.guild) return;
       const SlashCommands = client.slashCommands.get(interaction.commandName);
-      if(!SlashCommands) return console.log(!SlashCommands);
+      if(!SlashCommands) return;
       if(SlashCommands) {
         try {
           const embed = new EmbedBuilder().setTitle("Thiếu quyền sử dụng lệnh").setColor("Random");
