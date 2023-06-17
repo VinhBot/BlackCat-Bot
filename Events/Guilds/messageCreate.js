@@ -1,14 +1,14 @@
 const { EmbedBuilder, PermissionsBitField, ActivityType } = require("discord.js");
 const { onCoolDown } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
-const prefixSchema = require(`${process.cwd()}/Assets/Schemas/prefix`);
+const { Prefix: prefixSchema} = require(`${process.cwd()}/Assets/Schemas/database`);
 
 module.exports = {
 	eventName: "messageCreate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, message) => {
     if(message.author.bot || !message.guild) return;
-    const prefixDT = await prefixSchema.findOne({ GuildId: message.guild.id, GuildName: message.guild.name });
+    const prefixDT = await prefixSchema.findOne({ GuildId: message.guild.id });
     if(!prefixDT) {
       const newPrefix = new prefixSchema({
         GuildId: message.guild.id,

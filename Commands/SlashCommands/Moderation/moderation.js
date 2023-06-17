@@ -59,30 +59,43 @@ module.exports = {
   ],
   run: async(client, interaction) => {
     if(interaction.options.getSubcommand() === "ban") {
-      const user = interaction.options.getUser('user');
-      const reason = interaction.options.getString("reason");
+      const banUser = interaction.options.getUser('user');
       const time = interaction.options.getInteger("time");
-      const member = await interaction.guild.members.fetch(user.id);
-      if(member.roles.highest.position >= interaction.member.roles.highest.position) {
-        if(interaction.guild.owner !== interaction.author) return interaction.reply({
-          embeds: [new EmbedBuilder()
+      let reason = interaction.options.getString('reason');
+      
+      const banMember = await interaction.guild.members.fetch(banUser.id);
+      const channel = interaction.channel;
+      let guild = await interaction.guild.fetch();
+ 
+      if(!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)) return await interaction.reply({ content: "Bạn phải có quyền **Ban Member** để sử dụng lệnh này.", ephemeral: true });
+      if(!banMember) return await interaction.reply({ content: 'Người dùng được đề cập không còn trong guilds', ephemeral: true });
+      if(banMember.roles.highest.position >= interaction.member.roles.highest.position) {
+        if(interaction.guild.owner !== interaction.author) return interaction.reply({ embeds: [new EmbedBuilder()
             .setColor("Red")
             .setTitle("Không thể ban thành viên")
             .setDescription(`${user} có role cao hơn bạn.`)
           ], ephemeral: true 
         });
       };
-      member.ban({ days: time, reason: reason })
-      await interaction.reply({
-        embeds: [new EmbedBuilder()
+      if(interaction.member.id === banMember.id) return interaction.reply({ content: "Bạn không thể đá chính mình!", ephemeral: true });
+      if(banMember.permissions.has(PermissionsBitField.Flags.Administrator)) return interaction.reply({ content: "Bạn không thể đá nhân viên hoặc những người có quyền Quản trị viên!", ephemeral: true });
+      if(!reason) reason = "không có lý do được đưa ra";
+ 
+      return await banMember.ban({ days: time, reason: reason }).then(async() => {
+        return await banMember.send({ 
+          embeds: [new EmbedBuilder().setColor(0x0099FF).setTitle('Thông báo kiểm duyệt').setDescription(` \n ${banUser.tag}, \n \`Bạn đã bị cấm khỏi ${guild.name}\` \n \n \n **Lý do:** \n ${reason} \n \n **Người điều hành có trách nhiệm:** \n ${interaction.user.tag} | (<@${interaction.user.id}>:${interaction.user.id})`)] 
+        }).catch((err) => console.log(err));
+      }).then(async() => {
+        return await interaction.reply({ embeds: [new EmbedBuilder()
           .setColor("Green")
           .setTitle("Banned")
-          .setDescription(`${user} đã bị ban khỏi server`)
+          .setDescription(`${user} đã bị cấm khỏi server`)
           .addFields(
             { name: "Lý do:", value: `${reason}`, inline: true },
             { name: "Thời gian:", value: time, inline: true } 
           )]
-      });
+        });
+      }).catch((err) => interaction.reply({ content: "Có một lỗi", ephemeral: true }));
     } else if(interaction.options.getSubcommand() === "kick") {
       const kickUser = interaction.options.getUser('user');
       const kickMember = await interaction.guild.members.fetch(kickUser.id);
@@ -109,8 +122,8 @@ module.exports = {
         return console.log(err);
       });
  
-      await kickMember.kick({ reason: reason}).catch(err => {
-        interaction.reply({ content: "Có một lỗi", ephemeral: true});
+      await kickMember.kick({ reason: reason }).catch((err) => {
+        return interaction.reply({ content: "Có một lỗi", ephemeral: true });
       });
  
       await interaction.reply({ embeds: [embed] });

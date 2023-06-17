@@ -13,6 +13,7 @@ module.exports = {
   cooldown: 5, // thời gian có thể tái sử dụng lệnh
   run: async(client, message, args, prefix) => {
     let user = await client.cs.balance({ 
+      guild: { id: null },
       user: message.author
     });
     const checkMoney = new EmbedBuilder()
@@ -23,7 +24,7 @@ module.exports = {
     if(moneyEarned > user.wallet) return message.reply({ embeds: [checkMoney.setDescription("Bạn không có nhiều tiền trong ví của mình")]});
     if(!moneyEarned) return message.reply({ embeds: [checkMoney] });
     if(moneyEarned < 1) return message.reply({ embeds: [checkMoney.setDescription("Vui lòng chỉ định một số cao hơn \`1\`")]});
-    if(moneyEarned > 30000) return message.reply({ embeds: [checkMoney.setDescription("Vui lòng chỉ định một số nhỏ hơn \`30.000\`")]});
+    if(moneyEarned > 100000000000) return message.reply({ embeds: [checkMoney.setDescription("Vui lòng chỉ định một số nhỏ hơn \`100.000.000.000\`")]});
     if(isNaN(args[0])) return message.reply({ embeds: [checkMoney.setDescription("Vui lòng chỉ định một số hợp lệ!")]});
 
     const Game = new Slots(client, {

@@ -1,4 +1,4 @@
-const prefixDB = require(`${process.cwd()}/Assets/Schemas/prefix`);
+const { Prefix: prefixDB } = require(`${process.cwd()}/Assets/Schemas/database`);
 const path = require("node:path");
 module.exports = {
   name: path.parse(__filename).name,

@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, StringSelectMenuBuilder, EmbedBuilder, ChannelType } = require("discord.js");
-const { Music: database, Autoresume: autoresume } = require(`${process.cwd()}/Assets/Schemas/database`);
+const { Music: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const { MusicRole } = require(`${process.cwd()}/Events/functions`);
 const config = require(`${process.cwd()}/config.json`);
 const playerintervals = new Map();
@@ -9,14 +9,6 @@ let lastEdited = false;
 // export module :))) 
 module.exports = (client) => {
   const disspace = (newQueue, newTrack, queue) => {
-    const dataMusic = database.findOne({ GuildId: newQueue.id });
-    var djs = dataMusic.Djroles;
-    if(!djs || !Array.isArray(djs)) {
-      djs = [];
-    } else djs = djs.map(r => `<@&${r}>`);
-    if(djs.length == 0 ) {
-      djs = `\`Không thiết lập\``;
-    } else djs.slice(0, 15).join(`, `);
     if(!newQueue) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
     if(!newTrack) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
     let skip = new ButtonBuilder().setStyle('Primary').setCustomId('skip').setEmoji(`⏭`).setLabel(`Bỏ qua`);
@@ -57,6 +49,15 @@ module.exports = (client) => {
     } else {
       forward = forward.setDisabled(false)
     };
+    // lấy dữ liệu request roles
+    const dataMusic = database.findOne({ GuildId: newQueue.id });
+    var djs = dataMusic.Djroles;
+    if(!djs || !Array.isArray(djs)) {
+      djs = [];
+    } else djs = djs.map(r => `<@&${r}>`);
+    if(djs.length == 0 ) {
+      djs = `\`Không thiết lập\``;
+    } else djs.slice(0, 15).join(`, `);
     // tạo embeds hiển thị
     const embeds = [new EmbedBuilder()
       .setAuthor({ name: `${newTrack.name}`, iconURL: "https://i.pinimg.com/originals/ab/4d/e0/ab4de08ece783245be1fb1f7fde94c6f.gif", url: newTrack.url })
@@ -526,14 +527,6 @@ module.exports = (client) => {
         //Xóa khoảng thời gian để kiểm tra hệ thống thông báo liên quan
         clearInterval(playerintervals.get(`checkrelevantinterval-${queue.id}`))
         playerintervals.delete(`checkrelevantinterval-${queue.id}`);
-        // Xóa Khoảng thời gian cho trình tiết kiệm hồ sơ tự động 
-        /*
-        clearInterval(playerintervals.get(`autoresumeinterval-${queue.id}`))
-        if(await autoresume.find({ guild: queue.id })) {
-          await autoresume.deleteMany({ guild: queue.id }); // Xóa db nếu nó vẫn ở đó
-        };
-        playerintervals.delete(`autoresumeinterval-${queue.id}`);
-        */
         // Xóa khoảng thời gian cho Hệ thống Embed Chỉnh sửa Nhạc
         clearInterval(playerintervals.get(`musicsystemeditinterval-${queue.id}`))
         playerintervals.delete(`musicsystemeditinterval-${queue.id}`);
@@ -561,40 +554,6 @@ module.exports = (client) => {
     queue.volume = Number(data.DefaultVolume);
     queue.filters.set(data.DefaultFilters);
     queue.voice.setSelfDeaf(true); 
-    /**
-    * AUTO-RESUME-DATABASING
-    */
-    playerintervals.set(`autoresumeinterval-${queue.id}`, setInterval(async() => {
-      if(newQueue && newQueue.id && false) {
-        return autoresume.create({
-          guild: newQueue.id,
-          voiceChannel: newQueue.voiceChannel ? newQueue.voiceChannel.id : null,
-          textChannel: newQueue.textChannel ? newQueue.textChannel.id : null,
-          currentTime: newQueue.currentTime,
-          repeatMode: newQueue.repeatMode,
-          autoplay: newQueue.autoplay,
-          playing: newQueue.playing,
-          volume: newQueue.volume,
-          filters: [...newQueue.filters.names].filter(Boolean),
-          songs: newQueue.songs && newQueue.songs.length > 0 ? [...newQueue.songs].map((track) => {
-              return {
-                memberId: track.member.id, 
-                source: track.source,
-                duration: track.duration,
-                formattedDuration: track.formattedDuration,
-                id: track.id,
-                isLive: track.isLive,
-                name: track.name,
-                thumbnail: track.thumbnail,
-                type: "video",
-                uploader: track.uploader,
-                url: track.url,
-                views: track.views,
-              };
-          }) : null,
-        });
-      };
-    }, 4000));
     /** 
     * Kiểm tra các thông báo có liên quan bên trong Kênh yêu cầu hệ thống âm nhạc
     */

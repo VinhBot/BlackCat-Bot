@@ -20,9 +20,12 @@ async function EmbedPages(message, embeds, style = {}) {
         return embed.setFooter({ text: `Page: ${index + 1}/${embeds.length}`, iconURL: message.guild.iconURL() });
     });
     let curPage = 0;
-    let filter = (m) => m.member.id === message.member.id;
     const sendMsg = await message.channel.send({ embeds: [embeds[0]], components: [new ActionRowBuilder().addComponents(but1.setDisabled(true), but2.setDisabled(true), but3.setDisabled(false), but4.setDisabled(false), but5.setDisabled(false))] });
-    const collector = sendMsg.createMessageComponentCollector({ filter: filter, time: 60000, componentType: ComponentType.Button });
+    const collector = sendMsg.createMessageComponentCollector({ 
+      filter: (m) => m.member.id === message.member.id, 
+      time: 120000, 
+      componentType: ComponentType.Button
+    });
     collector.on("collect", async (b) => {
         await b.deferUpdate().catch((e) => null);
         if (b.customId === 'tiếp_theo') {

@@ -244,7 +244,7 @@ const Slots = class {
       if(this.slot1 === this.slot2 && this.slot1 === this.slot3) {
         this.client.cs.addMoney({
           user: this.message.user || this.message.author, // mention
-          amount: this.money,
+          amount: this.money * 1.45,
           wheretoPutMoney: "wallet"
         });
         board += `| : :   "Nổ hũ"   : : |`;
@@ -284,14 +284,14 @@ const Slots = class {
     .setDescription(this.getBoardContent())
     .setFooter({ text: this.message.author.tag, iconURL: this.message.author.displayAvatarURL({ dynamic: true }) })
     const msg = await this.sendMessage({ embeds: [embed], content: "" });
-    setTimeout(async () => {
+    setTimeout(async() => {
       this.slotMachine();
       embed.setDescription(this.getBoardContent());
       this.slotMachine();
       await msg.edit({ embeds: [embed], content: "" });
-      setTimeout(() => {
+      setTimeout(async() => {
         return msg.edit({ 
-          content: `${(this.slot1 === this.slot2 && this.slot1 === this.slot3) ? `Bạn đã thắng được ${this.money} tiền` : `Bạn đã thua ${this.money} tiền`}`,
+          content: `${(this.slot1 === this.slot2 && this.slot1 === this.slot3) ? `Bạn đã thắng được ${await this.client.cs.formatter(this.money * 1.45)}` : `Bạn đã thua ${await this.client.cs.formatter(this.money)}`}`,
           embeds: [new EmbedBuilder()
           .setColor(this.options.embed.color)
           .setTitle(this.options.embed.title)

@@ -112,7 +112,7 @@ const Client = class extends DiscordClient {
       this.slashHandlers({
         setSlashCommandPath: `${process.cwd()}/Commands/SlashCommands/`
       });
-    }).catch((e) => console.warn(`[Client] Đã sảy ra lỗi khi khởi chạy ${e}`.red));
+    }).catch((e) => console.warn(e));
   };
   /*================================================================================================================*/
   _connectMongoodb() {

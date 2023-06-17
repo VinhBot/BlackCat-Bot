@@ -120,21 +120,6 @@ const __logChannels = new mongoose.Schema({
   guildUpdate: mongoose.SchemaTypes.String
 });
 /*========================================================
-# autoresume
-========================================================*/
-const __autoresume = new mongoose.Schema({
-  guild: String,
-  voiceChannel: String,
-  textChannel: String,
-  currentTime: Number,
-  repeatMode: Number,
-  autoplay: Boolean,
-  playing: Boolean,
-  volume: Number,
-  filters: Array,
-  songs: Array,
-});
-/*========================================================
 # afkSchema
 ========================================================*/
 const __afkSchema = new mongoose.Schema({
@@ -150,8 +135,7 @@ module.exports = {
   Playlist: mongoose.model("playlist", __playlist),
   Music: mongoose.model("musicData", __music),
   welcomeGoodbye: mongoose.model("welcomeGoodbye", __welcomeGoodbye),
-  // Prefix: mongoose.model("prefix", __prefix),
+  Prefix: mongoose.model("prefix", __prefix),
   // logChannels:  mongoose.model("logChannels", __logChannels),
-  Autoresume: mongoose.model("autoresume", __autoresume),
   afkSchema: mongoose.model('afk', __afkSchema),
 };

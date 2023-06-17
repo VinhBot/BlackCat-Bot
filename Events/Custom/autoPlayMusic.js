@@ -4,7 +4,7 @@ module.exports = {
 	eventName: "messageCreate", // tên events
 	eventOnce: false, // bật lên nếu chỉ thực hiện nó 1 lần
 	executeEvents: async(client, message) => {
-    return database.findOne({ GuildId: message.guild.id, GuildName: message.guild.name }).then(async(data) => {
+    return database.findOne({ GuildId: message.guild?.id, GuildName: message.guild?.name }).then(async(data) => {
       if(!data) return;
       if(!message.guild || !message.guild.available) return;
       if(!data.ChannelId || data.ChannelId.length < 5) return;
