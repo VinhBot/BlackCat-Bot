@@ -6,11 +6,49 @@ const playerintervals = new Map();
 const PlayerMap = new Map();
 let songEditInterval = null;
 let lastEdited = false;
+
+const colorRandom = [0x000000, 0xffffff, 0x1abc9c, 0x57f287, 0x3498db, 0xfee75c, 0x9b59b6, 0xe91e63, 0xeb459e, 0xf1c40f, 0xe67e22, 0xed4245, 0x95a5a6, 0x34495e, 0x11806a, 0x1f8b4c, 0x206694, 0x71368a, 0xad1457, 0xc27c0e, 0xa84300, 0x992d22, 0x979c9f, 0x7f8c8d, 0xbcc0c0, 0x2c3e50, 0x5865f2, 0x99aab5, 0x2c2f33, 0x23272a];
+const colors = {
+  Random: colorRandom[Math.floor(Math.random() * colorRandom.length)],
+  Default: 0x000000,
+  White: 0xffffff,
+  Aqua: 0x1abc9c,
+  Green: 0x57f287,
+  Blue: 0x3498db,
+  Yellow: 0xfee75c,
+  Purple: 0x9b59b6,
+  LuminousVividPink: 0xe91e63,
+  Fuchsia: 0xeb459e,
+  Gold: 0xf1c40f,
+  Orange: 0xe67e22,
+  Red: 0xed4245,
+  Grey: 0x95a5a6,
+  Navy: 0x34495e,
+  DarkAqua: 0x11806a,
+  DarkGreen: 0x1f8b4c,
+  DarkBlue: 0x206694,
+  DarkPurple: 0x71368a,
+  DarkVividPink: 0xad1457,
+  DarkGold: 0xc27c0e,
+  DarkOrange: 0xa84300,
+  DarkRed: 0x992d22,
+  DarkGrey: 0x979c9f,
+  DarkerGrey: 0x7f8c8d,
+  LightGrey: 0xbcc0c0,
+  DarkNavy: 0x2c3e50,
+  Blurple: 0x5865f2,
+  Greyple: 0x99aab5,
+  DarkButNotBlack: 0x2c2f33,
+  NotQuiteBlack: 0x23272a,
+};
 // export module :))) 
 module.exports = (client) => {
+  /*========================================================
+  # Functions 
+  ========================================================*/
   const disspace = (newQueue, newTrack, queue) => {
-    if(!newQueue) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
-    if(!newTrack) return new EmbedBuilder().setColor("Random").setTitle(`Không thể tìm kiếm bài hát`);
+    if(!newQueue) return new EmbedBuilder({ color: "Random", title: "Không thể tìm kiếm bài hát" });
+    if(!newTrack) return new EmbedBuilder({ color: "Random", title: "Không thể tìm kiếm bài hát" });
     let skip = new ButtonBuilder().setStyle('Primary').setCustomId('skip').setEmoji(`⏭`).setLabel(`Bỏ qua`);
     let stop = new ButtonBuilder().setStyle('Danger').setCustomId('stop').setEmoji(`😢`).setLabel(`Dừng phát`);
     let pause = new ButtonBuilder().setStyle('Success').setCustomId('pause').setEmoji('⏸').setLabel(`Tạm dừng`);
@@ -23,8 +61,6 @@ module.exports = (client) => {
     let lyrics = new ButtonBuilder().setStyle('Primary').setCustomId('lyrics').setEmoji('📝').setLabel(`Lời nhạc`);
     let volumeUp = new ButtonBuilder().setStyle('Primary').setCustomId('volumeUp').setEmoji('🔊').setLabel(`+10`);
     let volumeDown = new ButtonBuilder().setStyle('Primary').setCustomId('volumeDown').setEmoji('🔉').setLabel(`-10`);
-    let discord = new ButtonBuilder().setStyle("Link").setEmoji('🏤').setLabel(`Vào discord`).setURL(`${config.discord}`);
-    let invitebot = new ButtonBuilder().setStyle("Link").setEmoji('🗿').setLabel(`Mời Bot`).setURL(`${config.discordBot}`);
     if(!newQueue.playing) {
       pause = pause.setStyle('Success').setEmoji('▶️').setLabel(`Tiếp tục`)
     } else if(newQueue.autoplay) {
@@ -59,10 +95,12 @@ module.exports = (client) => {
       djs = `\`Không thiết lập\``;
     } else djs.slice(0, 15).join(`, `);
     // tạo embeds hiển thị
-    const embeds = [new EmbedBuilder()
-      .setAuthor({ name: `${newTrack.name}`, iconURL: "https://i.pinimg.com/originals/ab/4d/e0/ab4de08ece783245be1fb1f7fde94c6f.gif", url: newTrack.url })
-      .setImage(`https://img.youtube.com/vi/${newTrack.id}/mqdefault.jpg`).setColor("Random")
-      .addFields([
+    const embeds = new EmbedBuilder({
+      author: { name: `${newTrack.name}`, iconURL: "https://i.pinimg.com/originals/ab/4d/e0/ab4de08ece783245be1fb1f7fde94c6f.gif", url: newTrack.url },
+      image: { url: `https://img.youtube.com/vi/${newTrack.id}/mqdefault.jpg` },
+      timestamp: Date.now(),
+      color: colors.Blue,
+      fields: [
         { name: `Thời lượng:`, value: `>>> \`${newQueue.formattedCurrentTime} / ${newTrack.formattedDuration}\`` },
         { name: `Hàng chờ:`, value: `>>> \`${newQueue.songs.length} bài hát\`\n\`${newQueue.formattedDuration}\`` },
         { name: `Âm lượng:`, value: `>>> \`${newQueue.volume} %\`` },
@@ -74,13 +112,13 @@ module.exports = (client) => {
         { name: `Lượt xem:`, value: `${Intl.NumberFormat().format(newQueue.songs[0].views)}` },
         { name: `Likes`, value: `👍 ${Intl.NumberFormat().format(newQueue.songs[0].likes)}` },
         { name: `Dislikes`, value: `👎 ${Intl.NumberFormat().format(newQueue.songs[0].dislikes)}` },
-      ])
-    ];
+      ]
+    });
     // khởi tạo các nút phản ứng
-    const row1 = new ActionRowBuilder().addComponents([skip, lyrics, pause, autoplay, shuffle]);
-    const row2 = new ActionRowBuilder().addComponents([songloop, queueloop, rewind, forward, volumeDown]);
-    const row3 = new ActionRowBuilder().addComponents([volumeUp, stop, discord, invitebot]);
-    return { embeds, components: [row1, row2, row3] };
+    const row1 = new ActionRowBuilder({ components: [skip, lyrics, pause, autoplay, shuffle] });
+    const row2 = new ActionRowBuilder({ components: [songloop, queueloop, rewind, forward, volumeDown] });
+    const row3 = new ActionRowBuilder({ components: [volumeUp, stop] });
+    return { embeds: [embeds], components: [row1, row2, row3] };
   };
   // tạo hàng đợi embed
   const generateQueueEmbed = (queue, guildId, leave) => {
@@ -113,8 +151,8 @@ module.exports = (client) => {
       .setDescription("**Hiện tại có 0 Bài hát trong Hàng đợi**")
       .setThumbnail(guild.iconURL({ dynamic: true }))
       .addFields([
-        { name: "Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!", value: "\u200B" },
-        { name: "Tôi hỗ trợ __youtube-url__, __Spotify__, __SoundCloud__ và các __mp3__ trực tiếp ...", value: "\u200B" }
+        { name: "Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi __liên kết bài hát__ hoặc __tên bài hát__ trong Kênh này!", value: "\u200B" },
+        { name: "Tôi hỗ trợ __youtube-url__, __Spotify__, __SoundCloud__ và các __mp3__ trực tiếp ...", value: "\u200B" },
       ]),
       new EmbedBuilder()
       .setColor("Random")
@@ -263,9 +301,9 @@ module.exports = (client) => {
       if(test && member.voice.channel.id !== test?.id) return interaction.reply({ embeds: [new EmbedBuilder().setDescription(`❌ Tôi đã chơi trong <#${test?.id}>`)], ephemeral: true });
       // bỏ qua bài hát
       if(i.customId == `skip`) {
-              if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
-              if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
-              if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
+        if(!member.voice.channel) return i.reply({ content: `**Bạn phải tham gia kênh voice mới có thể sử dụng lệnh**` });
+        if(!distube.getQueue(i.guild.id) || !newQueue.songs || newQueue.songs.length == 0) return await i.reply({ content: "Danh sách nhạc trống" });
+        if(member.voice.channel.id !== newQueue.voiceChannel.id) return i.reply({ content: `**Tham gia kênh voice của tôi**` });
               if(newQueue.songs.length == 0) {
                   clearInterval(songEditInterval);
                   await distube.stop(i.guild.id);
@@ -480,42 +518,50 @@ module.exports = (client) => {
     });
   }).on("finishSong", (queue, song) => {
     return queue.textChannel?.messages?.fetch(PlayerMap.get("currentmsg")).then((msg) => {
-      msg.edit({ embeds: [new EmbedBuilder()
-            .setAuthor({ name: `${song.name}`, iconURL: "https://cdn.discordapp.com/attachments/883978730261860383/883978741892649000/847032838998196234.png", url: song.url })
-            .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
-            .setFooter({ text: `💯 ${song.user.tag}\n⛔️ Bài hát đã kết thúc!`, iconURL: song.user.displayAvatarURL({ dynamic: true }) })
-            .setColor("Random")
-       ], components: []}).catch((e) => console.log(e));
+      const embed = new EmbedBuilder({
+        author: { name: `${song.name}`, iconURL: "https://cdn.discordapp.com/attachments/883978730261860383/883978741892649000/847032838998196234.png", url: song.url },
+        footer: { text: `💯 ${song.user.tag}\n⛔️ Bài hát đã kết thúc!`, iconURL: song.user.displayAvatarURL({ dynamic: true }) },
+        thumbnail: { proxy_url: `https://img.youtube.com/vi/${song.id}/mqdefault.jpg`, url: song.url },
+        color: colors.Random
+      });
+      return msg.edit({ 
+        embeds: [embed], 
+        components: []
+      }).catch((e) => console.log(e));
     }).catch((e) => console.log(e));
   }).on("finish", async(queue) => {
-    return queue.textChannel?.send({ embeds: [new EmbedBuilder().setColor("Random").setDescription("Đã phát hết nhạc trong hàng đợi,.. rời khỏi kênh voice")]}).catch((e) => {});
+    return queue.textChannel?.send({ 
+      embeds: [new EmbedBuilder({ color: colors.Random, description: "Đã phát hết nhạc trong hàng đợi,.. rời khỏi kênh voice" })]
+    }).catch((e) => { });
   }).on("addList", async(queue, playlist) => {
-    return queue.textChannel?.send({ embeds: [new EmbedBuilder()
-        .setTitle("Đã thêm vài hát vào hàng đợi")                                                
-        .setColor("Random")
-        .setThumbnail(playlist.thumbnail.url ? playlist.thumbnail.url : `https://img.youtube.com/vi/${playlist.songs[0].id}/mqdefault.jpg`)
-        .setFooter({ text: `💯 ${playlist.user.tag}`, iconURL: `${playlist.user.displayAvatarURL({ dynamic: true })}`})
-        .setDescription(`👍 Danh sách: [\`${playlist.name}\`](${playlist.url ? playlist.url : ``})  -  \`${playlist.songs.length} Bài hát ${playlist.songs.length > 0 ? `` : ``}\``)
-        .addFields(
-          { name: `**Thời gian dự tính**`, value: `\`${queue.songs.length - - playlist.songs.length} Bài hát${queue.songs.length > 0 ? `` : ``}\` - \`${(Math.floor((queue.duration - playlist.duration) / 60 * 100) / 100).toString().replace(`.`, `:`)}\``, inline: true },
-          { name: `**Thời lượng hàng đợi**`, value: `\`${queue.formattedDuration}\``, inline: true },
-        )
-      ]}).catch((e) => {});
+    const embed = new EmbedBuilder({
+      description: `👍 Danh sách: [\`${playlist.name}\`](${playlist.url ?playlist.url : ``})  -  \`${playlist.songs.length} Bài hát ${playlist.songs.length > 0 ? `` : ``}\``,
+      thumbnail: { proxy_url: `${playlist.thumbnail.url ? playlist.thumbnail.url : `https://img.youtube.com/vi/${playlist.songs[0].id}/mqdefault.jpg`}` },
+      footer: { text: `💯 ${playlist.user.tag}`, iconURL: `${playlist.user.displayAvatarURL({ dynamic: true })}` },
+      title: "Đã thêm vài hát vào hàng đợi",
+      color: colors.Random,
+      fields: [
+        { name: `**Thời gian dự tính**`, value: `\`${queue.songs.length - - playlist.songs.length} Bài hát\` - \`${(Math.floor((queue.duration - playlist.duration) / 60 * 100) / 100).toString().replace(`.`, `:`)}\``, inline: true },
+        { name: `**Thời lượng hàng đợi**`, value: `\`${queue.formattedDuration}\``, inline: true },
+      ]
+    });
+    return queue.textChannel?.send({ embeds: [embed] }).catch((e) => {});
   }).on("addSong", async(queue, song) => {
-    return queue.textChannel?.send({ embeds: [new EmbedBuilder()
-          .setColor("Random")
-          .setThumbnail(`https://img.youtube.com/vi/${song.id}/mqdefault.jpg`)
-          .setFooter({ text: `💯 ${song.user.tag}`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`})
-          .setAuthor({ name: `Bài hát đã được thêm!`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`, url: `${song.url}` })
-          .setDescription(`👍 Bài hát: [${song.name}](${song.url})  -  ${song.formattedDuration}`)
-          .addFields([
-            { name: `⌛ **Thời gian dự tính**`, value: `\`${queue.songs.length - 1} Bài hát${queue.songs.length > 0 ? `.` : ``}\` - \`${(Math.floor((queue.duration - song.duration) / 60 * 100) / 100).toString().replace(`.`, `:`)}\``, inline: true },
-            { name: `🎥 Lượt xem`, value: `${(queue.songs[0].views).toLocaleString()}`, inline: true },
-            { name: `👍 Likes`, value: `${(queue.songs[0].likes).toLocaleString()}`, inline: true },
-            { name: `👎 Dislikes`, value: `${(queue.songs[0].dislikes).toLocaleString()}`, inline: true},
-            { name: `🌀 **Thời lượng hàng đợi**`, value: `\`${queue.formattedDuration}\``, inline: true },
-          ])
-      ]}).catch((e) => {});
+    const embed = new EmbedBuilder({
+      author: { name: `Bài hát đã được thêm!`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}`, url: `${song.url}` },
+      footer: { text: `💯 ${song.user.tag}`, iconURL: `${song.user.displayAvatarURL({ dynamic: true })}` },
+      thumbnail: { proxy_url: `https://img.youtube.com/vi/${song.id}/mqdefault.jpg`, url: song.url },
+      description: `👍 Bài hát: [${song.name}](${song.url})  -  ${song.formattedDuration}`,
+      color: colors.Radom,
+      fields: [
+        { name: `⌛ **Thời gian dự tính**`, value: `\`${queue.songs.length - 1} Bài hát\` - \`${(Math.floor((queue.duration - song.duration) / 60 * 100) / 100).toString().replace(`.`, `:`)}\``, inline: true },
+        { name: `🎥 Lượt xem`, value: `${(queue.songs[0].views).toLocaleString()}`, inline: true },
+        { name: `👍 Likes`, value: `${(queue.songs[0].likes).toLocaleString()}`, inline: true },
+        { name: `👎 Dislikes`, value: `${(queue.songs[0].dislikes).toLocaleString()}`, inline: true},
+        { name: `🌀 **Thời lượng hàng đợi**`, value: `\`${queue.formattedDuration}\``, inline: true },
+      ]
+    });
+    return queue.textChannel?.send({ embeds: [embed] }).catch((e) => {});
   }).on("deleteQueue", async(queue) => {
     var newQueue = client.distube.getQueue(queue.id);
     if(!PlayerMap.has(`deleted-${queue.id}`)) {
@@ -534,7 +580,7 @@ module.exports = (client) => {
         console.log(e);
       };
       updateMusicSystem(queue, true);
-      queue.textChannel?.send({ embeds: [new EmbedBuilder()
+      return queue.textChannel?.send({ embeds: [new EmbedBuilder()
         .setColor("Random")
         .setTitle(`⛔️`)
         .setDescription(`:headphones: **Hàng đợi đã bị xóa**`)
@@ -599,7 +645,6 @@ module.exports = (client) => {
   }).on("empty", (queue) => {
       return queue.textChannel?.send({ content: "Kênh voice chống. rời khỏi kênh :))" }).catch((e) => {});
   }).on('error', (channel, error) => {
-    console.error(error);
     return channel.send({ embeds: [new EmbedBuilder()
         .setDescription(`Đã xảy ra lỗi: ${error?.slice(0, 1979)}`)
         .setColor("Random")

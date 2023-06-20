@@ -82,8 +82,8 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         botsCanWin: false,
         exemptPermissions: [],
         exemptMembers: () => false,
-        embedColor: 'Yellow',
-        embedColorEnd: 'Red',
+        embedColor: 0xfee75c,
+        embedColorEnd: 0xed4245,
         reaction: '<a:hehehe:1091770710915022858>'
       },
     });
@@ -108,13 +108,13 @@ const GiveawaysHandlers = class extends GiveawaysManager {
         enabled: true, // nếu hệ thống cơ hội cuối cùng được bật.
         content: '⚠️ **CƠ HỘI CUỐI CÙNG ĐỂ THAM GIA!** ⚠️', // Văn bản embed
         threshold: 10000, // số mili giây trước khi giveaways kết thúc.
-        embedColor: 'Random' // màu của embed.
+        embedColor: 0xfee75c // màu của embed.
       },
       pauseOptions: {
         isPaused: false, // nếu embed bị tạm dừng.
         content: '⚠️ **GIVEAWAY NÀY ĐÃ TẠM DỪNG!** ⚠️', // văn bản embed
         unpauseAfter: null, // số mili giây hoặc dấu thời gian tính bằng mili giây, sau đó giveaway sẽ tự động bỏ tạm dừng.
-        embedColor: 'Random', // màu embed
+        embedColor: 0xfee75c, // màu embed
         infiniteDurationText: '`KHÔNG BAO GIỜ`' // Văn bản được hiển thị bên cạnh GiveawayMessages#drawing phần embed bị tạm dừng, khi không có unpauseAfter.
       }
     };
@@ -180,28 +180,31 @@ const GiveawaysHandlers = class extends GiveawaysManager {
     for (let i = 1; descriptionString(formattedWinners).length > 4096 || strings.title.length + strings.endedAt.length + descriptionString(formattedWinners).length > 6000; i++) {
       formattedWinners = formattedWinners.slice(0, formattedWinners.lastIndexOf(', <@')) + `, ${i} more`;
     };
-    return new EmbedBuilder()
-      .setTitle(strings.title)
-      .setColor(giveaways.embedColorEnd) 
-      .setFooter({ text: strings.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
-      .setDescription(descriptionString(formattedWinners))
-      .setTimestamp(giveaways.endAt)
-      .setThumbnail(giveaway.thumbnail)
-      .setImage(giveaway.image);
+    return new EmbedBuilder({
+      footer: { text: strings.endedAt, iconURL: giveaway.messages.embedFooter.iconURL },
+      description: descriptionString(formattedWinners),
+      thumbnail: { proxy_url: giveaway.thumbnail },
+      image: { url: giveaway.image },
+      timestamp: giveaways.endAt,
+      title: strings.title,
+      color: giveaways.embedColorEnd
+    });
   };
   /*========================================================
   # Tạo embed được hiển thị khi giveaway kết thúc và khi không có người tham gia hợp lệ
   ========================================================*/
   generateNoValidParticipantsEndEmbed(giveaways) {
     const giveaway = this.optionalDefault;
-    return giveaways.fillInEmbed(new EmbedBuilder()
-    .setTitle(typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize)
-    .setColor(giveaways.embedColorEnd)
-    .setFooter({ text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL })
-    .setDescription(giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''))
-    .setTimestamp(giveaways.endAt)
-    .setThumbnail(giveaway.thumbnail)
-    .setImage(giveaway.image));
+    const embeds = new EmbedBuilder({
+      description: giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''),                   
+      title: `${typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize}`,
+      footer: { text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL },
+      thumbnail: { proxi_url: giveaway.thumbnail },
+      color: `${giveaways.embedColorEnd}`,
+      timestamp: `${giveaways.endAt}`,
+      image: { url: giveaway.image },
+    });
+    return giveaways.fillInEmbed(embeds);
   };
   /*========================================================
   # runModalSetup /

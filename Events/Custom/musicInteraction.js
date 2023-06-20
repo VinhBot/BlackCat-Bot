@@ -7,10 +7,7 @@ module.exports = {
 	executeEvents: async(client, interaction) => {
     if(!interaction.isButton() && !interaction.isStringSelectMenu()) return;
     var { guild, message, channel, member, user, customId } = interaction;
-    const data = await database.findOne({
-      GuildId: interaction.guild.id,
-      GuildName: interaction.guild.name
-    });
+    const data = await database.findOne({ GuildId: interaction.guild.id });
     if(!data) return; // trả về nếu không tìm thấy data
     if(!guild) guild = client.guilds.cache.get(interaction.guildId);
     if(!guild) return; // trả về nếu không tìm thấy guilds

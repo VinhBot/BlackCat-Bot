@@ -152,12 +152,10 @@ module.exports = {
           privacy: true,
         });
       };
-      return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor('#2a9454')
-          .setDescription(`✅ | Đã thêm danh sách **${playlistName.toUpperCase()}** được tạo bởi ${user}, sử dụng \`/playlist list\` để xem ID danh sách và \`/playlist privacy\` để chuyển quyền riêng tư`),
-        ],
-      });
+      return interaction.reply({ embeds: [new EmbedBuilder()
+        .setColor('#2a9454')
+        .setDescription(`✅ | Đã thêm danh sách **${playlistName.toUpperCase()}** được tạo bởi ${user}, sử dụng \`/playlist list\` để xem ID danh sách và \`/playlist privacy\` để chuyển quyền riêng tư`),
+      ]});
     } else if(options.getSubcommand() === "deleted") {
       const queueId = options.getString('playlist-id');
       const data = await Playlist.findOne({ _id: queueId }).catch(() => {
@@ -167,23 +165,21 @@ module.exports = {
         content: "Bạn chỉ có thể xóa danh sách phát của riêng mình"
       });
       await Playlist.deleteOne({ _id: queueId });
-      return interaction.reply({
-        embeds: [new EmbedBuilder().setColor('#2a9454').setDescription(`✅ | Đã xóa thành công Danh sách phát có ID được liên kết: **${queueId}**`)],
-      });
+      return interaction.reply({ embeds: [new EmbedBuilder()
+        .setColor('#2a9454')
+        .setDescription(`✅ | Đã xóa thành công Danh sách phát có ID được liên kết: **${queueId}**`)
+      ]});
     } else if(options.getSubcommand() === "add") {
-      const queueId = options.getString('playlist-id');
       const song = options.getString('song-name');
-      const data = await Playlist.findOne({ _id: queueId }).catch(() => {
-        return interaction.reply({ content: 'Danh sách phát này không tồn tại.' });
-      });
+      const data = await Playlist.findOne({ 
+        _id: options.getString('playlist-id') 
+      }).catch(() => interaction.reply({ content: 'Danh sách phát này không tồn tại.' }));
       if(data.userId !== user.id) return interaction.channel.send({ 
         content: "Bạn chỉ có thể thêm các bài hát vào danh sách phát của riêng mình"
       });
       const songData = await client.distube.search(song, {
         limit: 1 
-      }).catch(() => {
-        return interaction.reply({ content: 'Không tìm thấy bài hát nào.' });
-      });
+      }).catch(() => interaction.reply({ content: 'Không tìm thấy bài hát nào.' }));
 
       const url = songData[0].url;
       const name = songData[0].name;
@@ -196,13 +192,11 @@ module.exports = {
       data.songs.name.push(name);
       await data.save();
 
-      return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor('#2a9454')
-          .setTitle('📜 | Thông tin danh sách phát')
-          .setDescription(`✅ | Đã thêm thành công **[${name}](${url})** vào Danh sách phát`),
-        ],
-      });
+      return interaction.reply({ embeds: [new EmbedBuilder()
+        .setColor('#2a9454')
+        .setTitle('📜 | Thông tin danh sách phát')
+        .setDescription(`✅ | Đã thêm thành công **[${name}](${url})** vào Danh sách phát`),
+      ]});
     } else if(options.getSubcommand() === "info") {
       const queueId = options.getString('playlist-id');
       const data = await Playlist.findOne({ _id: queueId }).catch(() => {
@@ -219,44 +213,35 @@ module.exports = {
         return [`**${index++}.** [${field}](${data.songs.url[index - 2]})`].join('\n');
       }).join('\n');
 
-      return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor('#2a9454')
-          .setTitle('📜 | Thông tin danh sách phát')
-          .setDescription(`**Tên:** ${data.name.toUpperCase()}\n**ID:** ${queueId}\n**Trạng thái:** ${privacy}\n**Bài hát:**\n ${fields}\n**Được tạo bởi:** ${User}`)
-          .setThumbnail(guild.iconURL({ dynamic: true }))
-          .setFooter({ text: 'BlackCat-Club', })
-          .setTimestamp(),
-        ],
-      });
+      return interaction.reply({ embeds: [new EmbedBuilder()
+        .setColor('#2a9454')
+        .setTitle('📜 | Thông tin danh sách phát')
+        .setDescription(`**Tên:** ${data.name.toUpperCase()}\n**ID:** ${queueId}\n**Trạng thái:** ${privacy}\n**Bài hát:**\n ${fields}\n**Được tạo bởi:** ${User}`)
+        .setThumbnail(guild.iconURL({ dynamic: true }))
+        .setFooter({ text: 'BlackCat-Club', })
+        .setTimestamp(),
+      ]});
     } else if(options.getSubcommand() === "list") {
       const choices = options.getString('options');
       if(choices === "public") {
-        const data = await Playlist.find({
-          privacy: false,
-        });
+        const data = await Playlist.find({ privacy: false });
         if(!data?.length) return interaction.reply({
           content: "Không có danh sách phát nào được công khai."
         });
         let index = 1;
-        const queueData = data.map(queue => {
+        const queueData = data.map((queue) => {
           return [`**${index++}.** ${queue.name.toUpperCase()} - \`${queue._id}\``].join('\n');
         }).join('\n');
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setTitle('📃 | Danh sách phát công khai')
-            .setDescription(`${queueData}`)
-            .setThumbnail(guild.iconURL({ dynamic: true }))
-            .setFooter({ text: 'BlackCat-Club', })
-            .setTimestamp(),
-          ],
-        });
+        return interaction.reply({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setTitle('📃 | Danh sách phát công khai')
+          .setDescription(`${queueData}`)
+          .setThumbnail(guild.iconURL({ dynamic: true }))
+          .setFooter({ text: 'BlackCat-Club', })
+          .setTimestamp(),
+        ]});
       } else if(choices === "private") {
-        const data = await Playlist.find({
-          userId: user.id,
-          privacy: true,
-        });
+        const data = await Playlist.find({ userId: user.id, privacy: true });
         if(!data?.length) return interaction.reply({
           content: "Bạn không có danh sách phát riêng tư nào"
         });
@@ -264,16 +249,14 @@ module.exports = {
         const queueData = data.map(queue => {
           return [`**${index++}.** ${queue.name.toUpperCase()} - \`${queue._id}\``].join('\n');
         }).join('\n');
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setTitle('📃 | Danh sách phát riêng tư')
-            .setDescription(`${queueData}`)
-            .setThumbnail(guild.iconURL({ dynamic: true }))
-            .setFooter({ text: 'BlackCat-Club', })
-            .setTimestamp(),
-          ],
-        });
+        return interaction.reply({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setTitle('📃 | Danh sách phát riêng tư')
+          .setDescription(`${queueData}`)
+          .setThumbnail(guild.iconURL({ dynamic: true }))
+          .setFooter({ text: 'BlackCat-Club', })
+          .setTimestamp(),
+        ]});
       };
     } else if(options.getSubcommand() === "play") {
       const VoiceChannel = member.voice.channel;
@@ -281,16 +264,13 @@ module.exports = {
         content: '🚫 | Bạn phải ở trong một phòng Voice để sử dụng lệnh này !'
       });
       const queue = await client.distube.getQueue(VoiceChannel);
-      if(queue && guild.members.me.voice.channelId && VoiceChannel.id !== guild.members.me.voice.channelId) {
-        return interaction.reply({ content: `🚫 | Bạn phải ở cùng một phòng Voice để sử dụng lệnh này. Bài hát đang được phát tại ${guild.members.me.voice.channel}` });
-      };
-   
+      if(queue && guild.members.me.voice.channelId && VoiceChannel.id !== guild.members.me.voice.channelId) return interaction.reply({ 
+        content: `🚫 | Bạn phải ở cùng một phòng Voice để sử dụng lệnh này. Bài hát đang được phát tại ${guild.members.me.voice.channel}` 
+      });
       const queueId = options.getString('playlist-id');
-
       const data = await Playlist.findOne({ _id: queueId }).catch(() => {
         return interaction.reply({ content: 'Danh sách phát không tồn tại' });
       });
-
       if(data.privacy === true) {
         const User = client.users.cache.get(data.userId);
         if(data.userId !== user.id) return interaction.reply({
@@ -310,37 +290,29 @@ module.exports = {
           textChannel: channel,
           member,
         });
-
-        return interaction.channel.send({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setDescription(`✅ | Danh sách có ID: **${queueId}** đã được phát.`),
-          ],
-        });
+        return interaction.channel.send({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setDescription(`✅ | Danh sách có ID: **${queueId}** đã được phát.`),
+        ]});
       } else {
         const songs = data.songs.url;
-        const names = data.songs.name.toUpperCase();
-        if(songs?.length) return interaction.reply({
+        const names = data.songs.name;
+        if(songs.length === 0) return interaction.reply({
           content: 'Danh sách này trống. Vui lòng sử dụng `/playlist add` để thêm bài hát.'              
         });
-
         const playlist = await client.distube.createCustomPlaylist(songs, {
           member,
           properties: { name: `${names}` },
           parallel: true,
         });
-
         await client.distube.play(VoiceChannel, playlist, {
             textChannel: channel,
             member,
         });
-
-        return interaction.channel.send({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setDescription(`✅ | Danh sách có ID: **${queueId}** đã được phát.`),
-          ],
-        });
+        return interaction.channel.send({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setDescription(`✅ | Danh sách có ID: **${queueId}** đã được phát.`),
+        ]});
       };
     } else if(options.getSubcommand() === "privacy") {
       const playlistId = options.getString('playlist-id');
@@ -349,7 +321,9 @@ module.exports = {
         userId: user.id,
         _id: playlistId,
       });
-      if(!data) return interaction.reply({ content: 'Bạn không có danh sách phát nào.' });
+      if(!data) return interaction.reply({ 
+        content: 'Bạn không có danh sách phát nào.' 
+      });
       if(user.id !== data.userId) return interaction.reply({ 
         content: 'Bạn không có quyền thay đổi chế độ riêng tư của danh sách phát này.' 
       });
@@ -359,24 +333,20 @@ module.exports = {
         });
         data.privacy = false;
         await data.save();
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **CÔNG CỘNG**`),
-          ],
-        });
+        return interaction.reply({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **CÔNG CỘNG**`),
+        ]});
       } else if(choices === "private") {
         if(data.privacy === true) return interaction.reply({ 
           content: 'Danh sách phát này đã được riêng tư.'
         });
         data.privacy = true;
         await data.save();
-        return interaction.reply({
-          embeds: [new EmbedBuilder()
-            .setColor('#2a9454')
-            .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **RIÊNG TƯ**`),
-          ],
-        });
+        return interaction.reply({ embeds: [new EmbedBuilder()
+          .setColor('#2a9454')
+          .setDescription(`✅ | Chế độ bảo mật của danh sách phát **${data.name.toUpperCase()}** đã được thay đổi thành **RIÊNG TƯ**`),
+        ]});
       };
     } else if(options.getSubcommand() === "remove") {
       const queueId = options.getString('playlist-id');
@@ -387,28 +357,24 @@ module.exports = {
       if(data.userId !== user.id) return interaction.reply({ 
         content: 'Bạn chỉ có thể xóa các bài hát khỏi danh sách phát của riêng mình.'
       });
+      
       const name = data.songs.name;
       const url = data.songs.url;
-      const filtered = parseInt(position -1 );
-
+      
+      const filtered = parseInt(position -1);
       if(filtered > name.length - 1) return interaction.reply({
         content: 'Cung cấp vị trí bài hát hợp lệ, sử dụng `/playlist info` để kiểm tra tất cả các vị trí bài hát'
       });
 
-      const afName = name.splice(filtered, 1);
-      const afUrl = url.splice(filtered, 1);
-
-      const rmvName = afName.filter(x => !name.includes(x));
-      const rmvUrl = afUrl.filter(x => !url.includes(x));
+      const opName = name.splice(filtered, 1).filter((x) => !name.includes(x));
+      const opURL = url.splice(filtered, 1).filter((x) => !url.includes(x));
       
       await data.save();
       
-      return interaction.reply({
-        embeds: [new EmbedBuilder()
-          .setColor('#2a9454')
-          .setDescription(`✅ | Đã xóa thành công **[${rmvName}](${rmvUrl})** khỏi Danh sách phát`)
-        ],
-      });
+      return interaction.reply({ embeds: [new EmbedBuilder()
+        .setColor('#2a9454')
+        .setDescription(`✅ | Đã xóa thành công **[${opName}](${opURL})** khỏi Danh sách phát`)
+      ]});
     };
   },
 };

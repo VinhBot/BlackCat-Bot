@@ -101,6 +101,7 @@ module.exports = {
          .setThumbnail(member.guild.iconURL({ dynamic: true, extension: "jpg" }) || "https://cdn.discordapp.com/emojis/687231938955837454.gif")
       ], files: [attachment] }).catch((e) => console.log(e));
       let roles = data.AutoAddRoleWel;
+      if(!roles) return;
       if(roles) {
         for (let i = 0; i < roles.length; i++ ) {
           member.roles.add(roles[i]).then(() => {

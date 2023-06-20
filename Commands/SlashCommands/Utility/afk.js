@@ -60,8 +60,7 @@ module.exports = {
       };
     } else if(interaction.options.getSubcommand() === "remove") {
       if(!Data) {
-        return await interaction.reply({ content:
-          `You are **not** AFK, can't remove **nothing**...`, ephemeral: true});
+        return await interaction.reply({ content: `Bạn **không** AFK, không thể xóa...`, ephemeral: true});
       } else {
         const nick = Data.Nickname;
         await afkSchema.deleteMany({ GuildId: interaction.guild.id, UserId: interaction.user.id });

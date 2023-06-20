@@ -19,7 +19,7 @@ const spotifyPlugin = new SpotifyPlugin({
   api: {
     clientId: config.clientId, // Client ID của ứng dụng Spotify của bạn (Tùy chọn - Được sử dụng khi plugin không thể tự động lấy thông tin đăng nhập)
     clientSecret: config.clientSecret, // Client Secret của ứng dụng Spotify của bạn (Tùy chọn - Được sử dụng khi plugin không thể tự động lấy thông tin đăng nhập)
-    topTracksCountry: "VN", // Mã quốc gia của các bản nhạc của nghệ sĩ hàng đầu (mã quốc gia ISO 3166-1 alpha-2). Mặc định là US.
+    topTracksCountry: "US", // Mã quốc gia của các bản nhạc của nghệ sĩ hàng đầu (mã quốc gia ISO 3166-1 alpha-2). Mặc định là US.
   }
 });
 const ytDlpPlugin = new YtDlpPlugin({

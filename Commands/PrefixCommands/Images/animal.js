@@ -29,8 +29,8 @@ module.exports = {
 async function randomAnimal(message, url) {
   return await baseURL(url).then(async(response) => {
     if(!response.success) return message.reply({ content: "Có lỗi sảy ra vui lòng thử lại sau" });
-    const button1 = new ButtonBuilder().setCustomId("editButtons").setEmoji("🛑").setStyle(ButtonStyle.Secondary);
-    const row1 = new ActionRowBuilder().addComponents(button1);
+    const button1 = new ButtonBuilder({ customId: "editButtons", emoji: "🛑", style: ButtonStyle.Secondary, });
+    const row1 = new ActionRowBuilder({ components: [button1] });
     let responsez;
     if(response.data[0]) {
       responsez = response.data[0].url;
