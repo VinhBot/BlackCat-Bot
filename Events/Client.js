@@ -44,6 +44,7 @@ const Client = class extends DiscordClient {
       restTimeOffset: 0,
       restWsBridgetimeout: 100,
       shards: "auto",
+      failIfNotExists: false,
       allowedMentions: {
         parse: ["roles", "users", "everyone"],
         users: [],
@@ -55,6 +56,7 @@ const Client = class extends DiscordClient {
     });
     /*================================================================================================================*/
     this._init();
+    this._antiCrash();
     this._launchEvent();
     this._connectMongoodb();
   };
@@ -216,6 +218,10 @@ const Client = class extends DiscordClient {
       };
     })());
     console.log(SlashCmds.toString().blue);
+  };
+  /*================================================================================================================*/
+  _antiCrash() {
+    // 
   };
 };
 

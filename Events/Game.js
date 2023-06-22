@@ -71,10 +71,11 @@ const RPSGame = class {
         return new Promise(async(res, rej) => {
           const message = options.message;
     	    const opponent = options.opponent;
-          const askEmbed = new EmbedBuilder()
-            .setTitle(options.embed.askTitle || options.embed.title)
-            .setDescription(options.askMessage.replace('{challenger}', message.author.toString()).replace('{opponent}', opponent.toString()))
-            .setColor(options.colors?.green || options.embed.color)
+          const askEmbed = new EmbedBuilder({
+            title: options.embed.askTitle || options.embed.title,
+            description: options.askMessage.replace('{challenger}', message.author.toString()).replace('{opponent}', opponent.toString()),
+          });
+          askEmbed.setColor(options.colors?.green || options.embed.color);
           const row = new ActionRowBuilder().addComponents(
             new ButtonBuilder().setLabel(options.buttons?.accept || 'Chấp nhận').setStyle('Success').setCustomId('accept'),
             new ButtonBuilder().setLabel(options.buttons?.reject || 'Từ chối').setStyle('Danger').setCustomId('reject')

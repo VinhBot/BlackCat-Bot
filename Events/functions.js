@@ -2,6 +2,28 @@ const { EmbedBuilder, StringSelectMenuBuilder, parseEmoji, ActionRowBuilder, But
 const { Inventory: inv, Currency: cs, Music } = require(`${process.cwd()}/Assets/Schemas/database`);
 const fetch = require("node-fetch");
 const config = require(`${process.cwd()}/config.json`);
+// chỉnh sửa, rút gọn discord events
+const customEvents = () => {
+  /*========================================================
+  # Chỉnh sửa rút gọn Embeds <Discord.EmbedBuilder>
+  ========================================================*/
+  const EmbedBuilders = class extends EmbedBuilder {
+    constructor({ author, title, colors, fields, images, description, thumbnail, timestamp = false, footer }) {
+      super();
+      if(description) this.setDescription(description);
+      if(thumbnail) this.setThumbnail(thumbnail);
+      if(title?.name) this.setTitle(title.name);
+      if(title?.url) this.setURL(title.url);
+      if(timestamp) this.setTimestamp();
+      if(fields) this.addFields(fields);
+      if(author) this.setAuthor(author);
+      if(footer) this.setFooter(footer);
+      if(images) this.setImage(images);
+      if(colors) this.setColor(colors);
+    };
+  };
+  return { EmbedBuilders };
+};
 // tạo thời gian hồi lệnh
 const onCoolDown = (cooldowns, message, commands) => {
   if (!message || !commands) return;
@@ -37,7 +59,8 @@ const musicEmbedDefault = (client, guilds) => {
     const randomGenshin = genshinGif[Math.floor(Math.random() * genshinGif.length)];
     var Emojis = [`0️⃣`, `1️⃣`];
     return {
-      embeds: [new EmbedBuilder()
+      embeds: [
+        new EmbedBuilder()
         .setColor("Random")
         .setTitle(`📃 hàng đợi của __${guild.name}__`)
         .setDescription(`**Hiện tại có __0 Bài hát__ trong Hàng đợi**`)
@@ -48,8 +71,9 @@ const musicEmbedDefault = (client, guilds) => {
         .setImage(randomGenshin)
         .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
         .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
-      ], components: [new ActionRowBuilder().addComponents([
-        new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Gaming`, `NCS | No Copyright Music`].map((t, index) => {
+      ], components: [
+        new ActionRowBuilder().addComponents([
+          new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Gaming`, `NCS | No Copyright Music`].map((t, index) => {
             return {
               label: t.substr(0, 25),
               value: t.substr(0, 25),
@@ -58,20 +82,24 @@ const musicEmbedDefault = (client, guilds) => {
             };
           }))
         ]),
-        new ActionRowBuilder().addComponents([
-          new ButtonBuilder().setStyle('Primary').setCustomId('Skip').setEmoji(`⏭`).setLabel(`Skip`).setDisabled(),
-          new ButtonBuilder().setStyle('Danger').setCustomId("1").setEmoji(`🏠`).setLabel(`Stop`).setDisabled(),
-          new ButtonBuilder().setStyle('Secondary').setCustomId('Pause').setEmoji('⏸').setLabel(`Pause`).setDisabled(),
-          new ButtonBuilder().setStyle('Success').setCustomId('Autoplay').setEmoji('🔁').setLabel(`Autoplay`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Shuffle').setEmoji('🔀').setLabel(`Shuffle`).setDisabled(),
-        ]),
-        new ActionRowBuilder().addComponents([
-          new ButtonBuilder().setStyle('Success').setCustomId('Song').setEmoji(`🔁`).setLabel(`Song`).setDisabled(),
-          new ButtonBuilder().setStyle('Success').setCustomId('Queue').setEmoji(`🔂`).setLabel(`Queue`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Forward').setEmoji('⏩').setLabel(`+10 Sec`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Rewind').setEmoji('⏪').setLabel(`-10 Sec`).setDisabled(),
-          new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel(`Lyrics`).setDisabled(),
-        ]),
+        new ActionRowBuilder({ 
+          components: [
+            new ButtonBuilder({ style: "Primary", customId: "1", emoji: "⏭", label: "Skip", disabled: true }),
+            new ButtonBuilder({ style: "Danger", customId: "2", emoji: "🏠", label: "Stop", disabled: true }),
+            new ButtonBuilder({ style: "Secondary", customId: "3", emoji: "⏸", label: "Pause", disabled: true }),
+            new ButtonBuilder({ style: "Success", customId: "4", emoji: "🔁", label: "Autoplay", disabled: true }),
+            new ButtonBuilder({ style: "Primary", customId: "5", emoji: "🔀", label: "Shuffle", disabled: true }),
+          ] 
+        }),
+        new ActionRowBuilder({
+          components: [
+            new ButtonBuilder({ style: "Success", customId: "6", emoji: "🔁", label: "Song", disabled: true }),
+            new ButtonBuilder({ style: "Success", customId: "7", emoji: "🔂", label: "Queue", disabled: true }),
+            new ButtonBuilder({ style: "Primary", customId: "8", emoji: "⏩", label: "+10 Sec", disabled: true }),
+            new ButtonBuilder({ style: "Primary", customId: "9", emoji: "⏪", label: "-10 Sec", disabled: true }),
+            new ButtonBuilder({ style: "Primary", customId: "10", emoji: "📝", label: "Lyrics", disabled: true }),
+          ] 
+        }),
     ]};
 };
 // MusicRole
@@ -1440,5 +1468,5 @@ const EconomyHandler = class {
 };
 
 module.exports = {
-  onCoolDown, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
+  customEvents, onCoolDown, baseURL, MusicRole, musicEmbedDefault, EconomyHandler
 };

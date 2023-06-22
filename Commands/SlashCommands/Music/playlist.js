@@ -152,10 +152,9 @@ module.exports = {
           privacy: true,
         });
       };
-      return interaction.reply({ embeds: [new EmbedBuilder()
-        .setColor('#2a9454')
-        .setDescription(`✅ | Đã thêm danh sách **${playlistName.toUpperCase()}** được tạo bởi ${user}, sử dụng \`/playlist list\` để xem ID danh sách và \`/playlist privacy\` để chuyển quyền riêng tư`),
-      ]});
+      return interaction.reply({ 
+        embeds: [new EmbedBuilder({ description: `✅ | Đã thêm danh sách **${playlistName.toUpperCase()}** được tạo bởi ${user}, sử dụng \`/playlist list\` để xem ID danh sách và \`/playlist privacy\` để chuyển quyền riêng tư`, color: 0x2a9454 })]
+      });
     } else if(options.getSubcommand() === "deleted") {
       const queueId = options.getString('playlist-id');
       const data = await Playlist.findOne({ _id: queueId }).catch(() => {

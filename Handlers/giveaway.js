@@ -181,9 +181,9 @@ const GiveawaysHandlers = class extends GiveawaysManager {
       formattedWinners = formattedWinners.slice(0, formattedWinners.lastIndexOf(', <@')) + `, ${i} more`;
     };
     return new EmbedBuilder({
-      footer: { text: strings.endedAt, iconURL: giveaway.messages.embedFooter.iconURL },
+      footer: { text: strings.endedAt, icon_url: giveaway.messages.embedFooter.iconURL },
       description: descriptionString(formattedWinners),
-      thumbnail: { proxy_url: giveaway.thumbnail },
+      thumbnail: { url: giveaway.thumbnail },
       image: { url: giveaway.image },
       timestamp: giveaways.endAt,
       title: strings.title,
@@ -198,8 +198,8 @@ const GiveawaysHandlers = class extends GiveawaysManager {
     const embeds = new EmbedBuilder({
       description: giveaway.messages.noWinner + (giveaways.hostedBy ? '\n' + giveaway.messages.hostedBy : ''),                   
       title: `${typeof giveaway.messages.title === 'string' ? giveaway.messages.title : giveaways.prize}`,
-      footer: { text: giveaway.messages.endedAt, iconURL: giveaway.messages.embedFooter.iconURL },
-      thumbnail: { proxi_url: giveaway.thumbnail },
+      footer: { text: giveaway.messages.endedAt, icon_url: giveaway.messages.embedFooter.iconURL },
+      thumbnail: { url: giveaway.thumbnail },
       color: `${giveaways.embedColorEnd}`,
       timestamp: `${giveaways.endAt}`,
       image: { url: giveaway.image },
