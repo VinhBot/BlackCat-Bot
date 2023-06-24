@@ -1,3 +1,4 @@
+const { EmbedBuilder } = require("discord.js");
 const { Music: database } = require(`${process.cwd()}/Assets/Schemas/database`);
 const config = require(`${process.cwd()}/config.json`);
 

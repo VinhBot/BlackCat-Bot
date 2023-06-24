@@ -6,52 +6,16 @@ const playerintervals = new Map();
 const PlayerMap = new Map();
 let songEditInterval = null;
 let lastEdited = false;
-
 // export module :))) 
 module.exports = (client) => {
-  const { EmbedBuilders } = customEvents();
+  const { EmbedBuilders, addComponents } = customEvents();
   /*========================================================
   # Functions 
   ========================================================*/
+  // bản test 
   const disspace = (newQueue, newTrack, queue) => {
     if(!newQueue) return new EmbedBuilders({ color: "Random", title: { name: "Không thể tìm kiếm bài hát" } });
     if(!newTrack) return new EmbedBuilders({ color: "Random", title: { name: "Không thể tìm kiếm bài hát" } });
-    let skip = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "skip", emoji: "⏭", label: "Bỏ qua", disabled: false });
-    let stop = new ButtonBuilder({ style: ButtonStyle.Danger, customId: "stop", emoji: "🛑", label: "Dừng phát", disabled: false });
-    let pause = new ButtonBuilder({ style: ButtonStyle.Success, customId: "pause", emoij: "⏸", label: "Tạm dừng", disabled: false });
-    let autoplay = new ButtonBuilder({ style: ButtonStyle.Success, customId: "autoplay", emoji: "🧭", label: "Tự động phát", disabled: false });
-    let shuffle = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "shuffle", emoji: "🔀", label: "Xáo trộn", disabled: false });
-    let songloop = new ButtonBuilder({ style: ButtonStyle.Success, customId: "song", emoji: "🔁", label: "Bài hát", disabled: false });
-    let queueloop = new ButtonBuilder({ style: ButtonStyle.Success, customId: "queue", emoji: "🔂", label: "Hàng chờ", disabled: false });
-    let forward = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "seek", emoji: "⏩", label: "+10 Giây", disabled: false });
-    let rewind = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "seek2", emoji: "⏪", label: "-10 Giây", disabled: false });
-    let lyrics = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "lyrics", emoji: "📝", label: "Lời nhạc", disabled: false });
-    let volumeUp = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "volumeUp", emoji: "🔊", label: "+10", disabled: false });
-    let volumeDown = new ButtonBuilder({ style: ButtonStyle.Primary, customId: "volumeDown", emoji: "🔉", label: "-10", disabled: false });
-    if(!newQueue.playing) {
-      pause = pause.setStyle('Success').setEmoji('▶️').setLabel(`Tiếp tục`);
-    } else if(newQueue.autoplay) {
-      autoplay = autoplay.setStyle('Secondary');
-    } else if(newQueue.repeatMode === 0) {
-      songloop = songloop.setStyle('Success');
-      queueloop = queueloop.setStyle('Success');
-    } else if(newQueue.repeatMode === 1) {
-      songloop = songloop.setStyle('Secondary');
-      queueloop = queueloop.setStyle('Success');
-    } else if(newQueue.repeatMode === 2) {
-      songloop = songloop.setStyle('Success');
-      queueloop = queueloop.setStyle('Secondary');
-    };
-    if(Math.floor(newQueue.currentTime) < 10) {
-      rewind = rewind.setDisabled(true);
-    } else {
-      rewind = rewind.setDisabled(false);
-    };
-    if(Math.floor((newTrack.duration - newQueue.currentTime)) <= 10) {
-      forward = forward.setDisabled(true);
-    } else {
-      forward = forward.setDisabled(false);
-    };
     // lấy dữ liệu request roles
     const dataMusic = database.findOne({ GuildId: newQueue.id });
     var djs = dataMusic.Djroles;
@@ -82,12 +46,58 @@ module.exports = (client) => {
       ]
     });
     // khởi tạo các nút phản ứng
-    const row1 = new ActionRowBuilder({ components: [skip, lyrics, pause, autoplay, shuffle] });
-    const row2 = new ActionRowBuilder({ components: [songloop, queueloop, rewind, forward, volumeDown] });
-    const row3 = new ActionRowBuilder({ components: [volumeUp, stop] });
-    return { embeds: [embeds], components: [row1, row2, row3] };
+    const components = addComponents({
+      type: "ButtonBuilder",
+      options: [
+        { customId: "skip", style: ButtonStyle.Primary, emoji: "⏭", label: "Bỏ qua", disabled: false },
+        { customId: "stop", style: ButtonStyle.Danger, emoji: "🛑", label: "Dừng phát", disabled: false },
+        { customId: "pause", style: ButtonStyle.Success, emoij: "⏸", label: "Tạm dừng", disabled: false },
+        { customId: "autoplay", style: ButtonStyle.Success, emoji: "🧭", label: "Tự động phát", disabled: false },
+        { customId: "shuffle", style: ButtonStyle.Primary, emoji: "🔀", label: "Xáo trộn", disabled: false },
+      ],
+    },{
+      type: "ButtonBuilder",
+      options: [
+        { customId: "song", style: ButtonStyle.Success, emoji: "🔁", label: "Bài hát", disabled: false },
+        { customId: "queue", style: ButtonStyle.Success, emoji: "🔂", label: "Hàng chờ", disabled: false },
+        { customId: "seek", style: ButtonStyle.Primary, emoji: "⏩", label: "+10 Giây", disabled: false  },
+        { customId: "seek2", style: ButtonStyle.Primary, emoji: "⏪", label: "-10 Giây", disabled: false },
+        { customId: "lyrics", style: ButtonStyle.Primary, emoji: "📝", label: "Lời nhạc", disabled: false },
+      ],
+    },{
+      type: "ButtonBuilder",
+      options: [
+        { customId: "volumeUp", style: ButtonStyle.Primary, emoji: "🔊", label: "+10", disabled: false },
+        { customId: "volumeDown", style: ButtonStyle.Primary, emoji: "🔉", label: "-10", disabled: false }, 
+      ],
+    });
+    if(!newQueue.playing) {
+      components[0].components[2].setStyle('Success').setEmoji('▶️').setLabel(`Tiếp tục`);
+    } else if(newQueue.autoplay) {
+      components[0].components[3].setStyle('Secondary');
+    } else if(newQueue.repeatMode === 0) {
+      components[1].components[0].setStyle('Success');
+      components[1].components[1].setStyle('Success');
+    } else if(newQueue.repeatMode === 1) {
+      components[1].components[0].setStyle('Secondary');
+      queueloop = queueloop.setStyle('Success');
+    } else if(newQueue.repeatMode === 2) {
+      components[1].components[0].setStyle('Success');
+      components[1].components[1].setStyle('Secondary');
+    };
+    if(Math.floor(newQueue.currentTime) < 10) {
+      components[1].components[3].setDisabled(true);
+    } else {
+      components[1].components[3].setDisabled(false);
+    };
+    if(Math.floor((newTrack.duration - newQueue.currentTime)) <= 10) {
+      components[1].components[2].setDisabled(true);
+    } else {
+      components[1].components[2].setDisabled(false);
+    };
+    return { embeds: [embeds], components: components };
   };
-  // tạo hàng đợi embed
+  // tạo hàng đợi embed 
   const generateQueueEmbed = (queue, guildId, leave) => {
     // mốc tính thời gian 
     const createBar = (total, current, size = 25, line = "▬", slider = "🌟") => {
@@ -105,7 +115,6 @@ module.exports = (client) => {
       "https://upload-os-bbs.hoyolab.com/upload/2021/08/12/64359086/ad5f51c6a4f16adb0137cbe1e86e165d_8637324071058858884.gif?x-oss-process=image/resize,s_1000/quality,q_80/auto-orient,0/interlace,1/format,gif",
       "https://upload-os-bbs.hoyolab.com/upload/2021/08/12/64359086/2fc26b1deefa6d2ff633dda1718d6e5b_6343886487912626448.gif?x-oss-process=image/resize,s_1000/quality,q_80/auto-orient,0/interlace,1/format,gif",
     ];
-    const randomGenshin = genshinGif[Math.floor(Math.random() * genshinGif.length)];
     // tìm kiếm guilds
     let guild = client.guilds.cache.get(guildId);
     if(!guild) return; // nếu không thấy guilds, return 
@@ -124,7 +133,7 @@ module.exports = (client) => {
       }),
       new EmbedBuilders({
         footer: { text: guild.name, iconURL: guild.iconURL({ dynamic: true }) },
-        images: randomGenshin,
+        images: genshinGif[Math.floor(Math.random() * genshinGif.length)],
         colors: "Random"
       })
     ];
@@ -156,64 +165,81 @@ module.exports = (client) => {
       // hiển thị bài hát đang được phát
       embeds[0].addFields({ name: `**\` =>. \` __HIỆN TẠI ĐANG PHÁT__**`, value: `**${newQueue.songs[0].url ? `[${newQueue.songs[0].name.substr(0, 60).replace(/\[/igu, `\\[`).replace(/\]/igu, `\\]`)}](${newQueue.songs[0].url})` : newQueue.songs[0].name}** - \`${newQueue.songs[0].isStream ? "Trực Tiếp" : newQueue.formattedCurrentTime}\`\n> *Được yêu cầu bởi: __${newQueue.songs[0].user?.tag}__*` })
     };
-    var stopbutton = new ButtonBuilder({ style: ButtonStyle.Danger, customId: "Stop", emoji: "🏠", label: "Dừng phát", disabled: true });
-    var skipbutton = new ButtonBuilder().setStyle('Primary').setCustomId('Skip').setEmoji(`⏭`).setLabel("Bỏ qua").setDisabled();
-    var shufflebutton = new ButtonBuilder().setStyle('Primary').setCustomId('Shuffle').setEmoji('🔀').setLabel("Xáo trộn").setDisabled();
-    var pausebutton = new ButtonBuilder().setStyle('Secondary').setCustomId('Pause').setEmoji('⏸').setLabel("Tạm dừng").setDisabled();
-    var autoplaybutton = new ButtonBuilder().setStyle('Success').setCustomId('Autoplay').setEmoji('🔁').setLabel("Tự động phát").setDisabled();
-    var songbutton = new ButtonBuilder().setStyle('Success').setCustomId('Song').setEmoji(`🔁`).setLabel("Bài hát").setDisabled();
-    var queuebutton = new ButtonBuilder().setStyle('Success').setCustomId('Queue').setEmoji(`🔂`).setLabel("Hàng đợi").setDisabled();
-    var forwardbutton = new ButtonBuilder().setStyle('Primary').setCustomId('Forward').setEmoji('⏩').setLabel("+10 Giây").setDisabled();
-    var rewindbutton = new ButtonBuilder().setStyle('Primary').setCustomId('Rewind').setEmoji('⏪').setLabel("-10 Giây").setDisabled();
-    var volumeupbutton = new ButtonBuilder().setStyle("Primary").setCustomId("VolumeUp").setEmoji("🔊").setLabel("+10").setDisabled();
-    var volumedownbutton = new ButtonBuilder().setStyle("Primary").setCustomId("VolumeDown").setEmoji("🔉").setLabel("-10").setDisabled();
-    var lyricsbutton = new ButtonBuilder().setStyle('Primary').setCustomId('Lyrics').setEmoji('📝').setLabel("Lời nhạc").setDisabled();
+    // tạo components
+    var playlistName = [`Gaming`, `NCS | No Copyright Music`];
+    var Emojis = [`0️⃣`, `1️⃣`];
+    const components = addComponents({
+      type: "SelectMenuBuilder",
+      options: {
+        placeholder: "Vui lòng lựa chọn mục theo yêu cầu",
+        customId: "StringSelectMenuBuilder",
+        // minValues: 1, maxValues: 2,
+        options: [playlistName.map((t, index) => {
+          return { 
+            label: t.substr(0, 25), // trích xuất từ 0 đến 25 từ 
+            value: t.substr(0, 25), // trích xuất từ 0 đến 25 từ
+            description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),  // trích xuất từ 0 đến 50 từ
+            emoji: Emojis[index], // thêm emoji cho từng cụm từ 
+            default: false // lựa chọn mặc định
+          };
+        })]
+      }
+    },{
+      type: "ButtonBuilder",
+      options: [
+        { customId: "Stop", style: ButtonStyle.Danger, emoji: "🛑", label: "Dừng phát", disabled: true },
+        { customId: "Skip", style: ButtonStyle.Primary, emoji: "⏭", label: "Bỏ qua", disabled: true },
+        { customId: "Shuffle", style: ButtonStyle.Primary, emoji: "🔀", label: "Xáo trộn", disabled: true },
+        { customId: "Pause", style: ButtonStyle.Secondary, emoji: "⏸", label: "Tạm dừng", disabled: true },
+        { customId: "Autoplay", style: ButtonStyle.Success, emoji: "🛞", label: "Tự động phát", disabled: true },
+      ],
+    },{
+      type: "ButtonBuilder",
+      options: [
+        { customId: "Song", style: ButtonStyle.Success, emoji: "🔁", label: "Bài hát", disabled: true },
+        { customId: "Queue", style: ButtonStyle.Success, emoji: "🔂", label: "Hàng đợi", disabled: true },
+        { customId: "Forward", style: ButtonStyle.Primary, emoji: "⏩", label: "+10 Giây", disabled: true },
+        { customId: "Rewind", style: ButtonStyle.Primary, emoji: "⏪", label: "-10 Giây", disabled: true },
+        { customId: "VolumeUp", style: ButtonStyle.Primary, emoji: "🔊", label: "+10", disabled: true },
+      ],
+    },{
+      type: "ButtonBuilder",
+      options: [
+        { customId: "VolumeDown", style: ButtonStyle.Primary, emoji: "🔉", label: "-10", disabled: true },
+        { customId: "Lyrics", style: ButtonStyle.Primary, emoji: "📝", label: "Lời nhạc", disabled: true },
+      ],
+    });
     if(!leave && newQueue && newQueue.songs[0]) {
-      skipbutton = skipbutton.setDisabled(false);
-      shufflebutton = shufflebutton.setDisabled(false);
-      stopbutton = stopbutton.setDisabled(false);
-      songbutton = songbutton.setDisabled(false);
-      queuebutton = queuebutton.setDisabled(false);
-      forwardbutton = forwardbutton.setDisabled(false);
-      rewindbutton = rewindbutton.setDisabled(false);
-      autoplaybutton = autoplaybutton.setDisabled(false);
-      pausebutton = pausebutton.setDisabled(false);
-      lyricsbutton = lyricsbutton.setDisabled(false);
-      volumeupbutton = volumeupbutton.setDisabled(false);
-      volumedownbutton = volumedownbutton.setDisabled(false);
+      components[1].components[0].setDisabled(false);
+      components[1].components[1].setDisabled(false);
+      components[1].components[2].setDisabled(false);
+      components[1].components[4].setDisabled(false);
+      components[1].components[3].setDisabled(false);
+      components[2].components[0].setDisabled(false);
+      components[2].components[1].setDisabled(false);
+      components[2].components[2].setDisabled(false);
+      components[2].components[3].setDisabled(false);
+      components[2].components[4].setDisabled(false);
+      components[3].components[0].setDisabled(false);
+      components[3].components[1].setDisabled(false);
       if(newQueue.autoplay) {
-        autoplaybutton = autoplaybutton.setStyle('Secondary')
+        components[1].components[4].setStyle('Secondary');
       } else if(newQueue.paused) {
-        pausebutton = pausebutton.setStyle('Success').setEmoji('▶️').setLabel("Tiếp tục");
+        components[1].components[3].setStyle('Success').setEmoji('▶️').setLabel("Tiếp tục");
       };
       if(newQueue.repeatMode === 1) {
-        songbutton = songbutton.setStyle('Secondary');
-        queuebutton = queuebutton.setStyle('Success');
+        components[2].components[0].setStyle('Secondary');
+        components[2].components[1].setStyle('Success');
       } else if(newQueue.repeatMode === 2) {
-        songbutton = songbutton.setStyle('Success');
-        queuebutton = queuebutton.setStyle('Secondary');
+        components[2].components[0].setStyle('Success');
+        components[2].components[1].setStyle('Secondary');
       } else {
-        songbutton = songbutton.setStyle('Success');
-        queuebutton = queuebutton.setStyle('Success');
+        components[2].components[0].setStyle('Success');
+        components[2].components[1].setStyle('Success');
       };
     };
-    // tạo thành phần phản ứng 
-    var Emojis = [`0️⃣`, `1️⃣`];
-    var playlistName = [`Gaming`, `NCS | No Copyright Music`];
-    const selectMenu = new StringSelectMenuBuilder().setCustomId("StringSelectMenuBuilder").addOptions(playlistName.map((t, index) => {
-      return {
-        label: t.substr(0, 25), // trích xuất từ 0 đến 25 từ 
-        value: t.substr(0, 25), // trích xuất từ 0 đến 25 từ
-        description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),  // trích xuất từ 0 đến 50 từ
-        emoji: Emojis[index] // thêm emoji cho từng cụm từ
-      };
-    }));
-    const row0 = new ActionRowBuilder({ components: [selectMenu] });
-    const row1 = new ActionRowBuilder({ components: [skipbutton, stopbutton, pausebutton, autoplaybutton, shufflebutton] });
-    const row2 = new ActionRowBuilder({ components: [songbutton, queuebutton, forwardbutton, rewindbutton, lyricsbutton] });
-    const row3 = new ActionRowBuilder({ components: [volumeupbutton, volumedownbutton] });
     //bây giờ chúng tôi thêm các thành phần!
-    return { embeds, components: [row0, row1, row2, row3] };                                                                                                           
+    return { embeds, components: components };                                                                                                           
   };
   // cập nhật Hệ thống âm nhạc
   const updateMusicSystem = async(queue, leave = false) => {
@@ -502,10 +528,7 @@ module.exports = (client) => {
         thumbnail: `https://img.youtube.com/vi/${song.id}/mqdefault.jpg`,
         colors: "Random"
       });
-      return msg.edit({ 
-        embeds: [embed], 
-        components: []
-      }).catch((e) => console.log(e));
+      return msg.edit({ embeds: [embed], components: [] }).catch((e) => console.log(e));
     }).catch((e) => console.log(e));
   }).on("finish", async(queue) => {
     return queue.textChannel?.send({ 
@@ -547,7 +570,7 @@ module.exports = (client) => {
     if(!PlayerMap.has(`deleted-${queue.id}`)) {
       PlayerMap.set(`deleted-${queue.id}`, true);
       if(client.maps.has(`beforeshuffle-${queue.id}`)){
-        client.maps.delete(`beforeshuffle-${newQueue.id}`);
+        client.maps.delete(`beforeshuffle-${queue.id}`);
       };
       try {
         //Xóa khoảng thời gian để kiểm tra hệ thống thông báo liên quan

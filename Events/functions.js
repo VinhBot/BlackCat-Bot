@@ -1,7 +1,7 @@
 const { EmbedBuilder, StringSelectMenuBuilder, parseEmoji, ActionRowBuilder, ButtonBuilder, ModalBuilder, TextInputBuilder, ApplicationCommandOptionType, ChannelType, ButtonStyle, TextInputStyle, ComponentType, Collection, SelectMenuBuilder } = require("discord.js");
 const { Inventory: inv, Currency: cs, Music } = require(`${process.cwd()}/Assets/Schemas/database`);
 const fetch = require("node-fetch");
-const config = require(`${process.cwd()}/config.json`);
+const config = require(`${process.cwd()}/config.json`); 
 // chỉnh sửa, rút gọn discord events
 const customEvents = () => {
   /*========================================================
@@ -22,7 +22,50 @@ const customEvents = () => {
       if(colors) this.setColor(colors);
     };
   };
-  return { EmbedBuilders };
+  // rút gọn button
+  const addComponents = (...components) => {
+    // ActionRowBuilder
+    class ActionRowBuilders extends ActionRowBuilder {
+      constructor(components) {
+        super();
+        Array.isArray(components) ? this.addComponents(...components) : this.addComponents([components]);
+      };
+    };
+    // ButtonBuilder
+    class ButtonBuilders extends ButtonBuilder {
+      constructor(o) {
+        super();
+        this.setCustomId(o.customId).setLabel(o.label).setStyle(o.style);
+        if(o.url) this.setURL(o.url);
+        if(o.disabled) this.setDisabled(o.disabled);
+        if(o.emoji) this.setEmoji(o.emoji);
+      };
+    };
+    // SelectMenuBuilder
+    class SelectMenuBuilders extends StringSelectMenuBuilder {
+      constructor(o) {
+        super();
+        this.setCustomId(o.customId).setOptions(...o.options);
+        if(o.disabled) this.setDisabled(o.disabled);
+        if(o.maxValues) this.setMaxValues(o.maxValues);
+        if(o.minValues) this.setMinValues(o.minValues);
+        if(o.placeholder) this.setPlaceholder(o.placeholder);
+      };
+    };
+    // khởi chạy sự kiện
+    return components.map((a) => {
+      let c;
+      if(a.type == "ButtonBuilder") {
+        c = a.options.map((p) => new ButtonBuilders(p));
+      } else if(a.type == "SelectMenuBuilder") {
+        c = new SelectMenuBuilders(a.options);
+      } else {
+        return console.error("Đã sảy ra lỗi không mong muốn");
+      };
+      return new ActionRowBuilders(c);
+    });
+  };
+  return { EmbedBuilders, addComponents };
 };
 // tạo thời gian hồi lệnh
 const onCoolDown = (cooldowns, message, commands) => {
@@ -58,49 +101,59 @@ const musicEmbedDefault = (client, guilds) => {
     ];
     const randomGenshin = genshinGif[Math.floor(Math.random() * genshinGif.length)];
     var Emojis = [`0️⃣`, `1️⃣`];
+    const { EmbedBuilders, addComponents } = customEvents();
     return {
       embeds: [
-        new EmbedBuilder()
-        .setColor("Random")
-        .setTitle(`📃 hàng đợi của __${guild.name}__`)
-        .setDescription(`**Hiện tại có __0 Bài hát__ trong Hàng đợi**`)
-        .setThumbnail(guild.iconURL({ dynamic: true })),
-        new EmbedBuilder()
-        .setColor("Random")
-        .setFooter({ text: guild.name, iconURL: guild.iconURL({ dynamic: true }) })
-        .setImage(randomGenshin)
-        .setTitle(`Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!`)
-        .setDescription(`> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`)
-      ], components: [
-        new ActionRowBuilder().addComponents([
-          new StringSelectMenuBuilder().setCustomId(`StringSelectMenuBuilder`).addOptions([`Gaming`, `NCS | No Copyright Music`].map((t, index) => {
-            return {
-              label: t.substr(0, 25),
-              value: t.substr(0, 25),
-              description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),
-              emoji: Emojis[index]
+        new EmbedBuilders({
+          description: `**Hiện tại có __0 Bài hát__ trong Hàng đợi**`,
+          title: { name: `📃 hàng đợi của __${guild.name}__` },
+          thumbnail: guild.iconURL({ dynamic: true }),
+          colors: "Random",
+        }),
+        new EmbedBuilders({
+          title: { name: `Bắt đầu nghe nhạc, bằng cách kết nối với Kênh voice và gửi **LIÊN KẾT BÀI HÁT** hoặc **TÊN BÀI HÁT** trong Kênh này!` },
+          description: `> *Tôi hỗ trợ Youtube, Spotify, Soundcloud và các liên kết MP3 trực tiếp!*`,
+          footer: { text: guild.name, iconURL: guild.iconURL({ dynamic: true }) },
+          images: randomGenshin,
+          colors: "Random"
+        })
+      ], 
+      components: addComponents({
+        type: "SelectMenuBuilder",
+        options: {
+          placeholder: "Vui lòng lựa chọn mục theo yêu cầu",
+          customId: "StringSelectMenuBuilder",
+          // minValues: 1, maxValues: 2,
+          options: [playlistName.map((t, index) => {
+            return { 
+              label: t.substr(0, 25), // trích xuất từ 0 đến 25 từ 
+              value: t.substr(0, 25), // trích xuất từ 0 đến 25 từ
+              description: `Tải Danh sách phát nhạc: '${t}'`.substr(0, 50),  // trích xuất từ 0 đến 50 từ
+              emoji: Emojis[index], // thêm emoji cho từng cụm từ 
+              default: false // lựa chọn mặc định
             };
-          }))
-        ]),
-        new ActionRowBuilder({ 
-          components: [
-            new ButtonBuilder({ style: "Primary", customId: "1", emoji: "⏭", label: "Skip", disabled: true }),
-            new ButtonBuilder({ style: "Danger", customId: "2", emoji: "🏠", label: "Stop", disabled: true }),
-            new ButtonBuilder({ style: "Secondary", customId: "3", emoji: "⏸", label: "Pause", disabled: true }),
-            new ButtonBuilder({ style: "Success", customId: "4", emoji: "🔁", label: "Autoplay", disabled: true }),
-            new ButtonBuilder({ style: "Primary", customId: "5", emoji: "🔀", label: "Shuffle", disabled: true }),
-          ] 
-        }),
-        new ActionRowBuilder({
-          components: [
-            new ButtonBuilder({ style: "Success", customId: "6", emoji: "🔁", label: "Song", disabled: true }),
-            new ButtonBuilder({ style: "Success", customId: "7", emoji: "🔂", label: "Queue", disabled: true }),
-            new ButtonBuilder({ style: "Primary", customId: "8", emoji: "⏩", label: "+10 Sec", disabled: true }),
-            new ButtonBuilder({ style: "Primary", customId: "9", emoji: "⏪", label: "-10 Sec", disabled: true }),
-            new ButtonBuilder({ style: "Primary", customId: "10", emoji: "📝", label: "Lyrics", disabled: true }),
-          ] 
-        }),
-    ]};
+          })]
+        }
+      }, {
+        type: "ButtonBuilder",
+        options: [
+          { style: "Primary", customId: "1", emoji: "⏭", label: "Skip", disabled: true },
+          { style: "Danger", customId: "2", emoji: "🏠", label: "Stop", disabled: true },
+          { style: "Secondary", customId: "3", emoji: "⏸", label: "Pause", disabled: true },
+          { style: "Success", customId: "4", emoji: "🔁", label: "Autoplay", disabled: true },
+          { style: "Primary", customId: "5", emoji: "🔀", label: "Shuffle", disabled: true },
+        ]
+      }, {
+        type: "ButtonBuilder",
+        options: [
+          { style: "Success", customId: "6", emoji: "🔁", label: "Song", disabled: true },
+          { style: "Success", customId: "7", emoji: "🔂", label: "Queue", disabled: true },
+          { style: "Primary", customId: "8", emoji: "⏩", label: "+10 Sec", disabled: true },
+          { style: "Primary", customId: "9", emoji: "⏪", label: "-10 Sec", disabled: true },
+          { style: "Primary", customId: "10", emoji: "📝", label: "Lyrics", disabled: true },
+        ]
+      })
+    };
 };
 // MusicRole
 const MusicRole = (client, member, song) => {
